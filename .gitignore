@@ -4,6 +4,9 @@ obj/
 dist/
 *.zip
 
+# Local packaging script (machine-specific paths)
+tools/package.ps1
+
 # Web
 web/node_modules/
 web/dist/
