@@ -8,7 +8,9 @@ public sealed record ViteEntry(string Js, IReadOnlyList<string> Css);
 
 /// <summary>
 /// wwwroot/.vite/manifest.json 을 읽어 Razor 호스트 페이지가 삽입할 스크립트/스타일 URL을 제공한다.
-/// 점 접두어 폴더(.vite)는 SPT의 StaticFileMiddleware 가 노출하지 않으므로 디스크에서 직접 읽는다.
+/// 서버 프로세스 내부에서 typed 값이 필요하므로 디스크에서 직접 읽는다 (HTTP로 노출되는지 여부와 무관).
+/// 실측 결과 SPT 4.1.5의 정적 파일 미들웨어는 점 접두어 폴더를 차단하지 않으므로,
+/// wwwroot/ 아래 무엇을 두든 공개 서빙된다고 가정할 것 — 민감한 파일을 두지 말 것.
 /// </summary>
 [Injectable(InjectionType.Singleton)]
 public class ViteManifest

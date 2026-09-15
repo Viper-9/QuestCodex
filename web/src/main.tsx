@@ -1,15 +1,27 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, type Root } from 'react-dom/client'
 import { App } from './App'
 import './styles.css'
 
-const container = document.getElementById('questcodex-root')
-if (!container) {
-  throw new Error('QuestCodex: #questcodex-root not found')
+let root: Root | null = null
+
+export function mount(id: string) {
+  const container = document.getElementById(id)
+  if (!container) {
+    throw new Error(`QuestCodex: #${id} not found`)
+  }
+  if (root) {
+    root.unmount()
+  }
+  root = createRoot(container)
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
 }
 
-createRoot(container).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+export function unmount() {
+  root?.unmount()
+  root = null
+}

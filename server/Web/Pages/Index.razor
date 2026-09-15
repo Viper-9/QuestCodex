@@ -1,6 +1,7 @@
 @page "/questcodex"
 @layout EmptyLayout
 @rendermode InteractiveServer
+@implements IAsyncDisposable
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.JSInterop
 @inject ViteManifest Manifest
@@ -18,12 +19,37 @@
 <div id="questcodex-root"></div>
 
 @code {
+    private IJSObjectReference? _module;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
         {
-            // 동적 import 로 Vite 엔트리 모듈을 로드 → React 가 #questcodex-root 에 마운트.
-            await JS.InvokeAsync<IJSObjectReference>("import", Manifest.Entry.Js);
+            return;
+        }
+
+        // 동적 import 로 Vite 엔트리 모듈을 로드하고, mount() 를 명시적으로 호출한다.
+        // main.tsx 의 최상위 부수효과로 마운트하면 같은 탭에서 재방문 시 ES 모듈이 캐시돼
+        // 모듈 본문이 재실행되지 않아 화면이 비어 보인다 (realm당 URL당 1회만 평가됨).
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", Manifest.Entry.Js);
+        await _module.InvokeVoidAsync("mount", "questcodex-root");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _module.InvokeVoidAsync("unmount");
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // 서킷이 이미 끊긴 경우 (예: 탭 닫힘) 정리할 JS 컨텍스트가 없다 — 무시.
         }
     }
 }
