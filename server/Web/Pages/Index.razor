@@ -1,0 +1,15 @@
+@page "/questcodex"
+@layout EmptyLayout
+@inject ViteManifest Manifest
+
+<PageTitle>QuestCodex</PageTitle>
+
+<HeadContent>
+    @foreach (var css in Manifest.Entry.Css)
+    {
+        <link rel="stylesheet" href="@css" />
+    }
+</HeadContent>
+
+<div id="questcodex-root"></div>
+<script type="module" src="@Manifest.Entry.Js"></script>
