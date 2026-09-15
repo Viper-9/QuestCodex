@@ -1,0 +1,31 @@
+.qc-shell {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: #e6e6e6;
+}
+
+.qc-shell h1 {
+  font-size: 1.75rem;
+  margin: 0 0 1rem;
+}
+
+.qc-ping {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+
+.qc-ping dt {
+  opacity: 0.7;
+}
+
+.qc-ping dd {
+  margin: 0;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.qc-error {
+  color: #ff7b7b;
+}
