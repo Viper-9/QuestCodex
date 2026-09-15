@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/server/">
+    <Project Path="server/QuestCodex.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/QuestCodex.Tests/QuestCodex.Tests.csproj" />
+  </Folder>
+</Solution>

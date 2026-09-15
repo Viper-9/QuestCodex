@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+dist/
+*.zip
+
+# Web
+web/node_modules/
+web/dist/
+server/wwwroot/
+
+# IDE / OS
+.vs/
+.idea/
+.vscode/
+*.user
+Thumbs.db
+.DS_Store
+
+# Local docs (kept out of the public repo)
+docs/
+.superpowers/
