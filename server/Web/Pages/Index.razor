@@ -1,6 +1,10 @@
 @page "/questcodex"
 @layout EmptyLayout
+@rendermode InteractiveServer
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.JSInterop
 @inject ViteManifest Manifest
+@inject IJSRuntime JS
 
 <PageTitle>QuestCodex</PageTitle>
 
@@ -12,4 +16,14 @@
 </HeadContent>
 
 <div id="questcodex-root"></div>
-<script type="module" src="@Manifest.Entry.Js"></script>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 동적 import 로 Vite 엔트리 모듈을 로드 → React 가 #questcodex-root 에 마운트.
+            await JS.InvokeAsync<IJSObjectReference>("import", Manifest.Entry.Js);
+        }
+    }
+}
