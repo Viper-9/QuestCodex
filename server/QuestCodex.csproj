@@ -15,6 +15,12 @@
     <PackageReference Include="SPTushonka.Server.Web" Version="4.1.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Data\** 는 SDK 기본 글롭으로 이미 None 항목이므로 Include 가 아니라 Update 로 복사 속성만 붙인다 (중복 항목 오류 방지) -->
+    <None Update="Data\**" CopyToOutputDirectory="PreserveNewest" />
+    <InternalsVisibleTo Include="QuestCodex.Tests" />
+  </ItemGroup>
+
   <!-- web/dist 를 복사해 둔 wwwroot/ 를 빌드 출력에 동봉한다 (.vite/manifest.json 포함). -->
   <Target Name="CopyWwwroot" AfterTargets="Build">
     <ItemGroup>
