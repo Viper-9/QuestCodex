@@ -2,7 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // SPT 서버. 개발 중 API/이미지 요청을 여기로 프록시한다.
-const SPT_SERVER = 'http://127.0.0.1:6969'
+// SPT 4.1.5 는 자체 서명 인증서로 https 만 서빙한다 (http 는 빈 응답으로 끊김).
+const SPT_SERVER = 'https://127.0.0.1:6969'
+const sptProxy = { target: SPT_SERVER, secure: false }
 
 export default defineConfig({
   plugins: [react()],
@@ -25,8 +27,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/questcodex/api': SPT_SERVER,
-      '/files': SPT_SERVER,
+      '/questcodex/api': sptProxy,
+      '/files': sptProxy,
     },
   },
 })
