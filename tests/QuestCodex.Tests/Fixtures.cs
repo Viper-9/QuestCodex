@@ -76,10 +76,12 @@ public static class Fixtures
         Id = Id(8000), Type = type, Value = value, Items = items, Target = target, LoyaltyLevel = loyalty, TraderId = traderId,
     };
 
-    public static TemplateItem Template(MongoId id, MongoId parent, string? name = null) => new()
+    public static TemplateItem Template(MongoId id, MongoId parent, string? name = null)
     {
-        Id = id, Parent = parent, Name = name,
-    };
+        var t = new TemplateItem { Id = id, Parent = parent };
+        if (name is not null) t.Name = name;
+        return t;
+    }
 
     public static TraderBase Trader(MongoId id, string nickname, string avatar = "") => new()
     {
