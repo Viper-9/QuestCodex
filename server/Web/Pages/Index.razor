@@ -8,7 +8,7 @@
 @using SPTarkov.Common.Models.Logging
 @inject ViteManifest Manifest
 @inject IJSRuntime JS
-@inject RaidEndNotifier Notifier
+@inject ProfileChangeNotifier Notifier
 @inject ISptLogger<Index> Logger
 
 <PageTitle>QuestCodex</PageTitle>
@@ -38,12 +38,12 @@
         _module = await JS.InvokeAsync<IJSObjectReference>("import", Manifest.Entry.Js);
         await _module.InvokeVoidAsync("mount", "questcodex-root");
 
-        // 레이드 종료 푸시: 서버 이벤트 → 이 서킷 → JS notify(). 이 페이지가 살아 있는 동안만 구독한다.
+        // 프로필 변경 푸시(레이드 종료·메뉴 퀘스트 조작): 서버 이벤트 → 이 서킷 → JS notify(). 이 페이지가 살아 있는 동안만 구독한다.
         Notifier.ProfileUpdated += OnProfileUpdated;
         _subscribed = true;
     }
 
-    private void OnProfileUpdated(string profileId)
+    private void OnProfileUpdated(ProfileChange change)
     {
         // 라우터/스레드풀 스레드에서 호출되므로 컴포넌트 디스패처로 넘긴다. 실패해도 서버에는 영향 없음.
         _ = InvokeAsync(async () =>
@@ -55,7 +55,12 @@
 
             try
             {
-                await _module.InvokeVoidAsync("notify", new { type = "profileUpdated", profileId });
+                // changedQuestIds 는 "무엇이 바뀌었는지 아는" 경우(메뉴 diff)에만 실린다. 레이드 종료는
+                // 필드 자체를 빼서 브라우저가 전체 재요청하도록 한다 (null 로 보내지 않는다).
+                object msg = change.ChangedQuestIds is null
+                    ? new { type = "profileUpdated", profileId = change.ProfileId }
+                    : new { type = "profileUpdated", profileId = change.ProfileId, changedQuestIds = change.ChangedQuestIds };
+                await _module.InvokeVoidAsync("notify", msg);
             }
             catch (JSDisconnectedException)
             {
