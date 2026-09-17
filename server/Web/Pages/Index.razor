@@ -4,8 +4,12 @@
 @implements IAsyncDisposable
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.JSInterop
+@using QuestCodex.Services
+@using SPTarkov.Common.Models.Logging
 @inject ViteManifest Manifest
 @inject IJSRuntime JS
+@inject RaidEndNotifier Notifier
+@inject ISptLogger<Index> Logger
 
 <PageTitle>QuestCodex</PageTitle>
 
@@ -20,6 +24,7 @@
 
 @code {
     private IJSObjectReference? _module;
+    private bool _subscribed;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -32,10 +37,45 @@
         // export 된 mount() 를 매 방문마다 명시적으로 호출해야 재방문 시에도 React 가 뜬다.
         _module = await JS.InvokeAsync<IJSObjectReference>("import", Manifest.Entry.Js);
         await _module.InvokeVoidAsync("mount", "questcodex-root");
+
+        // 레이드 종료 푸시: 서버 이벤트 → 이 서킷 → JS notify(). 이 페이지가 살아 있는 동안만 구독한다.
+        Notifier.ProfileUpdated += OnProfileUpdated;
+        _subscribed = true;
+    }
+
+    private void OnProfileUpdated(string profileId)
+    {
+        // 라우터/스레드풀 스레드에서 호출되므로 컴포넌트 디스패처로 넘긴다. 실패해도 서버에는 영향 없음.
+        _ = InvokeAsync(async () =>
+        {
+            if (_module is null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _module.InvokeVoidAsync("notify", new { type = "profileUpdated", profileId });
+            }
+            catch (JSDisconnectedException)
+            {
+                // 서킷이 끊긴 탭. 다음 방문 때 visibilitychange 재요청이 보정한다.
+            }
+            catch (Exception ex)
+            {
+                Logger.Warning($"[QuestCodex] notify failed: {ex.Message}", ex);
+            }
+        });
     }
 
     public async ValueTask DisposeAsync()
     {
+        if (_subscribed)
+        {
+            Notifier.ProfileUpdated -= OnProfileUpdated;
+            _subscribed = false;
+        }
+
         if (_module is null)
         {
             return;
