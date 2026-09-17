@@ -32,7 +32,7 @@ public class RewardParserTests
         Assert.Equal("Colt M4A1", r.Name);
         Assert.Equal(2, r.Count);
         Assert.Equal(["weapon", "assaultRifle"], r.Categories);
-        Assert.Equal(RewardParser.IconUrl(M4), r.IconUrl);
+        Assert.Null(r.IconUrl);
     }
 
     [Fact]

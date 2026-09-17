@@ -14,9 +14,6 @@ public sealed class RewardParser(
     LocaleResolver locale,
     IReadOnlyDictionary<MongoId, TemplateItem> items)
 {
-    /// <summary>SPT ImageRouter 가 서빙하는 핸드북 아이콘 경로. 실제 경로는 수동 체크리스트에서 실측 후 필요 시 수정.</summary>
-    public static string IconUrl(string tpl) => $"/files/handbook/{tpl}.png";
-
     public CatalogReward Parse(Reward r, List<CatalogWarning> warnings, string questId)
     {
         try
@@ -51,7 +48,10 @@ public sealed class RewardParser(
             return new OtherReward("Item");
         }
 
-        return new ItemReward(tpl, NameOf(tpl), IconUrl(tpl), r.Value ?? 1, categorizer.Categorize(tpl));
+        // iconUrl 은 항상 null: SPT 는 임의 아이템 tpl 의 아이콘 PNG 를 서빙하지 않는다(실서버 실측,
+        // 2026-09-16 스펙 §3.2-10 갱신) — 바닐라·모드 아이템 모두 아이콘은 클라이언트 Unity 에셋 번들
+        // 안에만 존재한다. 프론트는 categories 로 카테고리 아이콘을 대신 표시한다.
+        return new ItemReward(tpl, NameOf(tpl), null, r.Value ?? 1, categorizer.Categorize(tpl));
     }
 
     private CatalogReward ParseAssortUnlock(Reward r, List<CatalogWarning> warnings, string questId)
@@ -67,7 +67,7 @@ public sealed class RewardParser(
             traderId,
             tpl,
             tpl is null ? null : NameOf(tpl),
-            tpl is null ? null : IconUrl(tpl),
+            null,
             r.LoyaltyLevel ?? 1,
             tpl is null ? [] : categorizer.Categorize(tpl));
     }
@@ -82,7 +82,7 @@ public sealed class RewardParser(
             warnings.Add(new CatalogWarning(questId, WarningCodes.EmptyRewardItems, $"ProductionScheme reward {r.Id} has no items"));
         }
 
-        return new ProductionReward(area, tpl, tpl is null ? null : NameOf(tpl), tpl is null ? null : IconUrl(tpl));
+        return new ProductionReward(area, tpl, tpl is null ? null : NameOf(tpl), null);
     }
 
     private static string? FirstTpl(Reward r)
