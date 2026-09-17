@@ -25,7 +25,7 @@ public record ModMetadata : IModMetadata, IModBlazorMetadata
     public List<string>? Incompatibilities { get; init; }
     public Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
     public string? Url { get; init; } = "https://github.com/Viper-9/QuestCodex";
-    public string License { get; init; } = "CC-BY-NC-ND-4.0";
+    public string License { get; init; } = "All Rights Reserved";
     public bool HasPrepatcher { get; init; } = false;
 
     // IModBlazorMetadata — wwwroot/ 가 http://host/questcodex/... 로 서빙된다.

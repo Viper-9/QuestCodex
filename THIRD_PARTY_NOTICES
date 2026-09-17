@@ -1,0 +1,67 @@
+THIRD PARTY NOTICES
+===================
+
+QuestCodex is distributed under the terms in LICENSE (All Rights Reserved).
+That license covers QuestCodex's own code only. The components listed below
+are the work of others, are redistributed inside QuestCodex's compiled web
+bundle, and remain subject to their own licenses. Nothing in LICENSE limits
+the rights granted to you by those licenses.
+
+
+-------------------------------------------------------------------------------
+Redistributed in wwwroot/assets/main-*.js
+-------------------------------------------------------------------------------
+
+  react       19.3.0   MIT   https://github.com/facebook/react
+  react-dom   19.3.0   MIT   https://github.com/facebook/react
+  scheduler   0.28.0   MIT   https://github.com/facebook/react
+              (a react-dom dependency, bundled transitively)
+
+All three carry the same notice:
+
+  MIT License
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+Build-time only — NOT redistributed
+-------------------------------------------------------------------------------
+
+These produce the build output but no part of them ships inside it, so they
+require no notice here. Listed for transparency only.
+
+  vite, @vitejs/plugin-react, typescript, @types/react, @types/react-dom
+
+
+-------------------------------------------------------------------------------
+Required at runtime — NOT redistributed
+-------------------------------------------------------------------------------
+
+QuestCodex compiles against the SPT server assemblies (SPTushonka.Common,
+SPTushonka.DI, SPTushonka.Server.Core, SPTushonka.Server.Web) and runs inside
+the SPT server process. None of those assemblies are included in the QuestCodex
+distribution -- the packaging script fails the build if any DLL other than
+QuestCodex.dll reaches the output. Users obtain SPT separately, under its own
+terms.
+
+Escape from Tarkov and SPT are the property of their respective owners.
+QuestCodex is an unofficial, unaffiliated third-party mod.

@@ -3,6 +3,8 @@ A browser-based quest wiki and progress tracker for every quest actually loaded 
 
 ## License
 
-This project is licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nc-nd/4.0/) (CC BY-NC-ND 4.0). See [LICENSE](LICENSE) for details.
+Copyright (c) 2026 Viper-9. **All Rights Reserved.**
 
-[![CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+No permission is granted to use, copy, modify or distribute this software, in whole or in part, without the prior written permission of the copyright holder. See [LICENSE](LICENSE) for the full terms.
+
+Third-party components remain under their own licenses — see [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
