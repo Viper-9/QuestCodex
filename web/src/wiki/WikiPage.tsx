@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
-import type { Route } from '../shell/router'
+import { hashFor, replaceHash, type Route } from '../shell/router'
 import { countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
 import { QuestDetail } from './QuestDetail'
+import { QuestDescriptionDialog } from './QuestDescriptionDialog'
 import { QuestList } from './QuestList'
+import { rowId } from './QuestRow'
 import { WikiSkeleton } from './WikiSkeleton'
 import './wiki.css'
 
@@ -15,11 +17,15 @@ interface WikiPageProps {
 }
 
 /** 필터·검색·펼침·팝업 상태의 소유자 (스펙 §2, §3.3). 아래 컴포넌트는 props 만 받는다. */
-export function WikiPage({ catalog }: WikiPageProps) {
+export function WikiPage({ catalog, route }: WikiPageProps) {
   const [traders, setTraders] = useState<ReadonlySet<string>>(() => new Set())
   const [chips, setChips] = useState<Chips>(DEFAULT_CHIPS)
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
+  const [dialogId, setDialogId] = useState<string | null>(null)
+  /** 다음 커밋 후 scrollIntoView 할 행. 필터 리셋과 같은 렌더에 반영되므로 효과 시점엔 행이 DOM 에 있다. */
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null)
+  const consumedDeepLink = useRef(false)
 
   // 파생값은 전부 useMemo (§3.2). 카탈로그가 바뀔 때(언어 전환)만 다시 계산된다.
   const quests = useMemo(() => (catalog ? Object.values(catalog.quests) : []), [catalog])
@@ -30,6 +36,34 @@ export function WikiPage({ catalog }: WikiPageProps) {
     () => sortQuests(filterQuests(quests, { traders, chips, query })),
     [quests, traders, chips, query],
   )
+  const visibleIds = useMemo(() => new Set(visible.map((q) => q.id)), [visible])
+
+  /** 연계 링크·딥링크 공통 (§4.4): 안 보이면 필터 리셋 → 펼침 → 스크롤. URL 은 건드리지 않는다. */
+  const jumpTo = useCallback((id: string) => {
+    if (!visibleIds.has(id)) {
+      setTraders(new Set())
+      setChips(DEFAULT_CHIPS)
+      setQuery('')
+    }
+    setExpanded((prev) => new Set(prev).add(id))
+    setScrollTarget(id)
+  }, [visibleIds])
+
+  useEffect(() => {
+    if (!scrollTarget) return
+    document.getElementById(rowId(scrollTarget))?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    setScrollTarget(null)
+  }, [scrollTarget])
+
+  /** 딥링크 #/wiki?quest=<id> (§4.5): 카탈로그 로딩 후 1회. 소비하면 URL 에서 quest 를 지운다. */
+  useEffect(() => {
+    if (!catalog || consumedDeepLink.current) return
+    consumedDeepLink.current = true
+    const id = route.query.get('quest')
+    if (!id) return
+    if (catalog.quests[id]) jumpTo(id)
+    replaceHash(hashFor('wiki'))
+  }, [catalog, route, jumpTo])
 
   if (!catalog || !lookup) return <WikiSkeleton />
 
@@ -50,12 +84,13 @@ export function WikiPage({ catalog }: WikiPageProps) {
         expanded={expanded}
         onToggle={toggleExpanded}
         renderDetail={(q) => (
-          <QuestDetail
-            quest={q} catalog={catalog} lookup={lookup}
-            onOpenDescription={() => { /* Task 7 */ }}
-            onJump={() => { /* Task 7 */ }}
-          />
+          <QuestDetail quest={q} catalog={catalog} lookup={lookup} onOpenDescription={setDialogId} onJump={jumpTo} />
         )}
+      />
+      <QuestDescriptionDialog
+        quest={dialogId ? catalog.quests[dialogId] ?? null : null}
+        traderName={dialogId ? lookup.traderName(catalog.quests[dialogId]?.traderId ?? '') : ''}
+        onClose={() => setDialogId(null)}
       />
     </div>
   )
