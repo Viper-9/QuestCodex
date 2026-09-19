@@ -50,6 +50,7 @@ export interface CatalogQuest {
   side: string
   factionOnly: FactionOnly
   isVanilla: boolean
+  modName: string | null   // isVanilla=false 일 때만 값이 있을 수 있다. 서버가 출처 모드를 못 찾으면 null
   imageUrl: string | null      // 위키에서는 쓰지 않는다 (스펙 §0)
   minLevel: number | null
   requirements: Requirement[]
