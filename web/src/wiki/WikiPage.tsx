@@ -4,6 +4,7 @@ import type { Route } from '../shell/router'
 import { countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
+import { QuestList } from './QuestList'
 import { WikiSkeleton } from './WikiSkeleton'
 import './wiki.css'
 
@@ -17,6 +18,7 @@ export function WikiPage({ catalog }: WikiPageProps) {
   const [traders, setTraders] = useState<ReadonlySet<string>>(() => new Set())
   const [chips, setChips] = useState<Chips>(DEFAULT_CHIPS)
   const [query, setQuery] = useState('')
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
 
   // 파생값은 전부 useMemo (§3.2). 카탈로그가 바뀔 때(언어 전환)만 다시 계산된다.
   const quests = useMemo(() => (catalog ? Object.values(catalog.quests) : []), [catalog])
@@ -32,6 +34,7 @@ export function WikiPage({ catalog }: WikiPageProps) {
 
   const toggleTrader = (id: string) => setTraders((prev) => toggleMember(prev, id))
   const toggleChip = (key: ChipKey) => setChips((prev) => ({ ...prev, [key]: !prev[key] }))
+  const toggleExpanded = (id: string) => setExpanded((prev) => toggleMember(prev, id))
 
   return (
     <div className="qc-wiki">
@@ -40,10 +43,13 @@ export function WikiPage({ catalog }: WikiPageProps) {
         selected={traders} onToggle={toggleTrader} onClear={() => setTraders(new Set())}
       />
       <FilterBar query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip} count={visible.length} />
-      {/* Task 5 에서 QuestList 로 교체 */}
-      <ul className="qc-placeholder">
-        {visible.slice(0, 20).map((q) => <li key={q.id}>{q.name} · {lookup.traderName(q.traderId)} · {q.minLevel ?? '—'}</li>)}
-      </ul>
+      <QuestList
+        quests={visible}
+        lookup={lookup}
+        expanded={expanded}
+        onToggle={toggleExpanded}
+        renderDetail={() => <div className="qc-detail"><p className="qc-muted">(QuestDetail: Task 6)</p></div>}
+      />
     </div>
   )
 }

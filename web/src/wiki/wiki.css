@@ -91,3 +91,48 @@
 .qc-skeleton__strip, .qc-skeleton__row { background: var(--bg-hover); border-radius: var(--radius); }
 .qc-skeleton__strip { height: 76px; margin-bottom: 18px; }
 .qc-skeleton__row { height: 30px; margin-bottom: 8px; }
+
+/* ---- (c) 리스트. 헤더와 행은 같은 그리드 열 ---- */
+.qc-list__header, .qc-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 56px 56px 20px;
+  gap: 10px;
+  align-items: center;
+  padding: 0 16px;
+}
+.qc-list__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 30px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-3);
+}
+.qc-quest { scroll-margin-top: 30px; } /* sticky 헤더 높이만큼 — scrollIntoView 오프셋 (§4.4-3) */
+.qc-row {
+  width: 100%;
+  height: 38px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  text-align: left;
+}
+.qc-row:hover { background: var(--bg-hover); }
+.qc-quest.is-open > .qc-row { background: var(--bg-hover); border-bottom-color: transparent; }
+.qc-row__name { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 500; }
+.qc-row__trader { color: var(--fg-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc-row__num { color: var(--fg-3); font-size: 11px; text-align: right; }
+.qc-row__caret { color: var(--fg-3); font-size: 11px; text-align: right; }
+.qc-tag {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  color: var(--fg-2);
+}
+.qc-tag--mod { color: var(--mod); border-color: color-mix(in srgb, var(--mod) 40%, transparent); }
+.qc-empty { padding: 24px 16px; color: var(--fg-2); }
