@@ -26,7 +26,7 @@ export function QuestRow({ quest, traderName, expanded, onToggle, detail }: Ques
       <button type="button" className="qc-row" aria-expanded={expanded} onClick={onToggle}>
         <span className="qc-row__name">
           {quest.name}
-          {!quest.isVanilla && <span className="qc-tag qc-tag--mod">{t('tag.mod')}</span>}
+          {!quest.isVanilla && <span className="qc-tag qc-tag--mod">{quest.modName ?? t('tag.mod')}</span>}
         </span>
         <span className="qc-row__trader">{traderName}</span>
         <span className="qc-row__num">{quest.minLevel ?? '—'}</span>
