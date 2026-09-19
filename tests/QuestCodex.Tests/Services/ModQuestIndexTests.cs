@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using QuestCodex.Catalog.Models;
@@ -74,6 +75,7 @@ public class ModQuestIndexTests
     /// 대상이라 다른 플랫폼 스킵 처리는 하지 않는다.
     /// </summary>
     [Fact]
+    [SupportedOSPlatform("windows")]
     public void Inaccessible_subfolder_does_not_stop_the_scan()
     {
         using var mods = new TempModsRoot();
