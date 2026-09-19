@@ -1,0 +1,93 @@
+/* 위키 페이지 전용. 토큰은 styles.css 의 .qc-shell 에서 상속. 리스트·펼침·팝업 규칙은 Task 5~7 에서 아래에 추가. */
+
+/* ---- (a) 상인 가로 줄 ---- */
+.qc-traders {
+  display: flex;
+  gap: 4px;
+  padding: 14px 16px 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+.qc-trader {
+  flex: none;
+  width: 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--fg-2);
+  transition: transform .08s, box-shadow .08s, background .12s;
+}
+.qc-trader:hover { background: var(--bg-hover); }
+.qc-trader.is-on {
+  color: var(--fg);
+  background: var(--accent-bg);
+  box-shadow: var(--pressed-shadow);
+  transform: translateY(1px);
+}
+.qc-trader__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-2);
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.qc-trader.is-on .qc-trader__avatar { border-color: var(--accent); }
+.qc-trader.is-mod .qc-trader__avatar { border-style: dashed; }
+.qc-trader__name { font-size: 11px; font-weight: 500; white-space: nowrap; }
+.qc-trader__count { font-size: 10px; color: var(--fg-3); white-space: nowrap; }
+
+/* ---- (b) 도구 줄 ---- */
+.qc-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.qc-search {
+  flex: 1;
+  max-width: 320px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  background: var(--bg-3);
+  color: var(--fg);
+  font-size: 12px;
+}
+.qc-search::placeholder { color: var(--fg-3); }
+.qc-chips { display: flex; gap: 6px; }
+.qc-chip {
+  padding: 3px 9px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--fg-2);
+  font-size: 11px;
+  transition: transform .08s, box-shadow .08s, background .12s;
+}
+.qc-chip.is-on {
+  background: var(--accent-bg);
+  border-color: transparent;
+  color: var(--accent-fg);
+  box-shadow: var(--pressed-shadow);
+  transform: translateY(1px);
+}
+.qc-tools__count { margin-left: auto; font-size: 12px; color: var(--fg-3); white-space: nowrap; }
+
+/* ---- 로딩 스켈레톤 ---- */
+.qc-skeleton { padding: 14px 16px; }
+.qc-skeleton__strip, .qc-skeleton__row { background: var(--bg-hover); border-radius: var(--radius); }
+.qc-skeleton__strip { height: 76px; margin-bottom: 18px; }
+.qc-skeleton__row { height: 30px; margin-bottom: 8px; }
