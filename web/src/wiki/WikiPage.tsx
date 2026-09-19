@@ -4,6 +4,7 @@ import type { Route } from '../shell/router'
 import { countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
+import { QuestDetail } from './QuestDetail'
 import { QuestList } from './QuestList'
 import { WikiSkeleton } from './WikiSkeleton'
 import './wiki.css'
@@ -48,7 +49,13 @@ export function WikiPage({ catalog }: WikiPageProps) {
         lookup={lookup}
         expanded={expanded}
         onToggle={toggleExpanded}
-        renderDetail={() => <div className="qc-detail"><p className="qc-muted">(QuestDetail: Task 6)</p></div>}
+        renderDetail={(q) => (
+          <QuestDetail
+            quest={q} catalog={catalog} lookup={lookup}
+            onOpenDescription={() => { /* Task 7 */ }}
+            onJump={() => { /* Task 7 */ }}
+          />
+        )}
       />
     </div>
   )

@@ -136,3 +136,42 @@
 }
 .qc-tag--mod { color: var(--mod); border-color: color-mix(in srgb, var(--mod) 40%, transparent); }
 .qc-empty { padding: 24px 16px; color: var(--fg-2); }
+
+/* ---- (d) 펼친 행 ---- */
+.qc-detail {
+  margin: 0 16px 8px;
+  padding: 14px 16px 16px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.qc-detail__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.qc-detail__meta { color: var(--fg-2); font-size: 12px; }
+.qc-detail__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.qc-detail__h {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.qc-detail__note { margin: 0 0 14px; color: var(--fg-2); }
+.qc-lines { margin: 0 0 14px; }
+.qc-lines li { display: flex; gap: 8px; padding: 3px 0; }
+.qc-lines li::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--fg-3);
+}
+.qc-extra { margin: -8px 0 14px; }
+.qc-extra > summary { cursor: pointer; font-size: 12px; color: var(--fg-2); }
+.qc-extra > .qc-lines { margin-top: 4px; }
+.qc-related { display: flex; gap: 20px; }
+.qc-related__col { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.qc-related__k { font-size: 11px; color: var(--fg-3); margin-bottom: 3px; }
+.qc-related__who { color: var(--fg-3); font-size: 11px; }
