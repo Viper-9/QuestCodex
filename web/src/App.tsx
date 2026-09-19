@@ -1,9 +1,12 @@
 import type { Catalog } from './api/catalog'
 import { useCatalog } from './shell/useCatalog'
 import { useTheme, type ThemePref } from './shell/theme'
+import { navigate, useHashRoute } from './shell/router'
+import { SideMenu } from './shell/SideMenu'
 import { TopBar } from './shell/TopBar'
 import { ErrorBanner } from './shell/ErrorBanner'
 import { I18nProvider, useT } from './i18n/I18nContext'
+import { ProgressPage } from './progress/ProgressPage'
 
 interface AppProps {
   initialTheme: ThemePref
@@ -11,11 +14,13 @@ interface AppProps {
 
 export function App({ initialTheme }: AppProps) {
   const theme = useTheme(initialTheme)
+  const route = useHashRoute()
   const c = useCatalog()
 
   return (
     <I18nProvider lang={c.lang}>
       <div className="qc-shell" data-theme={theme.resolved}>
+        <SideMenu page={route.page} onNavigate={navigate} />
         <div className="qc-main">
           <TopBar
             theme={theme.pref} onThemeChange={theme.setPref}
@@ -23,7 +28,8 @@ export function App({ initialTheme }: AppProps) {
             busy={c.loading && c.catalog !== null}
           />
           <div className="qc-page">
-            <CatalogStatus loading={c.loading} error={c.error} catalog={c.catalog} onRetry={c.retry} />
+            {route.page === 'progress' && <ProgressPage />}
+            {route.page === 'wiki' && <CatalogStatus loading={c.loading} error={c.error} catalog={c.catalog} onRetry={c.retry} />}
           </div>
         </div>
       </div>
@@ -31,14 +37,14 @@ export function App({ initialTheme }: AppProps) {
   )
 }
 
-/** Task 1 의 임시 표시 그대로 (Task 4 에서 WikiPage 로 교체) */
+/** Task 1·2 의 임시 표시 (Task 4 에서 WikiPage 로 교체) */
 function CatalogStatus({ loading, error, catalog, onRetry }: { loading: boolean; error: string | null; catalog: Catalog | null; onRetry(): void }) {
   const t = useT()
   return (
     <>
-      {loading && !catalog && <p className="qc-muted" style={{ padding: 16 }}>{t('app.loading')}</p>}
+      {loading && !catalog && <p className="qc-placeholder">{t('app.loading')}</p>}
       {error && <ErrorBanner code={error} onRetry={onRetry} />}
-      {catalog && <p style={{ padding: 16 }}>quests={Object.keys(catalog.quests).length} traders={Object.keys(catalog.traders).length} lang={catalog.lang}</p>}
+      {catalog && <p className="qc-placeholder">quests={Object.keys(catalog.quests).length} traders={Object.keys(catalog.traders).length} lang={catalog.lang}</p>}
     </>
   )
 }
