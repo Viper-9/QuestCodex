@@ -13,6 +13,8 @@ public static class WarningCodes
     public const string OrphanQuest = "orphanQuest";
     public const string VanillaSnapshotMissing = "vanillaSnapshotMissing";
     public const string VanillaSnapshotMismatch = "vanillaSnapshotMismatch";
+    public const string ModQuestScanFailed = "modQuestScanFailed";
+    public const string ModQuestIdCollision = "modQuestIdCollision";
 }
 
 public sealed record CatalogWarning(string? QuestId, string Code, string Detail);
@@ -36,6 +38,8 @@ public sealed class CatalogQuest
     public required string Side { get; init; }
     public string? FactionOnly { get; init; }
     public bool IsVanilla { get; init; }
+    /// <summary>IsVanilla=false 인 퀘스트에서만 채워진다. 출처 모드를 못 찾으면(예: CustomQuestService 로 주입) null.</summary>
+    public string? ModName { get; init; }
     public string? ImageUrl { get; init; }
     public int? MinLevel { get; init; }
     public required IReadOnlyList<Requirement> Requirements { get; init; }

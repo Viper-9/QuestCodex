@@ -16,4 +16,6 @@ public sealed record CatalogInput(
     IReadOnlySet<MongoId> BearOnly,
     IReadOnlySet<MongoId> UsecOnly,
     IReadOnlySet<string>? VanillaQuestIds,
-    string? VanillaSnapshotSptVersion);
+    string? VanillaSnapshotSptVersion,
+    IReadOnlyDictionary<string, string>? ModQuestOrigins = null,
+    IReadOnlyList<Models.CatalogWarning>? ModQuestScanWarnings = null);
