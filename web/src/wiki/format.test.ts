@@ -3,7 +3,7 @@ import { getT } from '../i18n/index'
 import type { NameLookup } from './derive'
 import { formatDuration, formatInt, formatObjective, formatRequirement, formatReward, formatSigned, lineText, shortId } from './format'
 
-const ko = getT('ko')
+const ko = getT('kr')
 const en = getT('en')
 const lookup: NameLookup = {
   traderName: (id) => ({ prapor: 'Prapor', skier: 'Skier' } as Record<string, string>)[id] ?? id,

@@ -18,6 +18,7 @@ public class CatalogService(
     TradersTable tradersTable,
     QuestConfig questConfig,
     LocaleService localeService,
+    LocaleTable localeTable,
     VanillaSnapshot vanilla,
     ISptLogger<CatalogService> logger) : ICatalogSource
 {
@@ -26,7 +27,14 @@ public class CatalogService(
     // "Catalog" 는 QuestCodex.Catalog 네임스페이스와 이름이 겹쳐 using 만으로는 모호해지므로 전체 이름을 쓴다.
     private readonly ConcurrentDictionary<string, Lazy<QuestCodex.Catalog.Models.Catalog>> _cache = new(StringComparer.Ordinal);
 
-    public IReadOnlySet<string> SupportedLangs => localeService.GetServerSupportedLocales();
+    // 지원 언어 = 게임 텍스트 로케일(database/locales/global: en, kr, jp, ge …)의 키. LocaleService.GetServerSupportedLocales()
+    // 는 서버 UI 로케일(ko, ja, de …) 목록이라 키 체계가 다르고, GetLocaleDb 는 모르는 키를 조용히 en 으로 폴백하므로
+    // 그 목록으로 검증하면 "ko 는 200 인데 영어" 가 된다. 첫 요청 시점(모든 모드 로드 후)에 한 번 스냅샷.
+    private readonly Lazy<IReadOnlySet<string>> _supportedLangs = new(
+        () => localeTable.Global.Keys.ToHashSet(StringComparer.Ordinal),
+        LazyThreadSafetyMode.ExecutionAndPublication);
+
+    public IReadOnlySet<string> SupportedLangs => _supportedLangs.Value;
 
     public QuestCodex.Catalog.Models.Catalog Get(string lang)
     {

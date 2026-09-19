@@ -7,7 +7,7 @@ interface SideMenuProps {
   onNavigate(page: Page): void
 }
 
-// 라벨 키는 `menu.${page}` — en.json/ko.json 에 menu.wiki, menu.progress
+// 라벨 키는 `menu.${page}` — en.json/kr.json 에 menu.wiki, menu.progress
 const PAGES: readonly Page[] = ['wiki', 'progress']
 
 export function SideMenu({ page, onNavigate }: SideMenuProps) {

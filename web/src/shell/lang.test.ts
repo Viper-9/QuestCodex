@@ -12,19 +12,19 @@ function fakeStorage(init: Record<string, string> = {}) {
 
 describe('loadLang', () => {
   it('저장값이 목록 안이면 그대로', () => {
-    expect(loadLang(fakeStorage({ 'questcodex.lang': 'ko' }), 'en-US')).toBe('ko')
+    expect(loadLang(fakeStorage({ 'questcodex.lang': 'kr' }), 'en-US')).toBe('kr')
   })
-  it('저장값이 없고 브라우저가 ko 로 시작하면 ko', () => {
-    expect(loadLang(fakeStorage(), 'ko-KR')).toBe('ko')
+  it('저장값이 없고 브라우저가 ko 로 시작하면 kr (게임 로케일 키)', () => {
+    expect(loadLang(fakeStorage(), 'ko-KR')).toBe('kr')
   })
   it('저장값이 없고 브라우저가 ko 가 아니면 en', () => {
     expect(loadLang(fakeStorage(), 'de-DE')).toBe('en')
   })
-  it('저장값이 목록 밖(kr)이면 무시하고 브라우저 언어로', () => {
-    expect(loadLang(fakeStorage({ 'questcodex.lang': 'kr' }), 'ko')).toBe('ko')
+  it('저장값이 목록 밖(ko — 서버 UI 로케일 키)이면 무시하고 브라우저 언어로', () => {
+    expect(loadLang(fakeStorage({ 'questcodex.lang': 'ko' }), 'ko')).toBe('kr')
   })
   it('storage 가 null 이면 브라우저 언어로', () => {
-    expect(loadLang(null, 'ko')).toBe('ko')
+    expect(loadLang(null, 'ko')).toBe('kr')
   })
 })
 
@@ -35,6 +35,6 @@ describe('saveLang', () => {
     expect(s.map.get('questcodex.lang')).toBe('en')
   })
   it('storage 가 null 이어도 예외 없음', () => {
-    expect(() => saveLang('ko', null)).not.toThrow()
+    expect(() => saveLang('kr', null)).not.toThrow()
   })
 })

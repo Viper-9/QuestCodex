@@ -10,7 +10,7 @@ interface FilterBarProps {
   count: number                            // 필터 적용 후 개수
 }
 
-// 라벨 키는 `filter.${key}` — en.json/ko.json 의 filter.vanilla / filter.mod / filter.bear / filter.usec
+// 라벨 키는 `filter.${key}` — en.json/kr.json 의 filter.vanilla / filter.mod / filter.bear / filter.usec
 const CHIP_KEYS: readonly ChipKey[] = ['vanilla', 'mod', 'bear', 'usec']
 
 export function FilterBar({ query, onQueryChange, chips, onToggleChip, count }: FilterBarProps) {

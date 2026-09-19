@@ -5,16 +5,16 @@ afterEach(() => vi.unstubAllGlobals())
 
 describe('fetchCatalog', () => {
   it('lang 을 쿼리로 보내고 JSON 을 그대로 돌려준다', async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ lang: 'ko', traders: {}, quests: {} }), { status: 200 }))
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ lang: 'kr', traders: {}, quests: {} }), { status: 200 }))
     vi.stubGlobal('fetch', fetchMock)
-    const c = await fetchCatalog('ko')
-    expect(c.lang).toBe('ko')
-    expect(fetchMock).toHaveBeenCalledWith('/questcodex/api/catalog?lang=ko', expect.objectContaining({}))
+    const c = await fetchCatalog('kr')
+    expect(c.lang).toBe('kr')
+    expect(fetchMock).toHaveBeenCalledWith('/questcodex/api/catalog?lang=kr', expect.objectContaining({}))
   })
 
   it('4xx/5xx 는 본문 error 코드를 담은 CatalogError', async () => {
-    vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ error: 'unknownLang', supported: ['en', 'ko'] }), { status: 400 }))
-    await expect(fetchCatalog('kr')).rejects.toMatchObject({ code: 'unknownLang', status: 400 })
+    vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ error: 'unknownLang', supported: ['en', 'kr'] }), { status: 400 }))
+    await expect(fetchCatalog('ko')).rejects.toMatchObject({ code: 'unknownLang', status: 400 })
   })
 
   it('본문이 JSON 이 아니면 code 는 http<status>', async () => {
