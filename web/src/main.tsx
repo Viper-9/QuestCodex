@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { App } from './App'
+import { loadTheme } from './shell/theme'
 import './styles.css'
 
 let root: Root | null = null
@@ -12,9 +13,10 @@ export function mount(id: string) {
   }
   root?.unmount()
   root = createRoot(container)
+  const initialTheme = loadTheme()
   root.render(
     <StrictMode>
-      <App />
+      <App initialTheme={initialTheme} />
     </StrictMode>,
   )
 }
