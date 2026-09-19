@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // SPT 서버. 개발 중 API/이미지 요청을 여기로 프록시한다.
@@ -30,5 +30,10 @@ export default defineConfig({
       '/questcodex/api': sptProxy,
       '/files': sptProxy,
     },
+  },
+  // 순수 함수만 단위 테스트한다 (DOM 없음). 컴포넌트는 npm run dev 로 손검증.
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
   },
 })
