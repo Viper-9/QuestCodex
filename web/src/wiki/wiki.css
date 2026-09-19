@@ -134,7 +134,15 @@
   border-radius: 4px;
   color: var(--fg-2);
 }
-.qc-tag--mod { color: var(--mod); border-color: color-mix(in srgb, var(--mod) 40%, transparent); }
+.qc-tag--mod {
+  color: var(--mod);
+  border-color: color-mix(in srgb, var(--mod) 40%, transparent);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .qc-empty { padding: 24px 16px; color: var(--fg-2); }
 
 /* ---- (d) 펼친 행 ---- */

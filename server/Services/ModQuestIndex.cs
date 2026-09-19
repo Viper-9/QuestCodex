@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using QuestCodex.Catalog.Models;
 using SPTarkov.DI.Annotations;
 
@@ -17,6 +18,9 @@ public class ModQuestIndex
     public IReadOnlyDictionary<string, string> QuestOrigins => _data.Value.QuestOrigins;
     public IReadOnlyList<CatalogWarning> Warnings => _data.Value.Warnings;
 
+    /// <summary>퀘스트 ID는 MongoID 24자리 hex — 이 형식이 아닌 최상위 키는 quests.json 이름만 같은 비-퀘스트 파일로 간주하고 무시한다.</summary>
+    private static readonly Regex QuestIdPattern = new("^[0-9a-fA-F]{24}$", RegexOptions.Compiled);
+
     private static (IReadOnlyDictionary<string, string>, IReadOnlyList<CatalogWarning>) Scan()
     {
         var modDir = Path.GetDirectoryName(typeof(ModQuestIndex).Assembly.Location);
@@ -31,9 +35,10 @@ public class ModQuestIndex
     /// <summary>순수 로직만 분리 — 테스트가 실제 어셈블리 경로 대신 임시 디렉터리로 호출한다.</summary>
     public static (IReadOnlyDictionary<string, string> QuestOrigins, IReadOnlyList<CatalogWarning> Warnings) ScanRoot(string modsRoot, string selfDir)
     {
-        var origins = new Dictionary<string, string>(StringComparer.Ordinal);
+        var origins = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var warnings = new List<CatalogWarning>();
         var selfFull = Path.GetFullPath(selfDir);
+        var enumOptions = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
 
         foreach (var modDir in Directory.GetDirectories(modsRoot))
         {
@@ -41,35 +46,44 @@ public class ModQuestIndex
 
             var modName = Path.GetFileName(modDir);
 
-            foreach (var file in Directory.EnumerateFiles(modDir, "quests.json", SearchOption.AllDirectories))
+            try
             {
-                Dictionary<string, JsonElement>? parsed;
-                try
+                foreach (var file in Directory.EnumerateFiles(modDir, "quests.json", enumOptions))
                 {
-                    parsed = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(file));
-                }
-                catch (Exception ex)
-                {
-                    warnings.Add(new CatalogWarning(null, WarningCodes.ModQuestScanFailed, $"{modName}: {ex.GetType().Name}: {ex.Message}"));
-                    continue;
-                }
-
-                if (parsed is null) continue;
-
-                foreach (var questId in parsed.Keys)
-                {
-                    if (!origins.TryGetValue(questId, out var existing))
+                    Dictionary<string, JsonElement>? parsed;
+                    try
                     {
-                        origins[questId] = modName;
+                        parsed = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(file));
                     }
-                    else if (existing != modName)
+                    catch (Exception ex)
                     {
-                        var winner = string.CompareOrdinal(existing, modName) <= 0 ? existing : modName;
-                        var loser = winner == existing ? modName : existing;
-                        origins[questId] = winner;
-                        warnings.Add(new CatalogWarning(questId, WarningCodes.ModQuestIdCollision, $"claimed by '{winner}' and '{loser}', kept '{winner}'"));
+                        warnings.Add(new CatalogWarning(null, WarningCodes.ModQuestScanFailed, $"{modName}: {ex.GetType().Name}: {ex.Message}"));
+                        continue;
+                    }
+
+                    if (parsed is null) continue;
+
+                    foreach (var questId in parsed.Keys)
+                    {
+                        if (!QuestIdPattern.IsMatch(questId)) continue;
+
+                        if (!origins.TryGetValue(questId, out var existing))
+                        {
+                            origins[questId] = modName;
+                        }
+                        else if (existing != modName)
+                        {
+                            var winner = string.CompareOrdinal(existing, modName) <= 0 ? existing : modName;
+                            var loser = winner == existing ? modName : existing;
+                            origins[questId] = winner;
+                            warnings.Add(new CatalogWarning(questId, WarningCodes.ModQuestIdCollision, $"claimed by '{winner}' and '{loser}', kept '{winner}'"));
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                warnings.Add(new CatalogWarning(null, WarningCodes.ModQuestScanFailed, $"{modName}: {ex.GetType().Name}: {ex.Message}"));
             }
         }
 
