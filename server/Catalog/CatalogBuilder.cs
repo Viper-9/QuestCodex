@@ -40,6 +40,8 @@ public static class CatalogBuilder
             warnings.Add(new CatalogWarning(null, WarningCodes.VanillaSnapshotMismatch, $"snapshot {input.VanillaSnapshotSptVersion} vs server {input.SptVersion}"));
         }
 
+        warnings.AddRange(input.ModQuestScanWarnings ?? []);
+
         var traders = new SortedDictionary<string, CatalogTrader>(StringComparer.Ordinal);
         foreach (var kv in input.Traders)
         {
@@ -132,6 +134,7 @@ public static class CatalogBuilder
             Side = quest.Side,
             FactionOnly = factionOnly,
             IsVanilla = input.VanillaQuestIds?.Contains(questId) ?? false,
+            ModName = input.VanillaQuestIds?.Contains(questId) == true ? null : input.ModQuestOrigins?.GetValueOrDefault(questId),
             ImageUrl = string.IsNullOrWhiteSpace(quest.Image) ? null : quest.Image,
             MinLevel = minLevel,
             Requirements = requirements,
