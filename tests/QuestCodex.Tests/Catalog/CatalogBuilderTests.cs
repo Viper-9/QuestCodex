@@ -20,7 +20,9 @@ public class CatalogBuilderTests
         IReadOnlySet<string>? vanilla = null,
         string? snapshotVersion = "4.1.5",
         Dictionary<MongoId, TemplateItem>? items = null,
-        Dictionary<MongoId, TraderBase>? traders = null)
+        Dictionary<MongoId, TraderBase>? traders = null,
+        Dictionary<string, string>? modOrigins = null,
+        IReadOnlyList<CatalogWarning>? modWarnings = null)
         => new(
             Lang: "kr",
             SptVersion: "4.1.5",
@@ -33,7 +35,9 @@ public class CatalogBuilderTests
             BearOnly: (bear ?? []).ToHashSet(),
             UsecOnly: (usec ?? []).ToHashSet(),
             VanillaQuestIds: vanilla,
-            VanillaSnapshotSptVersion: snapshotVersion);
+            VanillaSnapshotSptVersion: snapshotVersion,
+            ModQuestOrigins: modOrigins,
+            ModQuestScanWarnings: modWarnings);
 
     [Fact]
     public void Quest_text_uses_locale_chain_and_warns_once_per_quest()
@@ -99,6 +103,28 @@ public class CatalogBuilderTests
 
         var mismatch = CatalogBuilder.Build(Input([Quest(Id(1))], vanilla: new HashSet<string>(), snapshotVersion: "4.1.2"), Now);
         Assert.Single(mismatch.Warnings, w => w.Code == WarningCodes.VanillaSnapshotMismatch);
+    }
+
+    [Fact]
+    public void ModName_is_filled_for_non_vanilla_quests_only()
+    {
+        var origins = new Dictionary<string, string> { [Id(1).ToString()] = "SomeMod", [Id(2).ToString()] = "OtherMod" };
+
+        var cat = CatalogBuilder.Build(Input([Quest(Id(1)), Quest(Id(2))],
+            vanilla: new HashSet<string> { Id(2) }, modOrigins: origins), Now);
+
+        Assert.Equal("SomeMod", cat.Quests[Id(1)].ModName);
+        Assert.Null(cat.Quests[Id(2)].ModName); // 바닐라로 확정되면 origins 에 값이 있어도 무시
+    }
+
+    [Fact]
+    public void Mod_scan_warnings_are_merged_into_catalog_warnings()
+    {
+        var scanWarning = new CatalogWarning(null, WarningCodes.ModQuestScanFailed, "BrokenMod: bad json");
+
+        var cat = CatalogBuilder.Build(Input([Quest(Id(1))], modWarnings: [scanWarning]), Now);
+
+        Assert.Contains(cat.Warnings, w => w.Code == WarningCodes.ModQuestScanFailed);
     }
 
     [Fact]

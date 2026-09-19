@@ -156,5 +156,43 @@ server/Services/ModQuestIndex.cs
 - `dotnet build server/QuestCodex.csproj`: ✓ 성공
 - `dotnet test tests/QuestCodex.Tests/QuestCodex.Tests.csproj --filter "FullyQualifiedName~ModQuestIndexTests"`: ✓ 4개 테스트 모두 통과 (68ms)
 
+## 3. `CatalogBuilder` 연결 (Task 3)
+
+### 개요
+Task 1이 추가한 `CatalogInput.ModQuestOrigins`/`ModQuestScanWarnings`와 `CatalogQuest.ModName`은 지금까지 아무도 읽거나 쓰지 않는 죽은 필드였습니다. 이 Task는 `CatalogBuilder`(순수 함수, SPT DI 없이 테스트됨)가 이 두 입력 필드를 실제로 소비하도록 연결합니다. `ModQuestIndex`를 실제로 주입해 값을 채우는 작업(Task 4, `CatalogService.cs`)과는 분리되어 있습니다 — 이 Task의 테스트는 `ModQuestIndex`를 거치지 않고 `CatalogInput`에 테스트 데이터를 직접 넣어서 검증합니다.
+
+### 핵심 설계 결정
+
+#### 3.1 `ModName`은 `IsVanilla` 확정 이후에만 채운다
+```csharp
+IsVanilla = input.VanillaQuestIds?.Contains(questId) ?? false,
+ModName = input.VanillaQuestIds?.Contains(questId) == true ? null : input.ModQuestOrigins?.GetValueOrDefault(questId),
+```
+- `ModQuestOrigins`는 파일 시스템 스캔(`user/mods/*/quests.json`) 결과일 뿐이라, 어떤 questId가 그 안에 있다는 사실만으로는 "이 퀘스트가 모드산(産)"이라고 확정할 수 없습니다.
+- 스펙 §0에 나오는 "조건-패치 모드"(바닐라 퀘스트 ID를 그대로 재사용해서 `AvailableForStart` 조건만 바꿔치기하는 모드)가 존재하면, 그 모드의 `quests.json`에도 바닐라 questId가 등장할 수 있습니다.
+- 그래서 `ModName`을 채우기 전에 반드시 `IsVanilla`가 이미 `true`로 확정되지 않았는지부터 확인합니다. 바닐라로 확정되면 `ModQuestOrigins`에 값이 있어도 무조건 `null`로 덮어씁니다.
+- 이 순서를 뒤집어 `ModQuestOrigins`를 먼저 보고 `IsVanilla`를 나중에 체크하면(또는 체크를 생략하면), 조건-패치 모드가 설치된 환경에서 바닐라 퀘스트에 엉뚱하게 모드 이름이 붙는 안전성 버그가 생깁니다. `ModName_is_filled_for_non_vanilla_quests_only` 테스트가 이 성질을 직접 검증합니다(questId 2번은 `vanilla` 집합에도 있고 `modOrigins`에도 있지만, 결과는 반드시 `null`).
+
+#### 3.2 스캔 경고는 `Build()` 상단, 기존 바닐라 스냅샷 경고와 같은 자리에서 병합
+```csharp
+if (input.VanillaQuestIds is null) { warnings.Add(...VanillaSnapshotMissing...); }
+else if (...) { warnings.Add(...VanillaSnapshotMismatch...); }
+
+warnings.AddRange(input.ModQuestScanWarnings ?? []);
+```
+- `ModQuestScanWarnings`(Task 2의 `ModQuestIndex.Warnings`, 예: `ModQuestScanFailed`, `ModQuestIdCollision`)는 퀘스트 단위 루프가 시작되기 전에 이미 확정된, 빌드와 무관한 "입력 단계" 경고입니다. `VanillaSnapshotMissing`/`Mismatch`와 성격이 같습니다(둘 다 "카탈로그를 만들기 전에 입력 자체에 문제가 있었다"는 경고).
+- 기존 패턴 위치에 그대로 이어붙이면 퀘스트별 경고(`BuildFailed`, `MissingLocale` 등)보다 항상 앞에 오게 되어, 경고 목록을 볼 때 "전역 입력 문제 → 퀘스트별 문제" 순서가 유지됩니다.
+- `ModQuestScanWarnings`가 `null`인 경우(Task 4 이전, 또는 스캔이 아직 연결되지 않은 호출부)에도 `?? []`로 안전하게 무시됩니다.
+
+### TDD 과정
+1. `Input(...)` 헬퍼에 `modOrigins`/`modWarnings` 파라미터 추가, 새 `[Fact]` 2개(`ModName_is_filled_for_non_vanilla_quests_only`, `Mod_scan_warnings_are_merged_into_catalog_warnings`) 작성.
+2. RED: 필터 테스트 실행 → 2개 실패(`ModName`이 채워지지 않아 `null`, 경고 목록에 `ModQuestScanFailed` 없음), 기존 14개는 그대로 통과.
+3. `CatalogBuilder.cs`의 `Build()`와 `BuildQuest()`를 위 두 블록으로 수정.
+4. GREEN: 필터 테스트 16개 전부 통과, 전체 스위트 116개 전부 통과(회귀 없음).
+
+### 빌드 및 테스트 결과
+- `dotnet test tests/QuestCodex.Tests/QuestCodex.Tests.csproj --filter "FullyQualifiedName~CatalogBuilderTests"`: ✓ 16개 모두 통과
+- `dotnet test tests/QuestCodex.Tests/QuestCodex.Tests.csproj`: ✓ 116개 모두 통과
+
 ## 다음 단계
-Task 3: CatalogBuilder에 ModQuestIndex 주입 및 ModName 값 채우기
+Task 4: `CatalogService.cs`에 `ModQuestIndex`를 실제로 주입해 `ModQuestOrigins`/`ModQuestScanWarnings`에 실제 값을 채우기
