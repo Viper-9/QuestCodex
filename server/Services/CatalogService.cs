@@ -20,6 +20,7 @@ public class CatalogService(
     LocaleService localeService,
     LocaleTable localeTable,
     VanillaSnapshot vanilla,
+    ModQuestIndex modQuestIndex,
     ISptLogger<CatalogService> logger) : ICatalogSource
 {
     private const string FallbackLang = "en";
@@ -69,7 +70,9 @@ public class CatalogService(
             BearOnly: questConfig.BearOnlyQuests,
             UsecOnly: questConfig.UsecOnlyQuests,
             VanillaQuestIds: vanilla.QuestIds,
-            VanillaSnapshotSptVersion: vanilla.SptVersion);
+            VanillaSnapshotSptVersion: vanilla.SptVersion,
+            ModQuestOrigins: modQuestIndex.QuestOrigins,
+            ModQuestScanWarnings: modQuestIndex.Warnings);
 
         var catalog = CatalogBuilder.Build(input, started);
 
