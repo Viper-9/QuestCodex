@@ -21,13 +21,14 @@ export function QuestList({ quests, lookup, expanded, onToggle, renderDetail, mo
   return (
     <div className="qc-list">
       <div className="qc-list__header" aria-hidden="true">
-        <span>{t('list.name')}</span>
+        {/* 첫 칸은 필터 적용 후 개수. 헤더는 aria-hidden 이라 개수는 아래 ul 의 aria-label 로도 읽힌다. */}
+        <span className="qc-list__count">{t('filter.count', { n: quests.length })}</span>
         <span>{t('list.trader')}</span>
         <span className="qc-row__num">{t('list.level')}</span>
         <span className="qc-row__num">{t('list.prereq')}</span>
         <span />
       </div>
-      <ul className="qc-list__body">
+      <ul className="qc-list__body" aria-label={t('filter.count', { n: quests.length })}>
         {quests.map((q) => {
           const open = expanded.has(q.id)
           return (

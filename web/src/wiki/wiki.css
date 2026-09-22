@@ -87,6 +87,14 @@
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
 }
+.qc-tools__group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;               /* 좁아지면 칩이 검색창 아래로 */
+  gap: 8px;
+  flex: 1;
+  min-width: 0;                  /* 검색창이 줄어들 수 있게 — flex 자식 기본 min-width:auto 해제 */
+}
 .qc-search {
   flex: 1;
   max-width: 320px;
@@ -116,6 +124,7 @@
   transform: translateY(1px);
 }
 .qc-sort {
+  margin-left: auto;             /* 도구 줄 오른쪽 끝 (§3.3) */
   padding: 4px 8px;
   border: 1px solid var(--border-2);
   border-radius: var(--radius);
@@ -123,7 +132,6 @@
   color: var(--fg-2);
   font-size: 11px;
 }
-.qc-tools__count { margin-left: auto; font-size: 12px; color: var(--fg-3); white-space: nowrap; }
 
 /* ---- 로딩 스켈레톤. 실제 레이아웃과 같은 높이를 써서 로딩→렌더 전환 때 행이 튀지 않게 한다. ---- */
 .qc-skeleton { padding: 0; }
@@ -153,6 +161,7 @@
   font-weight: 500;
   color: var(--fg-3);
 }
+.qc-list__count { font-variant-numeric: tabular-nums; }   /* 개수가 바뀌어도 칸 너비가 흔들리지 않게 */
 .qc-quest { scroll-margin-top: 30px; } /* sticky 헤더 높이만큼 — scrollIntoView 오프셋 (§4.4-3) */
 .qc-row {
   width: 100%;

@@ -84,7 +84,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
       />
       <FilterBar
         query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip}
-        sort={sort} onSortChange={setSort} count={visible.length}
+        sort={sort} onSortChange={setSort}
       />
       <QuestList
         quests={visible}

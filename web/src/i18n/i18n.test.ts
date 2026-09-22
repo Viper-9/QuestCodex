@@ -27,7 +27,7 @@ describe('getT', () => {
     expect(getT('en')('menu.wiki')).toBe('Wiki')
   })
   it('자리표시자 치환', () => {
-    expect(getT('kr')('filter.count', { n: 612 })).toBe('612개')
+    expect(getT('kr')('filter.count', { n: 612 })).toBe('퀘스트 612개')
     expect(getT('en')('error.catalog', { code: 'network' })).toBe('Failed to load the catalog (network)')
   })
   it('interpolate 는 params 에 없는 자리표시자를 그대로 둔다', () => {
