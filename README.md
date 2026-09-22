@@ -1,10 +1,90 @@
 # QuestCodex
-A browser-based quest wiki and progress tracker for every quest actually loaded on your SPT server vanilla and modded alike
 
-## License
+**Language: [한국어](README.md) | [English](README.en.md)**
+
+## 모드 취지
+
+**내 SPT 서버에 실제로 로드된 퀘스트**를 브라우저에서 보는 퀘스트 위키입니다.
+
+외부 위키 사이트는 라이브 EFT 기준이라 내 서버와 다릅니다. QuestCodex는 그 반대로, 서버가 메모리에
+올린 퀘스트 테이블을 그대로 읽어 카탈로그를 만듭니다. 그래서 퀘스트 모드가 조건·보상을 바꿨다면 바뀐
+값이 나오고, 모드가 추가한 퀘스트도 바닐라 퀘스트와 같은 화면에 함께 나옵니다. 모드 퀘스트에는
+**어느 모드에서 온 것인지** 이름표가 붙습니다.
+
+서버 데이터를 **읽기만** 합니다. 퀘스트·프로필·상인 데이터를 수정하지 않으므로 다른 퀘스트 모드와
+겹쳐도 그 모드의 변경 결과를 그대로 보여줄 뿐입니다.
+
+## 요구사항
+
+- SPT 서버 `~4.1.6`
+- 클라이언트 플러그인 **불필요** — 서버 모드 하나뿐이고 BepInEx를 쓰지 않습니다
+
+## 설치
+
+1. [Releases](../../releases)에서 원하는 버전의 `QuestCodex-<버전>.zip`을 다운로드합니다.
+2. 압축을 풀어 나오는 `SPT_Runtime` 폴더를 SPT 설치 루트(예: `C:\SPT`, `SPT.Server.exe`가 든
+   `SPT_Runtime` 폴더의 상위 폴더)에 그대로 덮어씁니다. (`SPT_Runtime/user/mods/QuestCodex/...` 구조)
+   - `SPT_Runtime` 폴더 자체가 서버 루트인 구조(구버전 SPT)라면, 압축 안의
+     `SPT_Runtime\user\mods\QuestCodex` 폴더만 서버 루트의 `user\mods\`에 복사해도 됩니다.
+3. 서버를 재시작합니다.
+
+## 여는 법
+
+서버를 켠 뒤 브라우저에서 **`https://127.0.0.1:6969/questcodex`** 로 접속합니다.
+SPT 서버 웹 페이지(`https://127.0.0.1:6969`) 아래쪽 모드 카드에서도 들어갈 수 있습니다.
+
+- 인증서 경고가 뜨면 그대로 진행합니다 — SPT 서버 웹 페이지와 같은 자체 서명 인증서입니다.
+- SPT 서버는 `127.0.0.1`에만 바인딩하므로 **서버를 돌리는 그 PC의 브라우저에서만** 열립니다.
+  휴대폰이나 다른 PC에서는 접속되지 않습니다.
+- 게임을 켜 둔 채로 다른 모니터에 띄워 놓고 봐도 됩니다. 읽기 전용이라 게임에 영향이 없습니다.
+
+## 기능
+
+**위키 페이지**
+
+- **상인 필터** — 상인 아바타 가로줄에서 상인 하나를 고르면 그 상인 퀘스트만. 모드가 추가한 상인도 같이 나옵니다.
+- **검색·필터 칩** — 퀘스트 이름 검색, `바닐라` / `모드`, `BEAR 전용` / `USEC 전용`.
+- **정렬** — `연계순`(기본, 선행 퀘스트가 항상 위) / `레벨순` / `이름순`.
+- **행 펼침** — 퀘스트 줄을 누르면 그 자리에서 펼쳐집니다. 목표, 요구 조건, 보상(수락 시·실패 시 보상 포함),
+  선행/해금 퀘스트가 한 번에 보입니다. 여러 줄을 동시에 펼쳐 비교할 수 있습니다.
+- **연계 점프** — 펼친 상세의 선행·해금 퀘스트 이름을 누르면 그 퀘스트로 이동합니다.
+- **설명 팝업** — 퀘스트 설명 전문은 팝업으로. 긴 설명이 목록 높이를 늘리지 않습니다.
+- **딥링크** — `?quest=<퀘스트ID>` 로 특정 퀘스트를 바로 열 수 있습니다.
+- **모드 귀속 표기** — 모드 퀘스트에 출처 모드 이름표를 붙이고, 모드마다 다른 색으로 구분합니다.
+- **언어 전환** — `en` / `kr`. 화면 문구와 퀘스트·아이템 이름이 함께 바뀝니다
+  (게임 텍스트는 서버 로케일에서 가져옵니다).
+- **테마** — `시스템` / `밝게` / `어둡게`. 선택값은 브라우저에 저장됩니다.
+
+## 준비 중인 업데이트
+
+- **진행현황 페이지** — 왼쪽 메뉴에 자리만 있고 "준비 중" 한 줄입니다. 프로필별 퀘스트 진행현황(카파 트래커 포함)을 볼 수 있는 페이지
+- 보상 역검색
+
+## 알려진 한계
+
+**런타임에 응답을 후킹하는 모드의 변경은 보이지 않습니다.**
+
+QuestCodex는 서버가 부팅을 끝낸 뒤 **메모리에 병합해 둔 퀘스트 테이블**을 읽습니다. 그래서 퀘스트
+JSON을 추가·수정하는 모드는 로드 순서와 상관없이 전부 그대로 반영됩니다. 반대로 `/client/quest/list`
+같은 라우트를 가로채 **요청이 올 때마다 응답을 고쳐서 내보내는** 모드는 테이블 자체를 건드리지 않기
+때문에, 그 변경이 QuestCodex에는 잡히지 않습니다. 게임 안에서는 바뀐 퀘스트가 보이는데 QuestCodex에는
+바뀌기 전 내용이 뜨는 식입니다.
+
+흔한 방식은 아니지만 구조상 피할 수 없는 사각지대라, 화면과 게임이 다르다면 이쪽을 먼저 의심하시면
+됩니다.
+
+그 밖에:
+
+- 모드가 JSON 파일이 아니라 **C# 코드로 직접 주입**하는 퀘스트(`CustomQuestService.CreateQuest()`)는
+  파일 흔적이 없어 출처 모드를 찾지 못합니다. 이런 퀘스트는 모드 이름 대신 `모드` 라벨만 붙습니다.
+
+
+## 라이선스
 
 Copyright (c) 2026 Viper-9. **All Rights Reserved.**
 
-You may download and use this mod, unmodified, for personal, non-commercial purposes. Redistribution (including re-uploading elsewhere), modification, derivative works and commercial use are prohibited without the prior written permission of the copyright holder. See [LICENSE](LICENSE) for the full terms.
+이 모드를 개인적·비상업적 용도로 **원본 그대로** 내려받아 사용할 수 있습니다. 재배포(다른 곳에 재업로드
+포함), 수정, 2차적 저작물 제작, 상업적 이용은 저작권자의 사전 서면 허락 없이는 금지됩니다. 전체 조항은
+[LICENSE](LICENSE)를 참고하세요.
 
-Third-party components remain under their own licenses — see [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
+제3자 구성요소는 각자의 라이선스를 따릅니다 — [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) 참고.
