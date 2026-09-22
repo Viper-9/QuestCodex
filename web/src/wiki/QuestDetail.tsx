@@ -13,7 +13,7 @@ interface QuestDetailProps {
   onJump(questId: string): void
 }
 
-/** (d) 펼친 행. 2열: [목표·시작 조건] [보상·연계]. 설명 본문은 여기 없음 — 팝업 (§1.2 d, e). */
+/** (d) 펼친 행. 2열 [목표·시작 조건] [보상] + 전폭 푸터 [연계]. 설명 본문은 여기 없음 — 팝업 (§1.2 d, e). */
 export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onJump }: QuestDetailProps) {
   const t = useT()
   const meta = [
@@ -51,11 +51,11 @@ export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onJump 
           <LineList lines={quest.rewards.success.map((r) => formatReward(r, lookup, t))} empty={t('detail.noRewards')} onJump={onJump} />
           <ExtraRewards titleKey="detail.rewardsStarted" rewards={quest.rewards.started} lookup={lookup} onJump={onJump} />
           <ExtraRewards titleKey="detail.rewardsFail" rewards={quest.rewards.fail} lookup={lookup} onJump={onJump} />
-          {hasRelated
-            ? <RelatedQuests quest={quest} catalog={catalog} lookup={lookup} onJump={onJump} />
-            : quest.tags.includes('isolated') && <p className="qc-detail__note">{t('detail.isolated')}</p>}
         </section>
       </div>
+      {hasRelated
+        ? <RelatedQuests quest={quest} catalog={catalog} lookup={lookup} onJump={onJump} />
+        : quest.tags.includes('isolated') && <p className="qc-detail__note qc-detail__foot">{t('detail.isolated')}</p>}
     </div>
   )
 }
@@ -81,16 +81,15 @@ function ExtraRewards({ titleKey, rewards, lookup, onJump }: ExtraRewardsProps) 
 
 type RelatedProps = Omit<QuestDetailProps, 'onOpenDescription'>
 
+/** 연계는 제목 없이 구분선 아래 [선행] [후속] 두 열로만 (§1.2 d) */
 function RelatedQuests({ quest, catalog, lookup, onJump }: RelatedProps) {
-  const t = useT()
   return (
-    <>
-      <h4 className="qc-detail__h">{t('detail.related')}</h4>
+    <div className="qc-detail__foot">
       <div className="qc-related">
         <RelatedColumn labelKey="detail.prereq" ids={quest.prerequisites} quest={quest} catalog={catalog} lookup={lookup} onJump={onJump} />
         <RelatedColumn labelKey="detail.unlocks" ids={quest.unlocks} quest={quest} catalog={catalog} lookup={lookup} onJump={onJump} />
       </div>
-    </>
+    </div>
   )
 }
 
