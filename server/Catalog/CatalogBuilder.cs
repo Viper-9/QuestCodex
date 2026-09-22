@@ -45,7 +45,7 @@ public static class CatalogBuilder
         var traders = new SortedDictionary<string, CatalogTrader>(StringComparer.Ordinal);
         foreach (var kv in input.Traders)
         {
-            traders[kv.Key] = BuildTrader(kv.Key, kv.Value, locale);
+            traders[kv.Key] = BuildTrader(kv.Key, kv.Value, locale, input.AvatarIsServable);
         }
 
         var quests = new SortedDictionary<string, CatalogQuest>(StringComparer.Ordinal);
@@ -69,11 +69,21 @@ public static class CatalogBuilder
         return new Models.Catalog(input.SptVersion, input.ModVersion, now, input.Lang, traders, quests, rewardIndex, warnings);
     }
 
-    private static CatalogTrader BuildTrader(MongoId id, TraderBase tb, LocaleResolver locale)
+    private static CatalogTrader BuildTrader(MongoId id, TraderBase tb, LocaleResolver locale, Func<string, bool>? avatarIsServable)
     {
         var name = locale.TryResolve($"{id} Nickname")
                    ?? (string.IsNullOrWhiteSpace(tb.Nickname) ? id.ToString() : tb.Nickname);
         var avatar = string.IsNullOrWhiteSpace(tb.Avatar) ? null : tb.Avatar;
+
+        // SPT 4.1.5 Storyteller 처럼 base.json 이 존재하지 않는 이미지를 가리키는 경우가 있다. 그대로 내보내면
+        // 프론트가 로드 실패 후에야 이니셜로 폴백하고, 그 사이 요청마다 서버에 "처리되지 않은 응답" 에러가 남는다.
+        // 라우트 판정은 SPT 이미지 라우터가 하므로 "/files/" 로 시작하는 URL 에만 적용한다(모드의 외부 URL 은 그대로 둔다).
+        if (avatar is not null && avatarIsServable is not null
+            && avatar.StartsWith("/files/", StringComparison.OrdinalIgnoreCase) && !avatarIsServable(avatar))
+        {
+            avatar = null;
+        }
+
         return new CatalogTrader(id, name, avatar, VanillaTraderIds.Contains(id));
     }
 

@@ -8,6 +8,7 @@ dist/
 tools/package.ps1
 
 # Web
+*.tsbuildinfo
 web/node_modules/
 web/dist/
 server/wwwroot/

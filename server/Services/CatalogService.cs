@@ -4,6 +4,7 @@ using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Services.Image;
 using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 
@@ -21,6 +22,8 @@ public class CatalogService(
     LocaleTable localeTable,
     VanillaSnapshot vanilla,
     ModQuestIndex modQuestIndex,
+    ImageRouterService imageRouterService,
+    FileUtil fileUtil,
     ISptLogger<CatalogService> logger) : ICatalogSource
 {
     private const string FallbackLang = "en";
@@ -72,7 +75,8 @@ public class CatalogService(
             VanillaQuestIds: vanilla.QuestIds,
             VanillaSnapshotSptVersion: vanilla.SptVersion,
             ModQuestOrigins: modQuestIndex.QuestOrigins,
-            ModQuestScanWarnings: modQuestIndex.Warnings);
+            ModQuestScanWarnings: modQuestIndex.Warnings,
+            AvatarIsServable: IsAvatarServable);
 
         var catalog = CatalogBuilder.Build(input, started);
 
@@ -85,5 +89,16 @@ public class CatalogService(
         }
 
         return catalog;
+    }
+
+    /// <summary>
+    /// 이미지 URL 을 SPT 가 실제로 서빙하는지. 키 규칙(확장자 제거 → URL 디코드 → 소문자)은 ImageRouter.CanHandle 과
+    /// 같아야 하므로 SPT 의 FileUtil 을 그대로 쓴다. 라우트는 각 모드의 IOnLoad 에서 등록되고 카탈로그는 첫 요청
+    /// 시점(모든 모드 로드 후)에 빌드되므로, 이 시점이면 모드 상인 아바타도 이미 등록돼 있다.
+    /// </summary>
+    private bool IsAvatarServable(string avatarUrl)
+    {
+        var key = Uri.UnescapeDataString(fileUtil.StripExtension(avatarUrl, keepPath: true)).ToLowerInvariant();
+        return imageRouterService.ExistsByKey(key);
     }
 }

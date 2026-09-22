@@ -22,7 +22,8 @@ public class CatalogBuilderTests
         Dictionary<MongoId, TemplateItem>? items = null,
         Dictionary<MongoId, TraderBase>? traders = null,
         Dictionary<string, string>? modOrigins = null,
-        IReadOnlyList<CatalogWarning>? modWarnings = null)
+        IReadOnlyList<CatalogWarning>? modWarnings = null,
+        Func<string, bool>? avatarIsServable = null)
         => new(
             Lang: "kr",
             SptVersion: "4.1.5",
@@ -37,7 +38,8 @@ public class CatalogBuilderTests
             VanillaQuestIds: vanilla,
             VanillaSnapshotSptVersion: snapshotVersion,
             ModQuestOrigins: modOrigins,
-            ModQuestScanWarnings: modWarnings);
+            ModQuestScanWarnings: modWarnings,
+            AvatarIsServable: avatarIsServable);
 
     [Fact]
     public void Quest_text_uses_locale_chain_and_warns_once_per_quest()
@@ -64,6 +66,42 @@ public class CatalogBuilderTests
         Assert.True(cat.Traders[Prapor].IsVanilla);
         Assert.Equal("Therapist", cat.Traders[Therapist].Name);
         Assert.Null(cat.Traders[Therapist].AvatarUrl);
+    }
+
+    [Fact]
+    public void Unservable_avatar_becomes_null_so_the_front_never_requests_it()
+    {
+        // SPT 4.1.5 Storyteller: base.json 이 실제로 없는 이미지를 가리킨다.
+        var storyteller = Id(600);
+        var traders = new Dictionary<MongoId, TraderBase>
+        {
+            [Prapor] = Trader(Prapor, "Prapor", "/files/trader/avatar/x.jpg"),
+            [storyteller] = Trader(storyteller, "Storyteller", "/files/trader/avatar/missing.png"),
+        };
+
+        var cat = CatalogBuilder.Build(Input([Quest(Id(1), Prapor), Quest(Id(2), storyteller)],
+            traders: traders,
+            avatarIsServable: url => url != "/files/trader/avatar/missing.png"), Now);
+
+        Assert.Equal("/files/trader/avatar/x.jpg", cat.Traders[Prapor].AvatarUrl);
+        Assert.Null(cat.Traders[storyteller].AvatarUrl);
+    }
+
+    [Fact]
+    public void Avatar_outside_the_image_route_is_left_alone()
+    {
+        // 모드가 외부 URL 을 쓰면 SPT 이미지 라우터 소관이 아니므로 판정하지 않는다.
+        var modTrader = Id(601);
+        var traders = new Dictionary<MongoId, TraderBase>
+        {
+            [modTrader] = Trader(modTrader, "Lotus", "https://example.test/lotus.jpg"),
+        };
+
+        var cat = CatalogBuilder.Build(Input([Quest(Id(1), modTrader)],
+            traders: traders,
+            avatarIsServable: _ => false), Now);
+
+        Assert.Equal("https://example.test/lotus.jpg", cat.Traders[modTrader].AvatarUrl);
     }
 
     [Fact]
