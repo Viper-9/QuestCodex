@@ -239,6 +239,9 @@
 .qc-dialog {
   width: min(520px, calc(100vw - 32px));
   max-height: min(80vh, 640px);
+  /* 배포본에는 MudBlazor 의 전역 리셋 `*{margin:0}` 이 깔려 UA 의 dialog:modal{margin:auto} 를
+     덮어쓴다 → inset:0 만 남아 좌상단에 붙는다. 여기서 다시 잡아 준다 (vite dev 에는 없는 차이). */
+  margin: auto;
   padding: 0;
   border: 1px solid var(--border-2);
   border-radius: 8px;

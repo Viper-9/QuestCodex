@@ -29,9 +29,19 @@ export function navigate(page: Page): void {
   location.hash = hashFor(page)
 }
 
+/**
+ * 해시를 현재 경로 뒤에 붙인다. history.replaceState 의 URL 은 문서 base URL 기준으로 풀리는데,
+ * 배포본 호스트 페이지(Blazor)는 <base href="/"> 를 달고 있어 '#/wiki' 만 넘기면 /questcodex 가
+ * 통째로 날아가 '/#/wiki' 가 된다 (새로고침 → SPT 랜딩, 이후 해시 변경 → Blazor 가 '/' 를 로드).
+ * vite dev 의 index.html 에는 <base> 가 없어 이 차이가 드러나지 않는다 (§4.6).
+ */
+export function urlWithHash(pathname: string, search: string, hash: string): string {
+  return `${pathname}${search}${hash}`
+}
+
 /** hashchange 없이 URL 만 바꾼다 — 딥링크 소비 후 ?quest 제거(§4.5), 잘못된 해시 정정. */
 export function replaceHash(hash: string): void {
-  history.replaceState(null, '', hash)
+  history.replaceState(null, '', urlWithHash(location.pathname, location.search, hash))
 }
 
 function readRoute(): Route {

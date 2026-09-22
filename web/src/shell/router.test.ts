@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hashFor, parseHash } from './router'
+import { hashFor, parseHash, urlWithHash } from './router'
 
 describe('parseHash', () => {
   it('#/wiki → wiki, 빈 쿼리', () => {
@@ -29,5 +29,15 @@ describe('hashFor', () => {
   it('#/<page>', () => {
     expect(hashFor('wiki')).toBe('#/wiki')
     expect(hashFor('progress')).toBe('#/progress')
+  })
+})
+
+describe('urlWithHash', () => {
+  it('현재 경로를 앞에 붙인다 (<base href="/"> 가 경로를 먹지 않도록)', () => {
+    expect(urlWithHash('/questcodex', '', '#/wiki')).toBe('/questcodex#/wiki')
+    expect(urlWithHash('/questcodex', '', '#/progress')).toBe('/questcodex#/progress')
+  })
+  it('쿼리 스트링을 보존한다', () => {
+    expect(urlWithHash('/questcodex', '?a=1', '#/wiki')).toBe('/questcodex?a=1#/wiki')
   })
 })

@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 아래 두 줄은 배포본 호스트(SPT 의 Blazor 레이아웃) 환경을 dev 에서 재현하기 위한 것.
+         빠지면 prod 에서만 깨지는 버그가 dev 에서 안 보인다. -->
+    <!-- SPT 의 App.razor 가 항상 내보내는 <base>. history.pushState/replaceState 의 상대 URL 이
+         이 기준으로 풀린다 (router.ts urlWithHash 참조). -->
+    <base href="/" />
+    <!-- MudBlazor.min.css 의 전역 리셋. 앱 CSS 보다 먼저 깔린다 (prod 의 로드 순서와 동일). -->
+    <style>*{box-sizing:border-box;margin:0;padding:0;border-width:0;border-style:solid}</style>
     <title>QuestCodex (dev)</title>
   </head>
   <body>
