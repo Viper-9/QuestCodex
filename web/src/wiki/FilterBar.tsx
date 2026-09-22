@@ -13,8 +13,8 @@ interface FilterBarProps {
 
 // 라벨 키는 `filter.${key}` — en.json/kr.json 의 filter.vanilla / filter.mod / filter.bear / filter.usec
 const CHIP_KEYS: readonly ChipKey[] = ['vanilla', 'mod', 'bear', 'usec']
-// 라벨 키는 `sort.${key}` — en.json/kr.json 의 sort.level / sort.chain / sort.name
-const SORT_KEYS: readonly SortKey[] = ['level', 'chain', 'name']
+// 라벨 키는 `sort.${key}` — en.json/kr.json 의 sort.chain / sort.level / sort.name
+const SORT_KEYS: readonly SortKey[] = ['chain', 'level', 'name']
 
 export function FilterBar({ query, onQueryChange, chips, onToggleChip, sort, onSortChange }: FilterBarProps) {
   const t = useT()

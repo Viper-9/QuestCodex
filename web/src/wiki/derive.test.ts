@@ -76,9 +76,9 @@ describe('sortQuests', () => {
   it('이름순: 레벨을 무시하고 이름만 본다', () => {
     expect(sortQuests(src(), 'name').map((q) => q.id)).toEqual(['a', 'b', 'm', 'n', 'z'])
   })
-  it('기준을 생략하면 기본값(레벨순)', () => {
+  it('기준을 생략하면 기본값(연계순) — rank 가 없으니 레벨순으로 폴백', () => {
     expect(sortQuests(src()).map((q) => q.id)).toEqual(sortQuests(src(), DEFAULT_SORT).map((q) => q.id))
-    expect(DEFAULT_SORT).toBe('level')
+    expect(DEFAULT_SORT).toBe('chain')
   })
   it('원본은 그대로', () => {
     const input = src()

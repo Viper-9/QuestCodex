@@ -57,7 +57,7 @@ export function filterQuests(quests: CatalogQuest[], f: WikiFilters): CatalogQue
 
 /** 목록 정렬 기준. 도구 줄의 드롭다운 값이자 `sortQuests` 의 인자. */
 export type SortKey = 'level' | 'name' | 'chain'
-export const DEFAULT_SORT: SortKey = 'level'
+export const DEFAULT_SORT: SortKey = 'chain'
 
 /**
  * 연계순의 갈림길 비교자. 레벨 없음을 **0** 으로 친다 — `sortQuests('level')` 의 `Infinity` 와 정반대다.
