@@ -171,8 +171,22 @@ public class CatalogBuilderTests
 
         var objs = cat.Quests[Id(1)].Objectives;
         Assert.Equal(2, objs.Count);
-        Assert.Equal(new Objective(Id(201), "HandoverItem", "Hand over 3 mags", 3, true), objs[0]);
-        Assert.Equal(new Objective(Id(202), "CounterCreator", "CounterCreator", null, false), objs[1]);
+        Assert.Equal(new Objective(Id(201), "HandoverItem", "Hand over 3 mags", 3, true, null), objs[0]);
+        Assert.Equal(new Objective(Id(202), "CounterCreator", "", null, false, null), objs[1]); // 로케일 없음 → Text 는 빈 문자열, 표시 문구는 프론트가 조립
+    }
+
+    [Fact]
+    public void Objective_without_locale_falls_back_to_target_item_name_and_warns()
+    {
+        var tpl = Id(700);
+        var q = Quest(Id(1), finish: [FinishCond(Id(201), "HandoverItem", value: 1, target: tpl)]);
+
+        var cat = CatalogBuilder.Build(Input([q], locale: new() { [$"{tpl} Name"] = "황금 아령" }), Now);
+
+        var obj = Assert.Single(cat.Quests[Id(1)].Objectives);
+        Assert.Equal("", obj.Text);
+        Assert.Equal("황금 아령", obj.TargetName);
+        Assert.Single(cat.Warnings, w => w.Code == WarningCodes.MissingLocale && w.Detail.Contains(Id(201).ToString()));
     }
 
     [Fact]

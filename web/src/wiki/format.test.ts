@@ -76,12 +76,16 @@ describe('formatReward (§4.2)', () => {
 
 describe('formatObjective', () => {
   it('text + ×N + (선택)', () => {
-    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'HandoverItem', text: '창고 열쇠 인도', targetCount: 1, optional: false }, ko))).toBe('창고 열쇠 인도 ×1')
-    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'Kill', text: '스캐브 처치', targetCount: 25, optional: true }, ko))).toBe('스캐브 처치 ×25 (선택)')
-    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'Visit', text: '창고 위치 확인', targetCount: null, optional: false }, ko))).toBe('창고 위치 확인')
+    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'HandoverItem', text: '창고 열쇠 인도', targetName: null, targetCount: 1, optional: false }, ko))).toBe('창고 열쇠 인도 ×1')
+    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'Kill', text: '스캐브 처치', targetName: null, targetCount: 25, optional: true }, ko))).toBe('스캐브 처치 ×25 (선택)')
+    expect(lineText(formatObjective({ conditionId: 'c', conditionType: 'Visit', text: '창고 위치 확인', targetName: null, targetCount: null, optional: false }, ko))).toBe('창고 위치 확인')
   })
-  it('text 비면 conditionType 회색', () => {
-    expect(formatObjective({ conditionId: 'c', conditionType: 'CounterCreator', text: '', targetCount: null, optional: false }, ko)).toEqual({ parts: [{ text: 'CounterCreator' }], tone: 'muted' })
+  it('text 비고 targetName 있으면 conditionType + 아이템명, 톤은 일반', () => {
+    expect(formatObjective({ conditionId: 'c', conditionType: 'HandoverItem', text: '', targetName: '황금 아령', targetCount: 1, optional: false }, ko))
+      .toEqual({ parts: [{ text: 'HandoverItem: 황금 아령 ×1' }], tone: 'normal' })
+  })
+  it('text 비고 targetName 도 없으면 conditionType 만', () => {
+    expect(formatObjective({ conditionId: 'c', conditionType: 'CounterCreator', text: '', targetName: null, targetCount: null, optional: false }, ko)).toEqual({ parts: [{ text: 'CounterCreator' }], tone: 'normal' })
   })
 })
 

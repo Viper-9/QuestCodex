@@ -98,8 +98,14 @@ export function formatReward(r: Reward, lookup: NameLookup, t: T): FormattedLine
 }
 
 export function formatObjective(o: Objective, t: T): FormattedLine {
-  if (o.text === '') return plain(o.conditionType, 'muted')
+  // text 가 비면 서버가 조건 로케일을 못 찾은 것. 모드가 조건만 추가하고 번역을 빼먹으면 여기로 온다.
+  // 이때는 conditionType 에 대상 아이템 이름을 붙여 대체 문구를 만든다.
   let text = o.text
+  if (text === '') {
+    text = o.targetName === null
+      ? o.conditionType
+      : t('fmt.objectiveFallback', { type: o.conditionType, name: o.targetName })
+  }
   if (o.targetCount !== null) text += t('fmt.objectiveCount', { n: formatInt(o.targetCount) })
   if (o.optional) text += t('fmt.optional')
   return plain(text)

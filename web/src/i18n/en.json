@@ -71,6 +71,7 @@
   "fmt.experience": "Experience {value}",
   "fmt.skill": "{skill} +{value}",
   "fmt.achievement": "Achievement: {id}",
+  "fmt.objectiveFallback": "{type}: {name}",
   "fmt.objectiveCount": " ×{n}",
   "fmt.optional": " (optional)"
 }

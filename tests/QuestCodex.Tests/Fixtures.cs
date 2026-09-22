@@ -63,9 +63,10 @@ public static class Fixtures
         Target = new ListOrT<string>(null, trader), Value = value, CompareMethod = compare,
     };
 
-    public static QuestCondition FinishCond(MongoId condId, string type = "CounterCreator", double? value = null, bool? necessary = null) => new()
+    public static QuestCondition FinishCond(MongoId condId, string type = "CounterCreator", double? value = null, bool? necessary = null, MongoId? target = null) => new()
     {
         Id = condId, ConditionType = type, DynamicLocale = false, Value = value, IsNecessary = necessary,
+        Target = target is null ? null : new ListOrT<string>([target.Value.ToString()], null),
     };
 
     public static Item Item(MongoId tpl, MongoId? id = null) => new() { Id = id ?? Id(9000), Template = tpl };

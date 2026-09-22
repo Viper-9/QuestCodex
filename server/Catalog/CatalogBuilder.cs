@@ -112,12 +112,7 @@ public static class CatalogBuilder
         var minLevel = requirements.OfType<LevelRequirement>().Select(r => (int?)Math.Round(r.Value)).Min();
 
         var objectives = (quest.Conditions.AvailableForFinish ?? [])
-            .Select(c => new Objective(
-                c.Id.ToString(),
-                c.ConditionType,
-                locale.TryResolve(c.Id.ToString()) ?? c.ConditionType,
-                c.Value,
-                c.IsNecessary == false))
+            .Select(c => BuildObjective(c, locale, warnings, questId))
             .ToList();
 
         var rewards = new QuestRewards(
@@ -142,6 +137,23 @@ public static class CatalogBuilder
             Objectives = objectives,
             Rewards = rewards,
         };
+    }
+
+    /// <summary>
+    /// 조건 로케일이 없으면 Text 를 비우고 대상 아이템 이름만 실어 보낸다. 표시 문구 조립은 프론트(i18n) 몫이라
+    /// 여기서 ConditionType 을 Text 에 넣지 않는다. 모드가 조건만 추가하고 로케일을 빼먹는 경우를 잡아낸다.
+    /// </summary>
+    private static Objective BuildObjective(QuestCondition c, LocaleResolver locale, List<CatalogWarning> warnings, string questId)
+    {
+        var condId = c.Id.ToString();
+        var optional = c.IsNecessary == false;
+        var text = locale.TryResolve(condId);
+        if (text is not null) return new Objective(condId, c.ConditionType, text, c.Value, optional, null);
+
+        warnings.Add(new CatalogWarning(questId, WarningCodes.MissingLocale, $"condition {condId} ({c.ConditionType}) has no locale"));
+        var tpl = RequirementParser.TargetOf(c);
+        var targetName = tpl is null ? null : locale.TryResolve($"{tpl} Name");
+        return new Objective(condId, c.ConditionType, "", c.Value, optional, targetName);
     }
 
     private static List<CatalogReward> ParseRewards(Quest quest, string phase, RewardParser parser, List<CatalogWarning> warnings, string questId)

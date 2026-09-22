@@ -20,7 +20,10 @@ export type Requirement =
 export interface Objective {
   conditionId: string
   conditionType: string
+  /** 조건 로케일이 없으면 빈 문자열. 이때 targetName 으로 대체 문구를 만든다. */
   text: string
+  /** text 가 빈 경우에만 채워지는 대상 아이템 이름. 아이템 조건이 아니거나 이름도 없으면 null. */
+  targetName: string | null
   targetCount: number | null
   optional: boolean
 }
