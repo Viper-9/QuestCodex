@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
 import { hashFor, replaceHash, type Route } from '../shell/router'
-import { assignModColors, countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
+import { assignModColors, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips, type SortKey } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
 import { QuestDetail } from './QuestDetail'
@@ -21,6 +21,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const [traders, setTraders] = useState<ReadonlySet<string>>(() => new Set())
   const [chips, setChips] = useState<Chips>(DEFAULT_CHIPS)
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
   /** 다음 커밋 후 scrollIntoView 할 행. 필터 리셋과 같은 렌더에 반영되므로 효과 시점엔 행이 DOM 에 있다. */
@@ -34,9 +35,11 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const lookup = useMemo(() => (catalog ? makeLookup(catalog) : null), [catalog])
   /** 필터가 아니라 `quests`(카탈로그 전체)로 계산 — 검색·필터에 따라 색이 바뀌면 안 된다. */
   const modColors = useMemo(() => assignModColors(quests), [quests])
+  /** 연계순의 순위. `modColors` 와 같은 이유로 필터가 아니라 카탈로그 전체로 — 필터를 바꾸면 순서가 흔들린다. */
+  const chainOrder = useMemo(() => chainRank(quests), [quests])
   const visible = useMemo(
-    () => sortQuests(filterQuests(quests, { traders, chips, query })),
-    [quests, traders, chips, query],
+    () => sortQuests(filterQuests(quests, { traders, chips, query }), sort, chainOrder),
+    [quests, traders, chips, query, sort, chainOrder],
   )
   const visibleIds = useMemo(() => new Set(visible.map((q) => q.id)), [visible])
 
@@ -79,7 +82,10 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         traders={orderedTraders} counts={counts} total={quests.length}
         selected={traders} onToggle={toggleTrader} onClear={() => setTraders(new Set())}
       />
-      <FilterBar query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip} count={visible.length} />
+      <FilterBar
+        query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip}
+        sort={sort} onSortChange={setSort} count={visible.length}
+      />
       <QuestList
         quests={visible}
         lookup={lookup}

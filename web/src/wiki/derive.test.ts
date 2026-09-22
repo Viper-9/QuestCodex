@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogQuest, CatalogTrader } from '../api/catalog'
-import { assignModColors, countByTrader, DEFAULT_CHIPS, filterQuests, initials, makeLookup, MOD_COLOR_COUNT, orderTraders, sortQuests, toggleMember } from './derive'
+import { assignModColors, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, makeLookup, MOD_COLOR_COUNT, orderTraders, sortQuests, toggleMember } from './derive'
 
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
@@ -62,10 +62,133 @@ describe('filterQuests', () => {
 })
 
 describe('sortQuests', () => {
-  it('minLevel null 은 0 으로 맨 앞, 같은 레벨은 이름순, 원본은 그대로', () => {
-    const src = [quest({ id: 'b', minLevel: 2, name: 'B' }), quest({ id: 'n', minLevel: null, name: 'N' }), quest({ id: 'a', minLevel: 2, name: 'A' }), quest({ id: 'z', minLevel: 1, name: 'Z' })]
-    expect(sortQuests(src).map((q) => q.id)).toEqual(['n', 'z', 'a', 'b'])
-    expect(src[0].id).toBe('b')
+  const src = () => [
+    quest({ id: 'b', minLevel: 2, name: 'B' }),
+    quest({ id: 'n', minLevel: null, name: 'N' }),
+    quest({ id: 'a', minLevel: 2, name: 'A' }),
+    quest({ id: 'z', minLevel: 1, name: 'Z' }),
+    quest({ id: 'm', minLevel: null, name: 'M' }),
+  ]
+
+  it('레벨순: minLevel null 은 맨 뒤, 같은 레벨은 이름순', () => {
+    expect(sortQuests(src(), 'level').map((q) => q.id)).toEqual(['z', 'a', 'b', 'm', 'n'])
+  })
+  it('이름순: 레벨을 무시하고 이름만 본다', () => {
+    expect(sortQuests(src(), 'name').map((q) => q.id)).toEqual(['a', 'b', 'm', 'n', 'z'])
+  })
+  it('기준을 생략하면 기본값(레벨순)', () => {
+    expect(sortQuests(src()).map((q) => q.id)).toEqual(sortQuests(src(), DEFAULT_SORT).map((q) => q.id))
+    expect(DEFAULT_SORT).toBe('level')
+  })
+  it('원본은 그대로', () => {
+    const input = src()
+    sortQuests(input, 'name')
+    expect(input[0].id).toBe('b')
+  })
+})
+
+describe('chainRank', () => {
+  /** 순위 맵을 id 배열로 펴서 읽기 쉽게. */
+  const order = (qs: CatalogQuest[]) => [...chainRank(qs).entries()].sort((a, b) => a[1] - b[1]).map(([id]) => id)
+
+  it('선행은 언제나 후속보다 앞', () => {
+    const qs = [
+      quest({ id: 'c', prerequisites: ['b'] }),
+      quest({ id: 'a' }),
+      quest({ id: 'b', prerequisites: ['a'] }),
+    ]
+    expect(order(qs)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('체인을 끝까지 따라간 뒤 다음 체인으로 (깊이 우선)', () => {
+    const qs = [
+      quest({ id: 'r1', name: 'A' }), quest({ id: 'r1-x', name: 'X', prerequisites: ['r1'] }),
+      quest({ id: 'r2', name: 'B' }), quest({ id: 'r2-y', name: 'Y', prerequisites: ['r2'] }),
+    ]
+    expect(order(qs)).toEqual(['r1', 'r1-x', 'r2', 'r2-y'])   // 너비 우선이면 r1,r2,r1-x,r2-y
+  })
+
+  it('갈림길은 레벨순, 레벨 없음은 0 취급(= 앞)', () => {
+    const qs = [
+      quest({ id: 'root', name: 'root' }),
+      quest({ id: 'lv5', name: 'B', minLevel: 5, prerequisites: ['root'] }),
+      quest({ id: 'none', name: 'C', minLevel: null, prerequisites: ['root'] }),
+      quest({ id: 'lv2', name: 'A', minLevel: 2, prerequisites: ['root'] }),
+    ]
+    expect(order(qs)).toEqual(['root', 'none', 'lv2', 'lv5'])
+  })
+
+  it('갈림길에서 레벨이 같으면 이름순', () => {
+    const qs = [
+      quest({ id: 'root', name: 'root' }),
+      quest({ id: 'z', name: 'Z', minLevel: 3, prerequisites: ['root'] }),
+      quest({ id: 'a', name: 'A', minLevel: 3, prerequisites: ['root'] }),
+    ]
+    expect(order(qs)).toEqual(['root', 'a', 'z'])
+  })
+
+  it('루트도 같은 기준으로 정렬 — 레벨 없는 루트가 레벨 10 루트보다 앞', () => {
+    const qs = [quest({ id: 'lv10', name: 'A', minLevel: 10 }), quest({ id: 'none', name: 'Z', minLevel: null })]
+    expect(order(qs)).toEqual(['none', 'lv10'])
+  })
+
+  it('선행이 여럿이면 마지막 선행이 나온 뒤에야 배출', () => {
+    const qs = [
+      quest({ id: 'a', name: 'A' }),
+      quest({ id: 'b', name: 'B', minLevel: 9 }),
+      quest({ id: 'ab', name: 'AB', prerequisites: ['a', 'b'] }),
+    ]
+    expect(order(qs)).toEqual(['a', 'b', 'ab'])   // a 를 따라가다 ab 를 만나도 b 전이라 건너뛴다
+  })
+
+  it('카탈로그에 없는 선행 id 와 자기참조는 무시', () => {
+    const qs = [quest({ id: 'x', prerequisites: ['없는퀘스트', 'x'] })]
+    expect(order(qs)).toEqual(['x'])
+  })
+
+  it('순환이 있어도 멈추고, 모든 퀘스트가 정확히 한 번씩 나온다', () => {
+    const qs = [
+      quest({ id: 'ok', name: 'ok' }),
+      quest({ id: 'c1', name: 'c1', prerequisites: ['c2'] }),
+      quest({ id: 'c2', name: 'c2', prerequisites: ['c1'] }),
+    ]
+    const out = order(qs)
+    expect(out).toHaveLength(3)
+    expect(new Set(out)).toEqual(new Set(['ok', 'c1', 'c2']))
+    expect(out[0]).toBe('ok')                    // 순환은 정상 체인 뒤로 밀린다
+  })
+
+  it('모든 퀘스트에 순위가 매겨진다', () => {
+    const qs = [quest({ id: 'a' }), quest({ id: 'b', prerequisites: ['a'] }), quest({ id: 'c' })]
+    expect(chainRank(qs).size).toBe(3)
+  })
+})
+
+describe('sortQuests — 연계순', () => {
+  const qs = [
+    quest({ id: 'a', name: 'A' }),
+    quest({ id: 'b', name: 'B', minLevel: 9, prerequisites: ['a'] }),
+    quest({ id: 'c', name: 'C', minLevel: 1, prerequisites: ['b'] }),
+  ]
+  const rank = chainRank(qs)
+
+  it('rank 순서를 그대로 따른다 (레벨을 주 키로 쓰지 않는다)', () => {
+    expect(sortQuests(qs, 'chain', rank).map((q) => q.id)).toEqual(['a', 'b', 'c'])
+    expect(sortQuests(qs, 'level').map((q) => q.id)).toEqual(['c', 'b', 'a'])   // 레벨순과 다름을 확인
+  })
+
+  it('필터된 부분집합에 적용해도 상대 순서가 유지된다', () => {
+    const subset = [qs[2], qs[0]]                                              // c, a 만 보이는 상태
+    expect(sortQuests(subset, 'chain', rank).map((q) => q.id)).toEqual(['a', 'c'])
+  })
+
+  it('rank 를 안 주면 레벨순으로 폴백', () => {
+    expect(sortQuests(qs, 'chain').map((q) => q.id)).toEqual(sortQuests(qs, 'level').map((q) => q.id))
+  })
+
+  it('rank 에 없는 퀘스트는 뒤로, 그들끼리는 레벨→이름순', () => {
+    const extra = quest({ id: 'x', name: 'X', minLevel: 2 })
+    expect(sortQuests([...qs, extra], 'chain', rank).map((q) => q.id)).toEqual(['a', 'b', 'c', 'x'])
   })
 })
 

@@ -52,6 +52,7 @@
 .qc-tools {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;               /* 좁은 화면에서 검색창이 찌그러지는 대신 정렬·칩이 다음 줄로 */
   gap: 8px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
@@ -83,6 +84,14 @@
   color: var(--accent-fg);
   box-shadow: var(--pressed-shadow);
   transform: translateY(1px);
+}
+.qc-sort {
+  padding: 4px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  background: var(--bg-3);
+  color: var(--fg-2);
+  font-size: 11px;
 }
 .qc-tools__count { margin-left: auto; font-size: 12px; color: var(--fg-3); white-space: nowrap; }
 
