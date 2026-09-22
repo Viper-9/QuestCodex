@@ -29,7 +29,7 @@ export function TraderStrip({ traders, counts, total, selected, onToggle, onClea
           <button
             key={tr.id}
             type="button"
-            className={cls('qc-trader', on && 'is-on', !tr.isVanilla && 'is-mod')}
+            className={cls('qc-trader', on && 'is-on')}
             aria-pressed={on}
             onClick={() => onToggle(tr.id)}
           >
