@@ -137,12 +137,21 @@
 .qc-tag--mod {
   color: var(--mod);
   border-color: color-mix(in srgb, var(--mod) 40%, transparent);
+  background: color-mix(in srgb, var(--mod) 12%, transparent);
   white-space: nowrap;
   flex: 0 0 auto;
   max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* 모드별 색. --mod 만 바꿔 끼우면 위 규칙(글자·테두리·배경)이 그대로 따라온다.
+   번호는 derive.ts 의 assignModColors() 가 카탈로그 전체 기준으로 배정한다. 색이 없으면 --mod 폴백. */
+.qc-tag--mod[data-mod-color="1"] { --mod: var(--mod-1); }
+.qc-tag--mod[data-mod-color="2"] { --mod: var(--mod-2); }
+.qc-tag--mod[data-mod-color="3"] { --mod: var(--mod-3); }
+.qc-tag--mod[data-mod-color="4"] { --mod: var(--mod-4); }
+.qc-tag--mod[data-mod-color="5"] { --mod: var(--mod-5); }
+.qc-tag--mod[data-mod-color="6"] { --mod: var(--mod-6); }
 .qc-empty { padding: 24px 16px; color: var(--fg-2); }
 
 /* ---- (d) 펼친 행 ---- */

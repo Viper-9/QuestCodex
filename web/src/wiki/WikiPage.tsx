@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
 import { hashFor, replaceHash, type Route } from '../shell/router'
-import { countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
+import { assignModColors, countByTrader, DEFAULT_CHIPS, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
 import { QuestDetail } from './QuestDetail'
@@ -32,6 +32,8 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const orderedTraders = useMemo(() => (catalog ? orderTraders(catalog.traders) : []), [catalog])
   const counts = useMemo(() => countByTrader(quests), [quests])
   const lookup = useMemo(() => (catalog ? makeLookup(catalog) : null), [catalog])
+  /** 필터가 아니라 `quests`(카탈로그 전체)로 계산 — 검색·필터에 따라 색이 바뀌면 안 된다. */
+  const modColors = useMemo(() => assignModColors(quests), [quests])
   const visible = useMemo(
     () => sortQuests(filterQuests(quests, { traders, chips, query })),
     [quests, traders, chips, query],
@@ -83,6 +85,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         lookup={lookup}
         expanded={expanded}
         onToggle={toggleExpanded}
+        modColors={modColors}
         renderDetail={(q) => (
           <QuestDetail quest={q} catalog={catalog} lookup={lookup} onOpenDescription={setDialogId} onJump={jumpTo} />
         )}

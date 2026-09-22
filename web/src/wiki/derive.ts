@@ -60,6 +60,25 @@ export function sortQuests(quests: CatalogQuest[]): CatalogQuest[] {
   return [...quests].sort((a, b) => (a.minLevel ?? 0) - (b.minLevel ?? 0) || a.name.localeCompare(b.name))
 }
 
+// ---- 모드 태그 색 (스펙 §5) ----
+/** 팔레트 색 개수. `styles.css` 의 `--mod-1` … `--mod-N` 토큰 수와 반드시 같아야 한다. */
+export const MOD_COLOR_COUNT = 6
+
+/**
+ * 카탈로그에 등장하는 모드 이름을 이름순으로 정렬해 팔레트 색을 1부터 순서대로 배정한다.
+ * 반환값은 `모드 이름 → 색 번호(1..MOD_COLOR_COUNT)`.
+ *
+ * 필터가 아니라 **카탈로그 전체**를 넣어야 한다 — 보이는 목록으로 계산하면 검색·필터를 할 때마다
+ * 같은 모드의 색이 바뀐다. 모드 수가 팔레트보다 많으면 색이 순환해 재사용된다(중복 허용).
+ */
+export function assignModColors(quests: CatalogQuest[]): Record<string, number> {
+  const names = [...new Set(quests.map((q) => q.modName).filter((n): n is string => n !== null))]
+  names.sort((a, b) => a.localeCompare(b))
+  const out: Record<string, number> = {}
+  names.forEach((name, i) => { out[name] = (i % MOD_COLOR_COUNT) + 1 })
+  return out
+}
+
 // ---- 이름 조회 (§4.3) ----
 export interface NameLookup {
   traderName(id: string): string

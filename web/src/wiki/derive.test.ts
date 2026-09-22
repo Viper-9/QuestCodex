@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogQuest, CatalogTrader } from '../api/catalog'
-import { countByTrader, DEFAULT_CHIPS, filterQuests, initials, makeLookup, orderTraders, sortQuests, toggleMember } from './derive'
+import { assignModColors, countByTrader, DEFAULT_CHIPS, filterQuests, initials, makeLookup, MOD_COLOR_COUNT, orderTraders, sortQuests, toggleMember } from './derive'
 
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
@@ -80,6 +80,39 @@ describe('makeLookup', () => {
     expect(l.traderName('zzz')).toBe('zzz')
     expect(l.questName('q1')).toBe('Debut')
     expect(l.questName('zzz')).toBeUndefined()
+  })
+})
+
+describe('assignModColors', () => {
+  const mod = (id: string, modName: string | null) => quest({ id, modName, isVanilla: modName === null })
+
+  it('모드 이름순으로 1부터 색을 배정', () => {
+    const out = assignModColors([mod('q1', 'WTT-Artem'), mod('q2', 'WTT-Armory'), mod('q3', 'acidphantasm')])
+    expect(out).toEqual({ 'acidphantasm': 1, 'WTT-Armory': 2, 'WTT-Artem': 3 })
+  })
+
+  it('같은 모드의 퀘스트가 여러 개여도 색은 하나', () => {
+    const out = assignModColors([mod('q1', 'Alpha'), mod('q2', 'Alpha'), mod('q3', 'Beta')])
+    expect(out).toEqual({ Alpha: 1, Beta: 2 })
+  })
+
+  it('입력 순서가 달라도 결과가 같다(결정적)', () => {
+    const a = assignModColors([mod('q1', 'Zeta'), mod('q2', 'Alpha')])
+    const b = assignModColors([mod('q1', 'Alpha'), mod('q2', 'Zeta')])
+    expect(a).toEqual(b)
+  })
+
+  it('modName 이 null 인 퀘스트는 무시', () => {
+    expect(assignModColors([mod('q1', null), mod('q2', null)])).toEqual({})
+  })
+
+  it('팔레트보다 모드가 많으면 색이 순환한다', () => {
+    const names = Array.from({ length: MOD_COLOR_COUNT + 2 }, (_, i) => `mod-${String(i).padStart(2, '0')}`)
+    const out = assignModColors(names.map((n, i) => mod(`q${i}`, n)))
+    expect(out[names[0]]).toBe(1)
+    expect(out[names[MOD_COLOR_COUNT]]).toBe(1)        // 한 바퀴 돌아 1번으로 복귀
+    expect(out[names[MOD_COLOR_COUNT + 1]]).toBe(2)
+    expect(Object.values(out).every((n) => n >= 1 && n <= MOD_COLOR_COUNT)).toBe(true)
   })
 })
 

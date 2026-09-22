@@ -15,9 +15,11 @@ interface QuestRowProps {
   onToggle(): void
   /** 펼쳤을 때 행 아래에 붙는 내용 (Task 6 의 QuestDetail). 접힌 행은 undefined. */
   detail?: ReactNode
+  /** 모드 태그 색 번호 (derive.assignModColors). 출처 미상이면 undefined → 기본 --mod 색. */
+  modColor?: number
 }
 
-export function QuestRow({ quest, traderName, expanded, onToggle, detail }: QuestRowProps) {
+export function QuestRow({ quest, traderName, expanded, onToggle, detail, modColor }: QuestRowProps) {
   const t = useT()
   const prereq = quest.prerequisites.length
   return (
@@ -27,7 +29,7 @@ export function QuestRow({ quest, traderName, expanded, onToggle, detail }: Ques
         <span className="qc-row__name">
           {quest.name}
           {!quest.isVanilla && (
-            <span className="qc-tag qc-tag--mod" title={quest.modName ?? undefined}>
+            <span className="qc-tag qc-tag--mod" data-mod-color={modColor} title={quest.modName ?? undefined}>
               {quest.modName ?? t('tag.mod')}
             </span>
           )}
