@@ -85,6 +85,6 @@ Copyright (c) 2026 Viper-9. **All Rights Reserved.**
 
 이 모드를 개인적·비상업적 용도로 **원본 그대로** 내려받아 사용할 수 있습니다. 재배포(다른 곳에 재업로드
 포함), 수정, 2차적 저작물 제작, 상업적 이용은 저작권자의 사전 서면 허락 없이는 금지됩니다. 전체 조항은
-[LICENSE](LICENSE)를 참고하세요.
+[LICENSE](LICENSE.md)를 참고하세요.
 
 제3자 구성요소는 각자의 라이선스를 따릅니다 — [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) 참고.
