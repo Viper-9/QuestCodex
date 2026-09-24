@@ -72,6 +72,5 @@
   "fmt.skill": "{skill} +{value}",
   "fmt.achievement": "업적: {id}",
   "fmt.objectiveFallback": "{type}: {name}",
-  "fmt.objectiveCount": " ×{n}",
-  "fmt.optional": " (선택)"
+  "fmt.objectiveCount": " ×{n}"
 }

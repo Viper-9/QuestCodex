@@ -202,15 +202,15 @@ public class CatalogBuilderTests
     }
 
     [Fact]
-    public void Objectives_use_condition_locale_and_flags()
+    public void Objectives_use_condition_locale()
     {
-        var q = Quest(Id(1), finish: [FinishCond(Id(201), "HandoverItem", value: 3, necessary: false), FinishCond(Id(202), "CounterCreator")]);
+        var q = Quest(Id(1), finish: [FinishCond(Id(201), "HandoverItem", value: 3), FinishCond(Id(202), "CounterCreator")]);
         var cat = CatalogBuilder.Build(Input([q], locale: new() { [Id(201).ToString()] = "Hand over 3 mags" }), Now);
 
         var objs = cat.Quests[Id(1)].Objectives;
         Assert.Equal(2, objs.Count);
-        Assert.Equal(new Objective(Id(201), "HandoverItem", "Hand over 3 mags", 3, true, null), objs[0]);
-        Assert.Equal(new Objective(Id(202), "CounterCreator", "", null, false, null), objs[1]); // 로케일 없음 → Text 는 빈 문자열, 표시 문구는 프론트가 조립
+        Assert.Equal(new Objective(Id(201), "HandoverItem", "Hand over 3 mags", 3, null), objs[0]);
+        Assert.Equal(new Objective(Id(202), "CounterCreator", "", null, null), objs[1]); // 로케일 없음 → Text 는 빈 문자열, 표시 문구는 프론트가 조립
     }
 
     [Fact]

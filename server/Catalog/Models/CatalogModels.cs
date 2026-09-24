@@ -22,7 +22,7 @@ public sealed record CatalogWarning(string? QuestId, string Code, string Detail)
 public sealed record CatalogTrader(string Id, string Name, string? AvatarUrl, bool IsVanilla);
 
 public sealed record Objective(
-    string ConditionId, string ConditionType, string Text, double? TargetCount, bool Optional, string? TargetName);
+    string ConditionId, string ConditionType, string Text, double? TargetCount, string? TargetName);
 
 public sealed record QuestRewards(
     IReadOnlyList<CatalogReward> Started,

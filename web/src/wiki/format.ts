@@ -107,6 +107,5 @@ export function formatObjective(o: Objective, t: T): FormattedLine {
       : t('fmt.objectiveFallback', { type: o.conditionType, name: o.targetName })
   }
   if (o.targetCount !== null) text += t('fmt.objectiveCount', { n: formatInt(o.targetCount) })
-  if (o.optional) text += t('fmt.optional')
   return plain(text)
 }

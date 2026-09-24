@@ -156,14 +156,13 @@ public static class CatalogBuilder
     private static Objective BuildObjective(QuestCondition c, LocaleResolver locale, List<CatalogWarning> warnings, string questId)
     {
         var condId = c.Id.ToString();
-        var optional = c.IsNecessary == false;
         var text = locale.TryResolve(condId);
-        if (text is not null) return new Objective(condId, c.ConditionType, text, c.Value, optional, null);
+        if (text is not null) return new Objective(condId, c.ConditionType, text, c.Value, null);
 
         warnings.Add(new CatalogWarning(questId, WarningCodes.MissingLocale, $"condition {condId} ({c.ConditionType}) has no locale"));
         var tpl = RequirementParser.TargetOf(c);
         var targetName = tpl is null ? null : locale.TryResolve($"{tpl} Name");
-        return new Objective(condId, c.ConditionType, "", c.Value, optional, targetName);
+        return new Objective(condId, c.ConditionType, "", c.Value, targetName);
     }
 
     private static List<CatalogReward> ParseRewards(Quest quest, string phase, RewardParser parser, List<CatalogWarning> warnings, string questId)
