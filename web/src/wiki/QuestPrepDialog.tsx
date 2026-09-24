@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { CatalogQuest, Objective, ObjectivePrep } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
 import { formatInt, formatObjective, lineText } from './format'
+import { useDialogFrame } from './useDialogFrame'
 import { distinctNames, exitText, hasPrep, hasRules, headerMap, itemDetails, optionText } from './prep'
 
 interface QuestPrepDialogProps {
@@ -17,6 +18,7 @@ type Prepped = Objective & { prep: ObjectivePrep }
 export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
+  const frame = useDialogFrame(ref, 'prep', quest !== null, onClose)
 
   useEffect(() => {
     const el = ref.current
@@ -35,10 +37,11 @@ export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogP
       ref={ref}
       className="qc-dialog qc-dialog--wide"
       onClose={onClose}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      {...frame.dialogProps}
     >
+      {frame.grips}
       {quest && (
-        <header className="qc-dialog__head">
+        <header className="qc-dialog__head" {...frame.headProps}>
           <button type="button" className="qc-dialog__close" aria-label={t('dialog.close')} onClick={onClose}>✕</button>
           <h3 className="qc-dialog__title">{t('prep.button')} · {quest.name}</h3>
           <p className="qc-dialog__meta">

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { CatalogQuest } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
+import { useDialogFrame } from './useDialogFrame'
 
 interface QuestDescriptionDialogProps {
   /** null 이면 닫힘. 항상 마운트해 두고 showModal()/close() 로 토글한다. */
@@ -13,6 +14,7 @@ interface QuestDescriptionDialogProps {
 export function QuestDescriptionDialog({ quest, traderName, onClose }: QuestDescriptionDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
+  const frame = useDialogFrame(ref, 'description', quest !== null, onClose)
 
   useEffect(() => {
     const el = ref.current
@@ -26,11 +28,11 @@ export function QuestDescriptionDialog({ quest, traderName, onClose }: QuestDesc
       ref={ref}
       className="qc-dialog"
       onClose={onClose}
-      // 바깥(백드롭) 클릭: dialog 자체의 padding 이 0 이라 target 이 dialog 면 백드롭이다.
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      {...frame.dialogProps}
     >
+      {frame.grips}
       {quest && (
-        <header className="qc-dialog__head">
+        <header className="qc-dialog__head" {...frame.headProps}>
           <button type="button" className="qc-dialog__close" aria-label={t('dialog.close')} onClick={onClose}>✕</button>
           <h3 className="qc-dialog__title">{quest.name}</h3>
           <p className="qc-dialog__meta">{traderName} · {t('dialog.level', { n: quest.minLevel ?? '—' })}</p>
