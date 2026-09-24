@@ -32,6 +32,8 @@
   --pressed-shadow: inset 0 1.5px 3px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .04);
   --dialog-shadow: 0 12px 40px rgba(0, 0, 0, .35);
   --dialog-backdrop: rgba(0, 0, 0, .4);
+  --scroll-thumb: rgba(255, 255, 255, .14);
+  --scroll-thumb-hover: rgba(255, 255, 255, .26);
   --radius: 6px;
 }
 
@@ -61,6 +63,8 @@
   --mod-5: #be185d;
   --mod-6: #a16207;
   --pressed-shadow: inset 0 1.5px 3px rgba(25, 31, 40, .14), inset 0 0 0 1px rgba(25, 31, 40, .04);
+  --scroll-thumb: rgba(25, 31, 40, .16);
+  --scroll-thumb-hover: rgba(25, 31, 40, .3);
 }
 
 /* ---- 2. 글꼴. Pretendard Variable 을 wwwroot/fonts 에 동봉 (CDN 없음). Inter 는 시스템에 있으면 쓴다. ---- */
@@ -94,6 +98,27 @@
 .qc-shell button { cursor: pointer; }
 .qc-shell h1, .qc-shell h2, .qc-shell h3, .qc-shell h4, .qc-shell p, .qc-shell ul { margin: 0; }
 .qc-shell ul { padding: 0; list-style: none; }
+
+/* 스크롤바: 트랙은 투명, 가는 둥근 thumb 만. 화살표 버튼 없음.
+   Chromium 은 scrollbar-color/width 를 주면 ::-webkit-scrollbar 를 무시하므로 표준 속성은 Firefox 에만 준다. */
+.qc-shell ::-webkit-scrollbar { width: 10px; height: 10px; }
+.qc-shell ::-webkit-scrollbar-track,
+.qc-shell ::-webkit-scrollbar-corner { background: transparent; }
+.qc-shell ::-webkit-scrollbar-button { display: none; }
+.qc-shell ::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent; /* 10px 중 가운데 4px 만 보이게 */
+  border-radius: 999px;
+  min-height: 32px;
+}
+.qc-shell ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-thumb-hover);
+  border-width: 2px; /* 올리면 6px 로 살짝 굵어진다 */
+}
+@supports not selector(::-webkit-scrollbar) {
+  .qc-shell, .qc-shell * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+}
 
 .qc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .qc-page { flex: 1; min-height: 0; overflow: auto; }
