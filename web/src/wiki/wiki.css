@@ -259,9 +259,16 @@
   color: var(--fg);
   box-shadow: var(--dialog-shadow);
   font-family: inherit;
+  /* 스크롤은 __body 만. UA 의 dialog:modal{overflow:auto} 를 두면 __body(max-height: inherit)가 테두리 2px 만큼
+     틀보다 커서(border-box) 긴 내용에서 틀에도 스크롤바가 하나 더 생긴다. */
+  overflow: hidden;
 }
 .qc-dialog::backdrop { background: var(--dialog-backdrop, rgba(0, 0, 0, .4)); } /* 폴백 리터럴: ::backdrop 은 브라우저에 따라 변수 상속이 안 될 수 있음 */
-.qc-dialog__body { position: relative; padding: 16px 18px; overflow: auto; max-height: inherit; }
+/* 열린 팝업 = [머리(제목·메타·✕) 고정][본문 스크롤]. [open] 에만 flex — 닫힌 dialog 는 UA 의 display:none 유지 */
+.qc-dialog[open] { display: flex; flex-direction: column; }
+.qc-dialog__head { flex: none; position: relative; padding: 16px 18px 10px; border-bottom: 1px solid var(--border); }
+.qc-dialog__body { flex: 1 1 auto; min-height: 0; padding: 12px 18px 16px; overflow: auto; }
+.qc-dialog__body > :first-child { margin-top: 0; }
 .qc-dialog__close {
   position: absolute;
   top: 12px;
@@ -274,3 +281,38 @@
 .qc-dialog__title { margin: 0 24px 0 0; font-size: 14px; font-weight: 600; }
 .qc-dialog__meta { margin: 2px 0 10px; font-size: 12px; color: var(--fg-2); }
 .qc-dialog__text { white-space: pre-wrap; line-height: 1.6; }
+
+/* 준비물 팝업. FIR 표시는 목록의 모드 태그(.qc-tag)와 모양이 달라 별도 클래스 */
+.qc-prep__fir {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--fg-2);
+  font-size: 10.5px;
+  line-height: 16px;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.qc-dialog--wide { width: min(640px, calc(100vw - 32px)); }
+.qc-prep__sec { margin-top: 14px; }
+.qc-prep__obj { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+/* .qc-prep__obj 를 앞에 붙이는 이유: styles.css 의 `.qc-shell h4 { margin: 0 }`(0,1,1) 이 단일 클래스(0,1,0) 를 이긴다 */
+.qc-prep__obj .qc-prep__objtitle { margin: 0 0 4px; font-size: 13px; font-weight: 500; }
+.qc-prep__rules { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.qc-prep__row { display: grid; grid-template-columns: 76px 1fr; gap: 10px; font-size: 12.5px; line-height: 1.5; }
+.qc-prep__row dt { color: var(--fg-3); }
+.qc-prep__row dd { margin: 0; }
+.qc-prep__act { margin-right: 6px; color: var(--fg-2); font-size: 11px; }
+/* 외 N종 / 접기. .qc-prep__names 를 앞에 붙이는 이유: styles.css 의 `.qc-shell button { color: inherit }`(0,1,1) 이
+   단일 클래스를 이겨 본문과 같은 색이 된다 — 눌러서 펼칠 수 있다는 게 안 보인다. */
+.qc-prep__names .qc-prep__more { padding: 0; border: 0; background: none; color: var(--accent-fg); font-size: 12px; }
+.qc-prep__names .qc-prep__more:hover { text-decoration: underline; }
+.qc-prep__more::after { content: " ▾"; }
+.qc-prep__more.is-open::after { content: " ▴"; }
+.qc-prep__names { margin: 0; padding: 0; list-style: none; }
+.qc-prep__names li::before { content: none; } /* .qc-lines 안에 들어갈 때 불릿 제거 */
+.qc-lines .qc-prep__names { margin-top: 2px; }
+.qc-lines .qc-prep__names li { padding: 0; }

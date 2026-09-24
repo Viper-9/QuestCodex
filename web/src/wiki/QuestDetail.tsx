@@ -4,17 +4,19 @@ import type { UiKey } from '../i18n/index'
 import type { NameLookup } from './derive'
 import { formatObjective, formatRequirement, formatReward, shortId } from './format'
 import { LineList } from './LineList'
+import { prepCount } from './prep'
 
 interface QuestDetailProps {
   quest: CatalogQuest
   catalog: Catalog
   lookup: NameLookup
   onOpenDescription(questId: string): void
+  onOpenPrep(questId: string): void
   onJump(questId: string): void
 }
 
 /** (d) 펼친 행. 2열 [목표·시작 조건] [보상] + 전폭 푸터 [연계]. 설명 본문은 여기 없음 — 팝업 (§1.2 d, e). */
-export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onJump }: QuestDetailProps) {
+export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onOpenPrep, onJump }: QuestDetailProps) {
   const t = useT()
   const meta = [
     lookup.traderName(quest.traderId),
@@ -23,6 +25,7 @@ export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onJump 
     quest.factionOnly === 'bear' ? t('detail.bearOnly') : quest.factionOnly === 'usec' ? t('detail.usecOnly') : null,
   ].filter(Boolean).join(' · ')
   const hasDescription = quest.description.trim() !== ''
+  const prepN = prepCount(quest)
   const hasRelated = quest.prerequisites.length > 0 || quest.unlocks.length > 0
 
   return (
@@ -36,6 +39,15 @@ export function QuestDetail({ quest, catalog, lookup, onOpenDescription, onJump 
           onClick={() => onOpenDescription(quest.id)}
         >
           {t('detail.description')}
+        </button>
+        <button
+          type="button"
+          className="qc-btn"
+          disabled={prepN === 0}
+          title={prepN === 0 ? t('prep.none') : undefined}
+          onClick={() => onOpenPrep(quest.id)}
+        >
+          {t('prep.button')}
         </button>
         <span className="qc-detail__meta">{meta}</span>
       </div>
@@ -79,7 +91,7 @@ function ExtraRewards({ titleKey, rewards, lookup, onJump }: ExtraRewardsProps) 
   )
 }
 
-type RelatedProps = Omit<QuestDetailProps, 'onOpenDescription'>
+type RelatedProps = Omit<QuestDetailProps, 'onOpenDescription' | 'onOpenPrep'>
 
 /** 연계는 제목 없이 구분선 아래 [선행] [후속] 두 열로만 (§1.2 d) */
 function RelatedQuests({ quest, catalog, lookup, onJump }: RelatedProps) {

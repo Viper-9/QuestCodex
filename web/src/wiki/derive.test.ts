@@ -5,7 +5,7 @@ import { assignModColors, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT,
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
     name: p.id, description: '', traderId: 't1', side: 'Pmc', factionOnly: null, isVanilla: true, modName: null, imageUrl: null,
-    minLevel: null, requirements: [], prerequisites: [], unlocks: [], objectives: [],
+    minLevel: null, location: null, requirements: [], prerequisites: [], unlocks: [], objectives: [],
     rewards: { started: [], success: [], fail: [] }, tags: [], ...p,
   }
 }

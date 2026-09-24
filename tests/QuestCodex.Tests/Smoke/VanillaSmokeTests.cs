@@ -58,6 +58,12 @@ public class VanillaSmokeTests
         Assert.True(missingLocale < catalog.Quests.Count * 0.05, $"{missingLocale} quests missing locale");
         Assert.All(catalog.Quests.Values, q => Assert.True(q.IsVanilla));
         Assert.Contains(catalog.RewardIndex["weapon"], _ => true);
+
+        // 준비물: 바닐라 퍼니셔 파트 4 는 12게이지 산탄총 목록과 등대 제한을 가진다
+        var punisher4 = catalog.Quests["59ca264786f77445a80ed044"];
+        Assert.Equal("Lighthouse", punisher4.Location);
+        Assert.True(punisher4.Objectives[0].Prep?.Weapons.Count >= 10);
+        Assert.Contains(punisher4.Objectives, o => o.Prep?.Item is { Action: "handover", FoundInRaid: true });
     }
 
     private static T Deserialize<T>(string path)

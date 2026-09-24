@@ -1,4 +1,5 @@
 using QuestCodex.Catalog.Models;
+using QuestCodex.Catalog.Prep;
 using QuestCodex.Catalog.Requirements;
 using QuestCodex.Catalog.Rewards;
 using SPTarkov.Server.Core.Models.Common;
@@ -30,6 +31,7 @@ public static class CatalogBuilder
         var locale = new LocaleResolver(input.Locale, input.FallbackLocale);
         var categorizer = new ItemCategorizer(input.Items);
         var rewardParser = new RewardParser(categorizer, locale, input.Items);
+        var prepParser = new PrepParser(locale, rewardParser.NameOf);
 
         if (input.VanillaQuestIds is null)
         {
@@ -54,7 +56,7 @@ public static class CatalogBuilder
             var questId = kv.Key.ToString();
             try
             {
-                quests[questId] = BuildQuest(questId, kv.Value, input, locale, rewardParser, traders, warnings);
+                quests[questId] = BuildQuest(questId, kv.Value, input, locale, rewardParser, prepParser, traders, warnings);
             }
             catch (Exception ex)
             {
@@ -93,6 +95,7 @@ public static class CatalogBuilder
         CatalogInput input,
         LocaleResolver locale,
         RewardParser rewardParser,
+        PrepParser prepParser,
         SortedDictionary<string, CatalogTrader> traders,
         List<CatalogWarning> warnings)
     {
@@ -122,7 +125,7 @@ public static class CatalogBuilder
         var minLevel = requirements.OfType<LevelRequirement>().Select(r => (int?)Math.Round(r.Value)).Min();
 
         var objectives = (quest.Conditions.AvailableForFinish ?? [])
-            .Select(c => BuildObjective(c, locale, warnings, questId))
+            .Select(c => BuildObjective(c, locale, warnings, questId) with { Prep = prepParser.Parse(c) })
             .ToList();
 
         var rewards = new QuestRewards(
@@ -142,6 +145,7 @@ public static class CatalogBuilder
             ModName = input.VanillaQuestIds?.Contains(questId) == true ? null : input.ModQuestOrigins?.GetValueOrDefault(questId),
             ImageUrl = string.IsNullOrWhiteSpace(quest.Image) ? null : quest.Image,
             MinLevel = minLevel,
+            Location = ResolveLocation(quest.Location, locale),
             Requirements = requirements,
             Prerequisites = prerequisites,
             Objectives = objectives,
@@ -164,6 +168,10 @@ public static class CatalogBuilder
         var targetName = tpl is null ? null : locale.TryResolve($"{tpl} Name");
         return new Objective(condId, c.ConditionType, "", c.Value, targetName);
     }
+
+    /// <summary>quest.location 은 맵 MongoId(로케일 "<id> Name") 또는 "any"/"marathon" 같은 비지도 값이다.</summary>
+    private static string? ResolveLocation(string? location, LocaleResolver locale)
+        => string.IsNullOrWhiteSpace(location) || location == "any" ? null : locale.TryResolve($"{location} Name");
 
     private static List<CatalogReward> ParseRewards(Quest quest, string phase, RewardParser parser, List<CatalogWarning> warnings, string questId)
     {

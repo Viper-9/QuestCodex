@@ -22,7 +22,7 @@ public sealed record CatalogWarning(string? QuestId, string Code, string Detail)
 public sealed record CatalogTrader(string Id, string Name, string? AvatarUrl, bool IsVanilla);
 
 public sealed record Objective(
-    string ConditionId, string ConditionType, string Text, double? TargetCount, string? TargetName);
+    string ConditionId, string ConditionType, string Text, double? TargetCount, string? TargetName, ObjectivePrep? Prep = null);
 
 public sealed record QuestRewards(
     IReadOnlyList<CatalogReward> Started,
@@ -42,6 +42,8 @@ public sealed class CatalogQuest
     public string? ModName { get; init; }
     public string? ImageUrl { get; init; }
     public int? MinLevel { get; init; }
+    /// <summary>퀘스트가 묶인 맵의 표시 이름. "any" 이거나 이름을 못 찾으면 null.</summary>
+    public string? Location { get; init; }
     public required IReadOnlyList<Requirement> Requirements { get; init; }
     public required IReadOnlyList<string> Prerequisites { get; init; }
     /// <summary>빌더가 전체 순회 후 채운다. ID 오름차순.</summary>

@@ -17,6 +17,41 @@ export type Requirement =
   | { kind: 'traderStanding'; traderId: string; value: number; compare: string }
   | { kind: 'other'; conditionType: string; text: string }
 
+export interface ItemRef {
+  tpl: string
+  /** 로케일·템플릿 어디에도 없으면 tpl 그대로 */
+  name: string
+}
+
+export interface PrepItem {
+  action: 'handover' | 'plant'
+  /** 대안 목록 — 그중 하나면 된다 */
+  items: ItemRef[]
+  count: number
+  foundInRaid: boolean
+  minDurability: number | null
+  maxDurability: number | null
+  dogtagLevel: number | null
+  plantSeconds: number | null
+}
+
+/** 목표 하나의 준비물. 준비할 게 없으면 Objective.prep 이 null. */
+export interface ObjectivePrep {
+  maps: string[]
+  item: PrepItem | null
+  /** 인정 무기 (OR) */
+  weapons: ItemRef[]
+  calibers: string[]
+  /** [대안, OR][묶음, AND] */
+  weaponMods: ItemRef[][]
+  /** [슬롯, AND][대안, OR][묶음, AND] */
+  equipment: ItemRef[][][]
+  forbiddenEquipment: ItemRef[]
+  oneRaid: boolean
+  exitStatuses: string[]
+  exitName: string | null
+}
+
 export interface Objective {
   conditionId: string
   conditionType: string
@@ -25,6 +60,7 @@ export interface Objective {
   /** text 가 빈 경우에만 채워지는 대상 아이템 이름. 아이템 조건이 아니거나 이름도 없으면 null. */
   targetName: string | null
   targetCount: number | null
+  prep: ObjectivePrep | null
 }
 
 export type Reward =
@@ -55,6 +91,8 @@ export interface CatalogQuest {
   modName: string | null   // isVanilla=false 일 때만 값이 있을 수 있다. 서버가 출처 모드를 못 찾으면 null
   imageUrl: string | null      // 위키에서는 쓰지 않는다 (스펙 §0)
   minLevel: number | null
+  /** 퀘스트가 묶인 맵의 표시 이름. 아무 맵이면 null */
+  location: string | null
   requirements: Requirement[]
   prerequisites: string[]
   unlocks: string[]

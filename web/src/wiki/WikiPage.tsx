@@ -6,6 +6,7 @@ import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
 import { QuestDetail } from './QuestDetail'
 import { QuestDescriptionDialog } from './QuestDescriptionDialog'
+import { QuestPrepDialog } from './QuestPrepDialog'
 import { QuestList } from './QuestList'
 import { rowId } from './QuestRow'
 import { WikiSkeleton } from './WikiSkeleton'
@@ -24,6 +25,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
+  const [prepId, setPrepId] = useState<string | null>(null)
   /** 다음 커밋 후 scrollIntoView 할 행. 필터 리셋과 같은 렌더에 반영되므로 효과 시점엔 행이 DOM 에 있다. */
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
   const consumedDeepLink = useRef(false)
@@ -93,13 +95,18 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         onToggle={toggleExpanded}
         modColors={modColors}
         renderDetail={(q) => (
-          <QuestDetail quest={q} catalog={catalog} lookup={lookup} onOpenDescription={setDialogId} onJump={jumpTo} />
+          <QuestDetail quest={q} catalog={catalog} lookup={lookup} onOpenDescription={setDialogId} onOpenPrep={setPrepId} onJump={jumpTo} />
         )}
       />
       <QuestDescriptionDialog
         quest={dialogId ? catalog.quests[dialogId] ?? null : null}
         traderName={dialogId ? lookup.traderName(catalog.quests[dialogId]?.traderId ?? '') : ''}
         onClose={() => setDialogId(null)}
+      />
+      <QuestPrepDialog
+        quest={prepId ? catalog.quests[prepId] ?? null : null}
+        traderName={prepId ? lookup.traderName(catalog.quests[prepId]?.traderId ?? '') : ''}
+        onClose={() => setPrepId(null)}
       />
     </div>
   )

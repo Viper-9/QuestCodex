@@ -30,10 +30,14 @@ export function QuestDescriptionDialog({ quest, traderName, onClose }: QuestDesc
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       {quest && (
-        <div className="qc-dialog__body">
+        <header className="qc-dialog__head">
           <button type="button" className="qc-dialog__close" aria-label={t('dialog.close')} onClick={onClose}>✕</button>
           <h3 className="qc-dialog__title">{quest.name}</h3>
           <p className="qc-dialog__meta">{traderName} · {t('dialog.level', { n: quest.minLevel ?? '—' })}</p>
+        </header>
+      )}
+      {quest && (
+        <div className="qc-dialog__body">
           <p className="qc-dialog__text">{quest.description}</p>
         </div>
       )}

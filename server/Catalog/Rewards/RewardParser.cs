@@ -88,7 +88,7 @@ public sealed class RewardParser(
     private static string? FirstTpl(Reward r)
         => r.Items is { Count: > 0 } list ? list[0].Template.ToString() : null;
 
-    private string NameOf(string tpl)
+    public string NameOf(string tpl)
     {
         var fromLocale = locale.TryResolve($"{tpl} Name");
         if (fromLocale is not null) return fromLocale;
