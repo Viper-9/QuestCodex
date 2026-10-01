@@ -112,7 +112,7 @@ public static class CatalogBuilder
         "5b619f1a86f77450a702a6f3", "5b5f78b786f77447ed5636af",
     ];
 
-    /// <summary>제출·설치 아이템 tpl 마다 핸드북 부모를 끝까지 따라 올라가 최상위 카테고리를 찾는다.</summary>
+    /// <summary>제출·설치 아이템과 해금 보상(판매 해금·제작법) tpl 마다 핸드북 부모를 끝까지 따라 올라가 최상위 카테고리를 찾는다.</summary>
     private static (IReadOnlyList<CatalogItemCategory>, SortedDictionary<string, string>) BuildItemCategories(
         SortedDictionary<string, CatalogQuest> quests, CatalogInput input)
     {
@@ -131,10 +131,15 @@ public static class CatalogBuilder
             return null;
         }
 
+        var unlockTpls = quests.Values
+            .SelectMany(q => q.Rewards.Started.Concat(q.Rewards.Success).Concat(q.Rewards.Fail))
+            .Select(r => r switch { AssortUnlockReward a => a.Tpl, ProductionReward p => p.Tpl, _ => null })
+            .OfType<string>();
         var tpls = quests.Values
             .SelectMany(q => q.Objectives)
             .SelectMany(o => o.Prep?.Item?.Items ?? [])
-            .Select(i => i.Tpl);
+            .Select(i => i.Tpl)
+            .Concat(unlockTpls);
         foreach (var tpl in tpls)
         {
             if (categoryOf.ContainsKey(tpl) || !parents.TryGetValue(tpl, out var parent)) continue;
