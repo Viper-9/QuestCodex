@@ -7,6 +7,7 @@ import { ItemsView } from './ItemsView'
 import { OverviewView } from './OverviewView'
 import { ProfileBar } from './ProfileBar'
 import { RaidView } from './RaidView'
+import { UnlocksView } from './UnlocksView'
 import { useProgress } from './useProgress'
 import '../wiki/wiki.css'   // 검색창·칩·태그·목록 줄 같은 공용 규칙을 위키와 같이 쓴다
 import './progress.css'
@@ -55,6 +56,7 @@ export function ProgressPage({ catalog, route }: ProgressPageProps) {
           {route.sub === 'items' && (
             <ItemsView catalog={catalog} progress={p.progress} inventory={inventory} lookup={lookup} />
           )}
+          {route.sub === 'unlocks' && <UnlocksView catalog={catalog} progress={p.progress} lookup={lookup} />}
         </>
       ) : (
         !p.error && p.profiles?.length !== 0 && <p className="qc-empty">{t('app.loading')}</p>

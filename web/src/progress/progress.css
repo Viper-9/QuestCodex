@@ -290,3 +290,59 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
   .qc-pline__trader, .qc-pline__summary { display: none; }
   .qc-raidmap { position: static; }
 }
+
+/* ---- 해금 경로 (unlock-planner.spec.md §2) — 필요 아이템의 표·칩·카테고리 줄을 그대로 쓰고 펼친 카드·팝업만 더한다 ---- */
+.qc-bad { color: var(--danger); }
+.qc-chip--bad { color: var(--danger); }
+.qc-tag--ok, .qc-tag--bad { white-space: nowrap; }
+.qc-tag--ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.qc-tag--bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.qc-udone { margin: 2px 0 8px; color: var(--ok); }
+.qc-ucards { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.qc-ucard {
+  flex: 1 1 320px; min-width: 260px; max-width: 520px; padding: 10px 12px;
+  border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); font-size: 12px; text-align: left;
+}
+.qc-ucard.is-best { border-color: var(--accent); }
+.qc-ucard--compact { flex: 0 1 240px; min-width: 200px; display: flex; flex-direction: column; align-items: stretch; gap: 2px; color: var(--fg-2); text-align: left; cursor: pointer; }
+.qc-ucard--compact:hover { background: var(--bg-hover); }
+.qc-ucard__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; color: var(--fg); }
+.qc-ucard__n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qc-ucard__meta { margin: 0 0 8px; color: var(--fg-2); font-size: 11px; }
+.qc-ucard--compact .qc-ucard__meta { margin: 0; }
+/* 경로 줄 — 점 + 세로 선. 지금 할 수 있는 단계는 강조색 점, 목표는 경고색 점 */
+.qc-usteps { list-style: none; margin: 0; padding: 0; }
+.qc-usteps li { position: relative; display: flex; justify-content: space-between; gap: 8px; padding: 3px 0 3px 18px; }
+.qc-usteps li::before { content: ""; position: absolute; left: 4px; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--border-2); }
+.qc-usteps li::after { content: ""; position: absolute; left: 7px; top: 16px; bottom: -7px; width: 1px; background: var(--border); }
+.qc-usteps li:last-child::after { display: none; }
+.qc-usteps li.is-now::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+.qc-usteps li.is-goal::before { background: var(--warn); }
+.qc-usteps li.is-goal .qc-usteps__name { font-weight: 600; }
+.qc-usteps li.is-series::before { border-radius: 2px; }
+.qc-usteps li.is-gap::before { background: transparent; border: 1px dashed var(--fg-3); }
+.qc-usteps__name { min-width: 0; }
+.qc-usteps__cnt { margin-left: 6px; padding: 0 6px; border-radius: 8px; background: var(--bg-hover); color: var(--fg-2); font-size: 10px; }
+.qc-usteps__now { color: var(--accent-fg); white-space: nowrap; }
+.qc-usteps li > span:last-child { white-space: nowrap; }
+.qc-ucard__sum { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); color: var(--fg-2); }
+.qc-ucard__path { margin-left: auto; }
+/* 전체 경로 팝업 — 단계 번호 원 + 같은 단계 퀘스트 칩 */
+.qc-udialog { width: min(680px, calc(100vw - 32px)); }
+.qc-udialog__sum { margin: 0 0 10px; padding: 8px 10px; border-radius: var(--radius); background: var(--bg-2); font-size: 12px; }
+.qc-utiers { list-style: none; margin: 0; padding: 0; }
+.qc-utier { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 2px; border-bottom: 1px solid var(--border); }
+.qc-utier__n {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bg-hover); color: var(--fg-2); font-size: 11px; font-variant-numeric: tabular-nums;
+}
+.qc-utier.is-now .qc-utier__n { background: var(--accent); color: var(--accent-contrast); }
+.qc-utier.is-goal .qc-utier__n { background: var(--warn); color: var(--obj-fg); }
+.qc-utier__qs { display: flex; flex-wrap: wrap; gap: 6px; }
+.qc-utier__q { padding: 3px 8px; border-radius: var(--radius); background: var(--bg-2); font-size: 12px; }
+.qc-utier__q.is-now { background: var(--accent-bg); }
+.qc-utier.is-goal .qc-utier__q { outline: 1px solid var(--warn); }
+.qc-utier__lv { font-size: 11px; color: var(--fg-2); }
+.qc-utier__lv.qc-warn { color: var(--warn); }
+.qc-utier__tail { font-size: 11px; color: var(--fg-2); white-space: nowrap; }
+.qc-utier.is-now .qc-utier__tail { color: var(--accent-fg); }

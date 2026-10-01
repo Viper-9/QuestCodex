@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 export type Page = 'wiki' | 'progress'
 /** 진행현황의 소메뉴. 사이드 메뉴 트리 순서와 같다. */
-export type ProgressSub = 'overview' | 'raid' | 'items'
+export type ProgressSub = 'overview' | 'raid' | 'items' | 'unlocks'
 
 export interface Route {
   page: Page
@@ -11,7 +11,7 @@ export interface Route {
   query: URLSearchParams
 }
 
-export const PROGRESS_SUBS: readonly ProgressSub[] = ['overview', 'raid', 'items']
+export const PROGRESS_SUBS: readonly ProgressSub[] = ['overview', 'raid', 'items', 'unlocks']
 const DEFAULT_ROUTE: Route = { page: 'wiki', sub: null, query: new URLSearchParams() }
 
 /**
