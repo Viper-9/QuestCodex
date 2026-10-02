@@ -4,7 +4,7 @@ The docs site text lives in one JSON file per language, like the web UI's `web/s
 
 ## Adding or updating a translation
 
-1. Copy `en.json` to `<lang>.json` (e.g. `ru.json`), or open the existing file for your language.
+1. Copy `en.json` to `<lang>.json` (e.g. `ru.json`; Korean uses `kr.json`), or open the existing file for your language.
 2. Translate the values. Keep the keys as they are.
 3. Send a pull request with just that JSON file.
 
@@ -36,4 +36,5 @@ node tools/docs-i18n.mjs accept <lang> [page:key...]
 - `<lang>.sync.json` is managed by the script; don't edit it.
 - A new language also needs its collection and `note-<lang>` / `warning-<lang>` callouts in
   `docs/_config.yml`, plus a branch in the language switch and sidebar includes.
-- Korean (`docs/_kr/`) is written by hand and isn't generated.
+- `index` has one extra key, `translation-note`, shown as a note at the end of a translated home page only
+  (e.g. "Screenshots show the English UI."). It has no English fallback; leave it out to show nothing.
