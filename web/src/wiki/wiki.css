@@ -435,6 +435,8 @@
   margin: 0 0 5px auto; align-self: center; padding: 3px 10px; border: 1px solid var(--border-2); border-radius: 999px;
   background: none; color: var(--fg-2); font-size: 12px; cursor: pointer;
 }
+/* 두 번째 토글(탈출구)까지 auto 면 남는 폭이 둘로 나뉘어 첫 토글이 가운데로 간다 — 첫 토글만 오른쪽으로 민다 */
+.qc-map__tabs .qc-map__toggle + .qc-map__toggle { margin-left: 0; }
 .qc-map__tabs .qc-map__toggle:hover:not(:disabled), .qc-raidmap__head .qc-map__toggle:hover:not(:disabled) { color: var(--fg); background: var(--bg-hover); }
 .qc-map__tabs .qc-map__toggle.is-on, .qc-raidmap__head .qc-map__toggle.is-on { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-fg); font-weight: 600; }
 .qc-map__tabs .qc-map__toggle:disabled, .qc-raidmap__head .qc-map__toggle:disabled { opacity: .5; cursor: not-allowed; }

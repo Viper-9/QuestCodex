@@ -2,7 +2,7 @@ import type { T, UiKey } from '../i18n/index'
 
 const MAP_NAMES = new Set([
   'bigmap', 'factory4_day', 'sandbox', 'interchange', 'interchange-manimal', 'laboratory', 'labyrinth',
-  'lighthouse', 'rezervbase', 'shoreline', 'tarkovstreets', 'woods',
+  'lighthouse', 'rezervbase', 'shoreline', 'tarkovstreets', 'woods', 'icebreaker',
 ])
 
 /** 탭 이름. 번역이 없는 새 맵 폴더면 폴더 키 그대로. */

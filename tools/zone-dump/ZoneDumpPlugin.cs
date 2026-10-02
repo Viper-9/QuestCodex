@@ -18,7 +18,8 @@ namespace QuestCodex.ZoneDump;
 // so no conversion happens here.
 // 0.0.4: also exits (every ExfiltrationPoint subclass, incl. scav/shared/secret) and transit points, for maps whose
 // tarkov.dev positions are missing or wrong (10 spec §7).
-[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.5")]
+// 0.0.6: Icebreaker doors without a key (keypads, the explosive chain door) and named scene objects (11 spec §2).
+[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.6")]
 public class ZoneDumpPlugin : BaseUnityPlugin
 {
     private ConfigEntry<KeyboardShortcut> _dumpKey = null!;
@@ -27,7 +28,23 @@ public class ZoneDumpPlugin : BaseUnityPlugin
     private string? _autoDumpedLocation;
     private float _raidSeenAt = -1f;
 
-    private string DumpDir => Path.Combine(Path.GetDirectoryName(Info.Location)!, "dumps");
+    // ManimalIcebreaker doors that open without a key: keypads (doorId in the mod's icebreaker_passcodes.json) and the
+    // outdoor door the SZ-1 charge blows open. Matched by Id, so other maps are untouched.
+    private static readonly HashSet<string> KeylessDoors = new()
+    {
+        "door_Icebreaker_Indoor_01_00001", "door_Icebreaker_Indoor_01_00008", "door_Icebreaker_Indoor_01_00010",
+        "door_Icebreaker_Indoor_01_00017", "door_Icebreaker_Indoor_01_00051", "door_Icebreaker_Indoor_01_00052",
+        "door_Icebreaker_Indoor_01_00059", "door_Icebreaker_Indoor_01_00060", "door_Icebreaker_Indoor_02_00084",
+        "door_Icebreaker_Outdoor_00000",
+    };
+
+    // Scene objects the mod finds by name (IcebreakerChainDoor, HatchMeltDriver); they are not WorldInteractiveObjects.
+    private static readonly HashSet<string> NamedObjects = new()
+    {
+        "Icebreaker_chain_door", "Explosion_switch", "INTERACTIVE_Icebreaker_exterior_hatchway_door_frozen",
+    };
+
+    private string DumpDir =>Path.Combine(Path.GetDirectoryName(Info.Location)!, "dumps");
 
     private void Awake()
     {
@@ -101,7 +118,7 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                 .ToList();
 
             var doors = FindObjectsOfType<WorldInteractiveObject>(true)
-                .Where(d => !string.IsNullOrEmpty(d.KeyId))
+                .Where(d => !string.IsNullOrEmpty(d.KeyId) || KeylessDoors.Contains(d.Id))
                 .Select(d => new DoorRow
                 {
                     Id = d.Id,
@@ -111,6 +128,12 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                     Position = V(d.transform.position),
                 })
                 .OrderBy(d => d.KeyId)
+                .ToList();
+
+            var named = FindObjectsOfType<Transform>(true)
+                .Where(t => NamedObjects.Contains(t.name))
+                .Select(t => new NamedRow { Name = t.name, Active = t.gameObject.activeInHierarchy, Position = V(t.position) })
+                .OrderBy(n => n.Name)
                 .ToList();
 
             // Settings.Name is the server's allExtracts / secretExits Name. includeInactive: exits not rolled for this raid still exist.
@@ -147,13 +170,14 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                 Doors = doors,
                 Exits = exits,
                 Transits = transits,
+                Named = named,
             };
 
             Directory.CreateDirectory(DumpDir);
             // The game reports some ids capitalized (Sandbox, RezervBase); the server's locations folder is lowercase.
             var path = Path.Combine(DumpDir, $"{location.ToLowerInvariant()}.json");
             File.WriteAllText(path, JsonConvert.SerializeObject(dump, Formatting.Indented));
-            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors, {exits.Count} exits, {transits.Count} transits -> {path}");
+            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors, {exits.Count} exits, {transits.Count} transits, {named.Count} named -> {path}");
         }
         catch (Exception e)
         {
@@ -202,6 +226,14 @@ public class ZoneDumpPlugin : BaseUnityPlugin
         public List<DoorRow> Doors = new();
         public List<ExitRow> Exits = new();
         public List<TransitRow> Transits = new();
+        public List<NamedRow> Named = new();
+    }
+
+    private class NamedRow
+    {
+        public string Name = "";
+        public bool Active;
+        public Vec Position = new();
     }
 
     private class ExitRow

@@ -116,7 +116,8 @@ public class QuestZoneSnapshot(MapVariantDetector mapVariants)
                     .Select(d => new SnapshotDoor(
                         d.GetProperty("key").GetString() ?? throw new InvalidOperationException("door key is null"),
                         d.GetProperty("type").GetString() ?? throw new InvalidOperationException("door type is null"),
-                        new MapPoint(d.GetProperty("x").GetDouble(), d.GetProperty("y").GetDouble(), d.GetProperty("z").GetDouble())))
+                        new MapPoint(d.GetProperty("x").GetDouble(), d.GetProperty("y").GetDouble(), d.GetProperty("z").GetDouble()),
+                        d.TryGetProperty("code", out var code) ? code.GetString() : null))
                     .ToList();
             }
         }

@@ -219,6 +219,9 @@
       "zone_stairway": [{"x":59.56,"y":0.7,"z":50.49,"boxes":[{"cx":59.79,"cz":50.29,"sx":1.58,"sz":0.73,"r":0,"y0":0.54,"y1":1.9}]}],
       "zone_terminator": [{"x":-49.61,"y":2.35,"z":60.41,"boxes":[{"cx":-49.38,"cz":60.41,"sx":0.63,"sz":0.92,"r":0,"y0":2.16,"y1":3.22}]}]
     },
+    "icebreaker": {
+      "icebreaker_heli_zone": [{"x":0.07,"y":21.72,"z":-63.49,"boxes":[{"cx":0.14,"cz":-62.4,"sx":25.71,"sz":27.57,"r":0,"y0":21.05,"y1":32.94}]}]
+    },
     "interchange": {
       "Mark_transits_interchange": [{"x":261.52,"y":23.29,"z":402.45,"boxes":[{"cx":261.34,"cz":401.02,"sx":7.83,"sz":11.62,"r":7.26,"y0":22.09,"y1":24.48}]}],
       "event_labyrinth_02_mech_place_02": [{"x":159.9,"y":23.4,"z":-246.7,"boxes":[{"cx":159.9,"cz":-246.7,"sx":59.4,"sz":70,"r":1.09,"y0":17.35,"y1":29.45}]}],
@@ -733,6 +736,30 @@
       {"key":"5448ba0b4bdc2d02308b456c","type":"Door","x":66.83,"y":-1.61,"z":-29.32},
       {"key":"66acd6702b17692df20144c0","type":"KeycardDoor","x":-20.43,"y":-1.52,"z":44.06}
     ],
+    "icebreaker": [
+      {"key":"","type":"Keypad","x":-7,"y":32.96,"z":21.46,"code":"312220"},
+      {"key":"","type":"Keypad","x":-7,"y":35.65,"z":24.79,"code":"312220"},
+      {"key":"","type":"Keypad","x":-5.25,"y":30.24,"z":33.21},
+      {"key":"","type":"Keypad","x":-5.25,"y":27.54,"z":44.15},
+      {"key":"","type":"Keypad","x":-0.05,"y":8.66,"z":-16.88},
+      {"key":"","type":"Keypad","x":5.24,"y":30.24,"z":34.1},
+      {"key":"","type":"Keypad","x":5.24,"y":27.53,"z":45.05},
+      {"key":"","type":"Keypad","x":5.9,"y":32.95,"z":21.46,"code":"312220"},
+      {"key":"","type":"Keypad","x":5.91,"y":35.65,"z":24.82,"code":"312220"},
+      {"key":"69a0174087a75d2cbd0842e8","type":"Explosive","x":-11.11,"y":24.87,"z":18.92},
+      {"key":"69bb3e54d6c67f6265004ab9","type":"KeycardDoor","x":10.5,"y":16.76,"z":25.59},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":-7.67,"y":27.54,"z":32.63},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":-7.67,"y":24.83,"z":33.13},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":-7.67,"y":27.54,"z":42.43},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":-7.66,"y":30.24,"z":25.98},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":7.67,"y":27.54,"z":23.62},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":7.67,"y":24.84,"z":24.08},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":7.67,"y":24.84,"z":32.24},
+      {"key":"69bb3ec9f609db77390b0e1a","type":"KeycardDoor","x":7.67,"y":30.24,"z":37.82},
+      {"key":"69bb3f278af9f360ee010a7a","type":"KeycardDoor","x":-5.25,"y":35.64,"z":28.39},
+      {"key":"69bb3f7df94327bc0f0230c9","type":"KeycardDoor","x":11.43,"y":19.46,"z":41.63},
+      {"key":"9a449693dff5334122ed7388","type":"Hatch","x":-1.52,"y":43.33,"z":35.69}
+    ],
     "interchange": [
       {"key":"5ad5ccd186f774446d5706e9","type":"Door","x":85.18,"y":28.12,"z":104.64},
       {"key":"5ad5cfbd86f7742c825d6104","type":"Door","x":83.2,"y":28.12,"z":115.67},
@@ -992,7 +1019,7 @@
     },
     "icebreaker": {
       "exits": [
-        {"key":"Heli","name":"Helicopter","x":0.28,"y":22.56,"z":-66.03}
+        {"key":"Icebreaker_Exit_Heli","name":"Helicopter","x":0.28,"y":22.56,"z":-66.03}
       ],
       "transits": [
       ]

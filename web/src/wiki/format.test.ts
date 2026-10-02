@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { getT } from '../i18n/index'
 import type { NameLookup } from './derive'
-import { formatDuration, formatInt, formatObjective, formatRequirement, formatReward, formatSigned, lineText, shortId } from './format'
+import type { LockedDoor } from '../api/catalog'
+import { doorLabel, formatDuration, formatInt, formatObjective, formatRequirement, formatReward, formatSigned, lineText, shortId } from './format'
 
 const ko = getT('kr')
 const en = getT('en')
@@ -113,5 +114,22 @@ describe('helpers', () => {
   it('shortId 앞 8자', () => {
     expect(shortId('5f2a91c0abcdef0123456789')).toBe('5f2a91c0')
     expect(shortId('abc')).toBe('abc')
+  })
+})
+
+describe('doorLabel (06·11 스펙)', () => {
+  const door = (kind: LockedDoor['kind'], keyName = '', code?: string): LockedDoor =>
+    ({ keyTpl: 'tpl', keyName, kind, position: { x: 0, y: 0, z: 0 }, code })
+  it('열쇠·키카드는 열쇠 이름', () => {
+    expect(doorLabel(door('door', 'Dorm room 314 key'), en)).toBe('Dorm room 314 key')
+    expect(doorLabel(door('keycard', 'Red keycard'), ko)).toBe('키카드 · Red keycard')
+  })
+  it('키패드는 고정 코드가 있으면 코드까지', () => {
+    expect(doorLabel(door('keypad'), ko)).toBe('키패드 잠금')
+    expect(doorLabel(door('keypad', '', '312220'), en)).toBe('Keypad lock · code 312220')
+  })
+  it('폭파문·해치는 필요한 아이템', () => {
+    expect(doorLabel(door('explosive', 'SZ-1 explosive charge'), en)).toBe('Blow open with: SZ-1 explosive charge')
+    expect(doorLabel(door('hatch', 'BBQ-S44 gas torch'), en)).toBe('Melt the ice with: BBQ-S44 gas torch')
   })
 })
