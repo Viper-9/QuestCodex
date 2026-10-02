@@ -32,6 +32,19 @@
 
 대조: `node tools/zone-dump/check-coverage.js tools/zone-dump/dumps`
 
+## 지도 변형 덤프 `variants/` (09 스펙)
+
+맵을 통째로 바꾸는 모드를 깐 상태로 뜬 덤프다. `build-snapshot.js`가 스냅샷의 `variants.<변형>`에 넣고, 서버는 **그 모드가 로드됐을 때만** 해당 맵의 존·문을 통째로 이것으로 바꾼다. 바닐라 덤프(위 표)와 섞지 않는다.
+
+| 파일 | 모드 | 수집일 | 덤프 존(모드 포함) | 스냅샷 존 ID | 잠긴 오브젝트 |
+|---|---|---|---|---|---|
+| `variants/manimal/interchange.json` | ManimalInterchange 1.0.8(`Mode: test`, 씬 `SourceBuild 1.1.5.47242`) | 2026-10-03 | 93 | 61 | 100 |
+
+- 바닐라 인터체인지(33개)에 없는 존 28개가 늘었고, 바닐라에만 있는 존은 없다. 새 존은 라이브 1.x 존(`ny25_*`, `taah_*`, `batya_*`, `shop_*_hide`, `shorl_exit_*` 등)이다.
+- 바닐라 퀘스트가 쓰는 `place_WARBLOOD_04_2`가 확장 씬에서 190m 옮겨졌다((274, 15) → (429, 125)).
+- `q14_10_kill_ice`(ManimalIcebreaker 퀘스트)는 확장 씬에만 있다.
+- 모드가 정식판으로 바뀌어 씬이 달라지면 다시 덤프한다. 절차는 바닐라와 같고, 결과 파일만 이 폴더에 둔다.
+
 ## 남은 존 (2026-10-01 기준, 461개 중 457개 확보)
 
 10/1 재덤프로 미궁 존 7개(Hypotheses Testing, Confidential Info, This Tape Sucks, Keeper's Word 3개, Offensive Reconnaissance)를 확보했다. 아래 4개 퀘스트가 남아 있다.

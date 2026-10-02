@@ -251,6 +251,7 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
         quest={mapId ? catalog.quests[mapId] ?? null : null}
         traderName={mapId ? lookup.traderName(catalog.quests[mapId]?.traderId ?? '') : ''}
         lockedDoors={catalog.lockedDoors}
+        mapVariants={catalog.mapVariants}
         onClose={() => setMapId(null)}
       />
     </section>

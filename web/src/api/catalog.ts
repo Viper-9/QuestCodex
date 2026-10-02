@@ -181,6 +181,8 @@ export interface Catalog {
   itemCategoryOf: Record<string, string>
   /** 서버 맵 키 → 잠긴 문. 필드가 생기기 전 서버(구버전 DLL)는 보내지 않는다. */
   lockedDoors?: Record<string, LockedDoor[]>
+  /** 서버 맵 키 → 활성 지도 변형 ID(맵 교체 모드가 로드된 서버만, 예: interchange → manimal). 구버전 서버는 보내지 않는다. */
+  mapVariants?: Record<string, string>
 }
 
 export interface CatalogItemCategory {

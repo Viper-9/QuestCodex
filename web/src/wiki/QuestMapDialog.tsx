@@ -15,15 +15,17 @@ interface QuestMapDialogProps {
   traderName: string
   /** catalog.lockedDoors — 서버 맵 키 → 잠긴 문. 구버전 서버면 undefined. */
   lockedDoors: Record<string, LockedDoor[]> | undefined
+  /** catalog.mapVariants — 맵 교체 모드가 로드된 서버면 그 맵을 변형 지도로 그린다 */
+  mapVariants: Record<string, string> | undefined
   onClose(): void
 }
 
 /** 위치정보 팝업. 맵 탭(+ 잠긴 문 토글) → [지도(층 버튼·마커) | 목표 목록], 아래에 지도 출처. */
-export function QuestMapDialog({ quest, traderName, lockedDoors, onClose }: QuestMapDialogProps) {
+export function QuestMapDialog({ quest, traderName, lockedDoors, mapVariants, onClose }: QuestMapDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const frame = useDialogFrame(ref, 'map', quest !== null, onClose)
-  const index = useLoaded(quest ? loadMapIndex : null, [quest !== null])
+  const index = useLoaded(quest ? () => loadMapIndex(mapVariants) : null, [quest !== null, mapVariants])
 
   useEffect(() => {
     const el = ref.current

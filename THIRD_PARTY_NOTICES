@@ -66,7 +66,13 @@ Redistributed in wwwroot/maps/<map>/*.svg
   Interchange, Woods) or dirtbikercj (Factory). The Labyrinth map is the work of
   acidphantasm. Those modifications are not made or endorsed by Shebuka.
 
-  QuestCodex ships these files unmodified, as separate files, each map folder
+  The expanded Interchange (wwwroot/maps/interchange-manimal/, shown only when
+  the ManimalInterchange mod is loaded) comes from Interchange.svg in
+  tarkov-dev-svg-maps (commit 6bbddad). QuestCodex split that single file into
+  one file per floor (each keeps the original styles and one floor group); the
+  drawing itself is unchanged.
+
+  Apart from that split, QuestCodex ships these files unmodified, as separate files, each map folder
   alongside its original license file (Shebuka-LICENSE*.md or
   acidphantasm-LICENSE.md). The quest map popup credits the author, modifier
   and license of the map it shows. These files are not covered by LICENSE and

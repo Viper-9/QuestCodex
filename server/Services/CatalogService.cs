@@ -26,6 +26,7 @@ public class CatalogService(
     ModQuestIndex modQuestIndex,
     QuestZoneSnapshot questZoneSnapshot,
     ModQuestZoneIndex modQuestZoneIndex,
+    MapVariantDetector mapVariants,
     ImageRouterService imageRouterService,
     FileUtil fileUtil,
     ISptLogger<CatalogService> logger) : ICatalogSource
@@ -124,7 +125,8 @@ public class CatalogService(
             LockedDoors: questZoneSnapshot.Doors,
             HandbookCategories: _handbook.Value.Categories,
             HandbookItemParents: _handbook.Value.ItemParents,
-            QuestZoneAreas: locations.Areas);
+            QuestZoneAreas: locations.Areas,
+            MapVariants: mapVariants.Active);
 
         var catalog = CatalogBuilder.Build(input, started);
 

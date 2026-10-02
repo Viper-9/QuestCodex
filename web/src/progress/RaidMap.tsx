@@ -17,6 +17,8 @@ interface RaidMapProps {
   plan: RaidMapPlan
   /** catalog.lockedDoors — 구버전 서버면 undefined */
   lockedDoors: Record<string, LockedDoor[]> | undefined
+  /** catalog.mapVariants — 맵 교체 모드가 로드된 서버면 그 맵을 변형 지도로 그린다 */
+  mapVariants: Record<string, string> | undefined
   /** 강조할 퀘스트 번호 — 목록 줄과 지도 마커가 같은 값을 공유한다 */
   hot: number | null
   onHot(n: number | null): void
@@ -27,9 +29,9 @@ interface RaidMapProps {
  * 맵은 상단 맵 탭이 정하고, 목록은 "이 맵에서 진행되는 퀘스트" 카드가 대신한다(번호 = 퀘스트).
  * 크게 보기 버튼은 같은 지도를 옮기고 크기를 바꿀 수 있는 팝업으로 연다.
  */
-export function RaidMap({ map, mapLabel, plan, lockedDoors, hot, onHot }: RaidMapProps) {
+export function RaidMap({ map, mapLabel, plan, lockedDoors, mapVariants, hot, onHot }: RaidMapProps) {
   const t = useT()
-  const index = useLoaded(loadMapIndex, [])
+  const index = useLoaded(() => loadMapIndex(mapVariants), [mapVariants])
   const [showDoors, setShowDoors] = usePersistedFlag('qc.map.showDoors', true)
   const [expanded, setExpanded] = useState(false)
   const key = index.data ? mapKeyFor(index.data, map) : null

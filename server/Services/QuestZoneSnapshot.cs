@@ -11,11 +11,12 @@ namespace QuestCodex.Services;
 /// 모드에 동봉한 바닐라 퀘스트 존 스냅샷(Data/quest-zones.json). 존 트리거는 클라이언트 맵 씬에만 있어서
 /// 개발자가 덤프 플러그인(tools/zone-dump)으로 맵마다 한 번 뽑아 둔 것이다. 없으면 Zones == null 이고
 /// 카탈로그가 경고를 낸다(기동 실패 아님). VanillaSnapshot 과 같은 처리다.
+/// 맵 교체 모드가 로드돼 있으면(MapVariantDetector) 그 맵의 존·영역·문을 스냅샷 variants 의 것으로 통째로 바꾼다.
 /// </summary>
 [Injectable(InjectionType.Singleton)]
-public class QuestZoneSnapshot
+public class QuestZoneSnapshot(MapVariantDetector mapVariants)
 {
-    private readonly Lazy<Snapshot?> _data = new(LoadFromModFolder);
+    private readonly Lazy<Snapshot?> _data = new(() => LoadFromModFolder()?.WithVariants(mapVariants.Active));
 
     public string? CollectedWith => _data.Value?.CollectedWith;
     public PointTable? Zones => _data.Value?.Zones;
@@ -28,15 +29,55 @@ public class QuestZoneSnapshot
     {
         /// <summary>위치 인수가 아니라 init 속성 — 기존 3-분해(var (_, zones, doors) = …) 호출을 깨지 않으려고.</summary>
         public AreaTable Areas { get; init; } = new Dictionary<string, IReadOnlyDictionary<string, IReadOnlyList<MapArea>>>();
+
+        /// <summary>변형 ID → 그 변형이 바꾸는 맵들만 담은 스냅샷(collectedWith 는 부모 것). 변형 자체의 Variants 는 비어 있다.</summary>
+        public IReadOnlyDictionary<string, Snapshot> Variants { get; init; } = new Dictionary<string, Snapshot>();
+
+        /// <summary>
+        /// 활성 변형(map → 변형 ID)마다 그 맵의 존·영역·문을 변형 것으로 바꾼다. 섞지 않고 통째로 — 확장 씬에서 옮겨진 존이
+        /// 바닐라 좌표로 남지 않게, 변형에 없는 존은 위치 없음이 된다. 스냅샷에 없는 변형·맵은 바닐라 그대로 둔다.
+        /// </summary>
+        public Snapshot WithVariants(IReadOnlyDictionary<string, string> active)
+        {
+            var swaps = active
+                .Where(a => Variants.TryGetValue(a.Value, out var v) && v.Zones.ContainsKey(a.Key))
+                .Select(a => (Map: a.Key, Data: Variants[a.Value]))
+                .ToList();
+            if (swaps.Count == 0) return this;
+
+            var zones = Zones.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            var areas = Areas.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            var doors = Doors.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            foreach (var (map, data) in swaps)
+            {
+                zones[map] = data.Zones[map];
+                if (data.Areas.TryGetValue(map, out var a)) areas[map] = a; else areas.Remove(map);
+                if (data.Doors.TryGetValue(map, out var d)) doors[map] = d; else doors.Remove(map);
+            }
+
+            return new Snapshot(CollectedWith, zones, doors) { Areas = areas, Variants = Variants };
+        }
     }
 
     public static Snapshot Parse(string json)
     {
         using var doc = JsonDocument.Parse(json);
         var collectedWith = doc.RootElement.TryGetProperty("collectedWith", out var c) ? c.GetString() ?? "" : "";
+        var variants = new Dictionary<string, Snapshot>(StringComparer.Ordinal);
+        if (doc.RootElement.TryGetProperty("variants", out var variantsJson))
+        {
+            foreach (var v in variantsJson.EnumerateObject()) variants[v.Name] = ParseBody(v.Value, collectedWith);
+        }
+
+        return ParseBody(doc.RootElement, collectedWith) with { Variants = variants };
+    }
+
+    /// <summary>zones·doors 절 하나(최상위 또는 variants.&lt;변형&gt;)를 읽는다.</summary>
+    private static Snapshot ParseBody(JsonElement root, string collectedWith)
+    {
         var builder = new PointTableBuilder();
         var areas = new AreaTableBuilder();
-        foreach (var map in doc.RootElement.GetProperty("zones").EnumerateObject())
+        foreach (var map in root.GetProperty("zones").EnumerateObject())
         {
             foreach (var zone in map.Value.EnumerateObject())
             {
@@ -61,7 +102,7 @@ public class QuestZoneSnapshot
         }
 
         var doors = new Dictionary<string, IReadOnlyList<SnapshotDoor>>(StringComparer.Ordinal);
-        if (doc.RootElement.TryGetProperty("doors", out var doorMaps))
+        if (root.TryGetProperty("doors", out var doorMaps))
         {
             foreach (var map in doorMaps.EnumerateObject())
             {
