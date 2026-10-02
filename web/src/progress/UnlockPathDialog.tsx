@@ -73,8 +73,7 @@ export function UnlockPathDialog({ row, plan, catalog, progress, lookup, onClose
                 {levelShort ? t('unlock.sum.levelShort', { n: plan.maxLevel, now: progress.level }) : `${t('unlock.sum.maxLevel', { n: plan.maxLevel })} ✓`}
               </span></>}
             </span>
-            {/* 팁은 한 단계에 퀘스트가 2개 이상일 때만(일직선이면 걸러 볼 일이 없다). 걸러 보는 중에도 유지 */}
-            {tiers.some((tier) => tier.length > 1) && <span className="qc-udialog__tip">💡 {t('unlock.dialog.focusHint')}</span>}
+            <span className="qc-udialog__tip">💡 {t('unlock.dialog.focusHint')}</span>
           </div>
           {focusId && (
             <p className="qc-udialog__focus">
