@@ -1,0 +1,3 @@
+# Store text files with LF in the repo; checkouts follow each machine's core.autocrlf.
+# Keeps CRLF files from contributors (e.g. a translation PR) from turning into whole-file diffs.
+* text=auto
