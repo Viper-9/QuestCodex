@@ -223,7 +223,8 @@
 .qc-count.is-zero .qc-count__cur { color: var(--fg-3); font-weight: 400; }
 /* 퀘스트 이름 뒤 지도 번호 — 글자 높이(1em)에 맞춰 줄 높이·정렬을 건드리지 않는다. 색은 지도 마커와 같다 */
 .qc-rgroup__num {
-  flex: none; display: inline-grid; place-items: center; min-width: 1.15em; height: 1.15em; padding: 0 .2em; border-radius: 999px;
+  /* 높이는 정수 px — em(12.65px)이면 숫자가 픽셀 반올림으로 0.5~0.8px 위로 뜬다 */
+  flex: none; display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 999px;
   margin-left: -3px;  /* .qc-pline__name 의 gap(8px) 을 이름 ↔ 번호 사이만 5px 로 */
   background: var(--c, var(--marker)); color: var(--obj-fg); font-size: 11px; font-weight: 700; line-height: 1;
 }
