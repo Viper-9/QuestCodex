@@ -16,7 +16,8 @@
     "whats-inside.table1.r4c1": "[Quest guide](wiki/quest-guide.html)",
     "whats-inside.table1.r4c2": "What to bring before a raid: maps, weapons, gear, items to hand over or plant",
     "whats-inside.table1.r5c1": "[Progress](progress/)",
-    "whats-inside.table1.r5c2": "Your profile's quest progress, raid prep per map and the items you still need"
+    "whats-inside.table1.r5c2": "Your profile's quest progress, raid prep per map and the items you still need",
+    "translation-note": "Screenshots show the English UI."
   },
   "getting-started": {
     "title": "Getting started",
