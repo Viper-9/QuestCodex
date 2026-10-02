@@ -224,10 +224,14 @@
 /* 퀘스트 이름 뒤 지도 번호 — 글자 높이(1em)에 맞춰 줄 높이·정렬을 건드리지 않는다. 색은 지도 마커와 같다 */
 .qc-rgroup__num {
   /* 높이는 정수 px — em(12.65px)이면 숫자가 픽셀 반올림으로 0.5~0.8px 위로 뜬다 */
-  flex: none; display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 999px;
+  flex: none; display: inline-grid; place-items: center; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px;
   margin-left: -3px;  /* .qc-pline__name 의 gap(8px) 을 이름 ↔ 번호 사이만 5px 로 */
+  /* 가운데 정렬이면 행의 소수점 y 에 따라 글자·배지가 따로 반올림돼 0~1px 오락가락한다.
+     기준선에 묶어 함께 움직이게 하고, 숫자(11px)가 이름(13px)보다 낮게 앉는 만큼 1px 올린다 */
+  align-self: baseline; position: relative; top: -1px;
   background: var(--c, var(--marker)); color: var(--obj-fg); font-size: 11px; font-weight: 700; line-height: 1;
 }
+.qc-pline__name:has(> .qc-rgroup__num) { align-items: baseline; }  /* 이름 글자도 기준선 정렬에 넣어야 배지와 묶인다 */
 /* 지도 번호 배지가 붙은 퀘스트 줄 — 지도 마커에 마우스를 올려도 같은 줄이 강조된다 */
 .qc-rgroups .qc-pline.is-hot > .qc-pline__row { background: var(--bg-hover); }
 
