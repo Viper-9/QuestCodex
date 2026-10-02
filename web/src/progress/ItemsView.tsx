@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import type { Catalog } from '../api/catalog'
 import type { Holding, ProfileProgress } from '../api/progress'
 import { cls } from '../cls'
@@ -6,9 +6,9 @@ import { useT } from '../i18n/I18nContext'
 import type { NameLookup } from '../wiki/derive'
 import { formatInt } from '../wiki/format'
 import {
-  aggregateNeeds, filterNeedRows, ITEM_FILTERS, itemNeeds, mergeSources, missing, OTHER_CATEGORY, rowCategory, sortNeedRows, type ItemFilter, type NeedRow,
+  aggregateNeeds, filterNeedRows, ITEM_FILTERS, itemNeeds, mergeSources, missing, rowCategory, sortNeedRows, type ItemFilter, type NeedRow,
 } from './derive'
-import { itemCategoryLabel } from './format'
+import { CategoryBar, countBy } from './CategoryBar'
 import { ItemName, QuestLink } from './parts'
 
 interface ItemsViewProps {
@@ -37,17 +37,11 @@ export function ItemsView({ catalog, progress, inventory }: ItemsViewProps) {
     () => Object.fromEntries(ITEM_FILTERS.map((f) => [f, filterNeedRows(rows, f, '', category, categoryOf).length])) as Record<ItemFilter, number>,
     [rows, category, categoryOf],
   )
-  const categories = useMemo(() => {
-    const present = new Set(rows.map((r) => rowCategory(r, categoryOf)))
-    const inFilter = new Map<string, number>()
-    for (const r of filterNeedRows(rows, filter, '')) {
-      const c = rowCategory(r, categoryOf)
-      inFilter.set(c, (inFilter.get(c) ?? 0) + 1)
-    }
-    const known = catalog.itemCategories.filter((c) => present.has(c.id))
-    const list = present.has(OTHER_CATEGORY) ? [...known, { id: OTHER_CATEGORY, iconUrl: null }] : known
-    return list.map((c) => ({ ...c, count: inFilter.get(c.id) ?? 0 }))
-  }, [rows, filter, catalog.itemCategories, categoryOf])
+  const present = useMemo(() => new Set(rows.map((r) => rowCategory(r, categoryOf))), [rows, categoryOf])
+  const categoryCounts = useMemo(
+    () => countBy(filterNeedRows(rows, filter, ''), (r) => rowCategory(r, categoryOf)),
+    [rows, filter, categoryOf],
+  )
   const visible = useMemo(() => filterNeedRows(rows, filter, query, category, categoryOf), [rows, filter, query, category, categoryOf])
   const toggle = (key: string) => setExpanded((prev) => {
     const next = new Set(prev)
@@ -74,30 +68,7 @@ export function ItemsView({ catalog, progress, inventory }: ItemsViewProps) {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      {categories.length > 1 && (
-        <div className="qc-cats" role="group" aria-label={t('items.cat.label')}>
-          <CategoryButton label={t('items.cat.all')} on={category === null} onClick={() => setCategory(null)}>
-            <svg className="qc-cat__icon" viewBox="0 0 16 16" aria-hidden="true">
-              <rect x="2" y="2" width="5" height="5" rx="1" /><rect x="9" y="2" width="5" height="5" rx="1" />
-              <rect x="2" y="9" width="5" height="5" rx="1" /><rect x="9" y="9" width="5" height="5" rx="1" />
-            </svg>
-          </CategoryButton>
-          {categories.map((c) => {
-            const label = itemCategoryLabel(c.id, t)
-            return (
-              <CategoryButton
-                key={c.id}
-                label={label}
-                count={c.count}
-                on={category === c.id}
-                onClick={() => setCategory(category === c.id ? null : c.id)}
-              >
-                {c.iconUrl ? <img className="qc-cat__icon" src={c.iconUrl} alt="" /> : <span className="qc-cat__text">{label}</span>}
-              </CategoryButton>
-            )
-          })}
-        </div>
-      )}
+      <CategoryBar categories={catalog.itemCategories} present={present} counts={categoryCounts} value={category} onChange={setCategory} />
       {visible.length === 0 ? <p className="qc-empty">{t('items.empty')}</p> : (
         <table className="qc-table">
           <thead>
@@ -119,15 +90,6 @@ export function ItemsView({ catalog, progress, inventory }: ItemsViewProps) {
         </table>
       )}
     </section>
-  )
-}
-
-function CategoryButton({ label, count, on, onClick, children }: { label: string; count?: number; on: boolean; onClick(): void; children: ReactNode }) {
-  return (
-    <button type="button" className={cls('qc-cat', on && 'is-on', count === 0 && 'is-empty')} aria-pressed={on} title={label} aria-label={label} onClick={onClick}>
-      {children}
-      {count !== undefined && <span className="qc-cat__count">{formatInt(count)}</span>}
-    </button>
   )
 }
 

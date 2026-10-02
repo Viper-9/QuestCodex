@@ -302,6 +302,31 @@ public class CatalogBuilderTests
     }
 
     [Fact]
+    public void Unlock_reward_items_get_a_category_too()
+    {
+        const string ammo = "5b47574386f77428ca22b346", gear = "5b47574386f77428ca22b33f";
+        var (bullet, case_, gift) = (Id(711), Id(712), Id(713));
+        var q = Quest(Id(10), rewards: new()
+        {
+            ["Started"] = [Reward(RewardType.ProductionScheme, items: [Item(case_)], traderId: new SPTarkov.Server.Core.Utils.Json.StringOrInt(null, 10))],
+            ["Success"] = [Reward(RewardType.AssortmentUnlock, items: [Item(bullet)], loyalty: 3, traderId: new SPTarkov.Server.Core.Utils.Json.StringOrInt(Prapor, null))],
+            ["Fail"] = [Reward(RewardType.Item, items: [Item(gift)])],   // 일회성 아이템 보상은 매기지 않는다
+        });
+        var input = Input([q]) with
+        {
+            HandbookCategories = new Dictionary<string, HandbookCategoryInput> { [ammo] = new(null, null), [gear] = new(null, null) },
+            HandbookItemParents = new Dictionary<string, string> { [bullet] = ammo, [case_] = gear, [gift] = gear },
+        };
+
+        var cat = CatalogBuilder.Build(input, Now);
+
+        Assert.Equal(ammo, cat.ItemCategoryOf[bullet]);
+        Assert.Equal(gear, cat.ItemCategoryOf[case_]);
+        Assert.False(cat.ItemCategoryOf.ContainsKey(gift));
+        Assert.Equal([new CatalogItemCategory(ammo, null), new CatalogItemCategory(gear, null)], cat.ItemCategories);
+    }
+
+    [Fact]
     public void Rewards_are_split_by_phase_and_indexed_by_success_only()
     {
         var m4 = Id(1);
