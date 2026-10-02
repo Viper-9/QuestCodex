@@ -1,0 +1,10 @@
+{
+  "name": "questcodex-map-tools",
+  "private": true,
+  "description": "Dev-only dependencies for build-icebreaker-map.js (11 spec)",
+  "devDependencies": {
+    "imagetracerjs": "1.2.6",
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0"
+  }
+}

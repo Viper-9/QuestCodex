@@ -72,9 +72,18 @@ Redistributed in wwwroot/maps/<map>/*.svg
   one file per floor (each keeps the original styles and one floor group); the
   drawing itself is unchanged.
 
-  Apart from that split, QuestCodex ships these files unmodified, as separate files, each map folder
+  The Icebreaker decks (wwwroot/maps/icebreaker/, used for the location the
+  ManimalIcebreaker mod adds) are adapted from re3mr's 2D Icebreaker map
+  (https://reemr.se/, version 0.8, as published at
+  https://tarkov.dev/maps/icebreaker-2d.jpg). QuestCodex cropped one panel per
+  deck, removed the icons, labels and room names, and traced the rest into
+  SVG (tools/maps/build-icebreaker-map.js). These adapted files are licensed
+  under CC BY-NC-SA 4.0 like the original (re3mr-LICENSE.md in that folder)
+  and are not made or endorsed by re3mr.
+
+  Apart from that split and the Icebreaker tracing, QuestCodex ships these files unmodified, as separate files, each map folder
   alongside its original license file (Shebuka-LICENSE*.md or
-  acidphantasm-LICENSE.md). The quest map popup credits the author, modifier
+  acidphantasm-LICENSE.md, re3mr-LICENSE.md). The quest map popup credits the author, modifier
   and license of the map it shows. These files are not covered by LICENSE and
   may not be used commercially.
 
