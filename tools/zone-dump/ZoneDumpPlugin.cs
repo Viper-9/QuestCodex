@@ -13,13 +13,19 @@ using UnityEngine;
 namespace QuestCodex.ZoneDump;
 
 // Dev tool (not shipped): captures quest zone coordinates once per map without accepting any quest.
-// Press the dump key (F10 by default) inside a raid; nothing is dumped automatically.
+// Dumps once per raid automatically 15 s after the raid starts (0.0.5, configurable), or any time with the dump key (F10).
 // Positions are raw Unity world coordinates (x, y = height, z), the same space as the server's looseLoot.json,
 // so no conversion happens here.
-[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.3")]
+// 0.0.4: also exits (every ExfiltrationPoint subclass, incl. scav/shared/secret) and transit points, for maps whose
+// tarkov.dev positions are missing or wrong (10 spec §7).
+[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.5")]
 public class ZoneDumpPlugin : BaseUnityPlugin
 {
     private ConfigEntry<KeyboardShortcut> _dumpKey = null!;
+    private ConfigEntry<bool> _autoDump = null!;
+    private ConfigEntry<float> _autoDumpDelay = null!;
+    private string? _autoDumpedLocation;
+    private float _raidSeenAt = -1f;
 
     private string DumpDir => Path.Combine(Path.GetDirectoryName(Info.Location)!, "dumps");
 
@@ -28,23 +34,40 @@ public class ZoneDumpPlugin : BaseUnityPlugin
         // F10: unused by every other plugin config on the dev machine (F9 is FieldKit's "Toggle Chams").
         _dumpKey = Config.Bind("Dump", "Manual dump key", new KeyboardShortcut(KeyCode.F10),
             "Dump the current raid scene (modifier keys are ignored)");
-        Logger.LogInfo($"Zone dump loaded (press {_dumpKey.Value} in a raid), output: {DumpDir}");
+        _autoDump = Config.Bind("Dump", "Auto dump", true, "Dump once per raid after the delay below");
+        _autoDumpDelay = Config.Bind("Dump", "Auto dump delay (seconds)", 15f, "Time after entering a raid before the auto dump, so the scene can settle");
+        Logger.LogInfo($"Zone dump loaded (press {_dumpKey.Value} in a raid, auto dump {(_autoDump.Value ? $"after {_autoDumpDelay.Value} s" : "off")}), output: {DumpDir}");
     }
 
     private void Update()
     {
+        var location = Singleton<GameWorld>.Instance?.MainPlayer?.Location;
+
         // Read the main key directly: KeyboardShortcut.IsDown() fails while any other modifier (Shift to sprint, Ctrl…)
         // is held, which is easy to do mid-raid and gives no feedback at all.
-        if (!Input.GetKeyDown(_dumpKey.Value.MainKey)) return;
-        Logger.LogInfo($"Dump key {_dumpKey.Value.MainKey} pressed");
-
-        var location = Singleton<GameWorld>.Instance?.MainPlayer?.Location;
-        if (string.IsNullOrEmpty(location))
+        if (Input.GetKeyDown(_dumpKey.Value.MainKey))
         {
-            Logger.LogWarning("Not in a raid, nothing to dump");
+            Logger.LogInfo($"Dump key {_dumpKey.Value.MainKey} pressed");
+            if (string.IsNullOrEmpty(location)) Logger.LogWarning("Not in a raid, nothing to dump");
+            else Dump(location!);
             return;
         }
 
+        if (string.IsNullOrEmpty(location))
+        {
+            // Out of raid: the next raid (even on the same map) gets its own auto dump.
+            _raidSeenAt = -1f;
+            _autoDumpedLocation = null;
+            return;
+        }
+
+        // Auto dump once per raid, after the scene has had time to settle.
+        if (!_autoDump.Value || _autoDumpedLocation == location) return;
+        if (_raidSeenAt < 0f) _raidSeenAt = Time.time;
+        if (Time.time - _raidSeenAt < _autoDumpDelay.Value) return;
+
+        _autoDumpedLocation = location;
+        Logger.LogInfo($"Auto dump {_autoDumpDelay.Value} s after entering {location}");
         Dump(location!);
     }
 
@@ -90,19 +113,47 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                 .OrderBy(d => d.KeyId)
                 .ToList();
 
+            // Settings.Name is the server's allExtracts / secretExits Name. includeInactive: exits not rolled for this raid still exist.
+            var exits = FindObjectsOfType<ExfiltrationPoint>(true)
+                .Select(e => new ExitRow
+                {
+                    Name = e.Settings?.Name ?? "",
+                    Type = e.GetType().Name,
+                    Active = e.gameObject.activeInHierarchy,
+                    Position = V(e.transform.position),
+                    Bounds = BoundsOf(e.gameObject),
+                })
+                .OrderBy(e => e.Name)
+                .ToList();
+
+            // parameters.id is the server's base.transits id.
+            var transits = FindObjectsOfType<TransitPoint>(true)
+                .Select(t => new TransitRow
+                {
+                    Id = t.parameters?.id ?? -1,
+                    Location = t.parameters?.location ?? "",
+                    Active = t.gameObject.activeInHierarchy,
+                    Position = V(t.transform.position),
+                    Bounds = BoundsOf(t.gameObject),
+                })
+                .OrderBy(t => t.Id)
+                .ToList();
+
             var dump = new DumpFile
             {
                 Location = location,
                 DumpedAtUtc = DateTime.UtcNow.ToString("o"),
                 Zones = zones,
                 Doors = doors,
+                Exits = exits,
+                Transits = transits,
             };
 
             Directory.CreateDirectory(DumpDir);
             // The game reports some ids capitalized (Sandbox, RezervBase); the server's locations folder is lowercase.
             var path = Path.Combine(DumpDir, $"{location.ToLowerInvariant()}.json");
             File.WriteAllText(path, JsonConvert.SerializeObject(dump, Formatting.Indented));
-            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors -> {path}");
+            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors, {exits.Count} exits, {transits.Count} transits -> {path}");
         }
         catch (Exception e)
         {
@@ -149,6 +200,26 @@ public class ZoneDumpPlugin : BaseUnityPlugin
         public string DumpedAtUtc = "";
         public List<ZoneRow> Zones = new();
         public List<DoorRow> Doors = new();
+        public List<ExitRow> Exits = new();
+        public List<TransitRow> Transits = new();
+    }
+
+    private class ExitRow
+    {
+        public string Name = "";
+        public string Type = "";
+        public bool Active;
+        public Vec Position = new();
+        public BoundsRow? Bounds;
+    }
+
+    private class TransitRow
+    {
+        public int Id;
+        public string Location = "";
+        public bool Active;
+        public Vec Position = new();
+        public BoundsRow? Bounds;
     }
 
     private class ZoneRow

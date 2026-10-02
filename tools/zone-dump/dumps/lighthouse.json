@@ -1,6 +1,6 @@
 {
   "Location": "Lighthouse",
-  "DumpedAtUtc": "2026-10-01T08:40:12.9405085Z",
+  "DumpedAtUtc": "2026-10-02T17:21:18.9528565Z",
   "Zones": [
     {
       "Id": "ARTT_LIGHTHOUSE_MEDBED",
@@ -99,6 +99,60 @@
             "X": 8.75,
             "Y": 10.25,
             "Z": 11.0
+          },
+          "Rotation": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "Yaw": 0.0
+        }
+      ]
+    },
+    {
+      "Id": "boreas_roman_lighthouse_transit",
+      "Type": "PlaceItemTrigger",
+      "Active": true,
+      "Position": {
+        "X": 110.245,
+        "Y": 4.62,
+        "Z": -957.479
+      },
+      "Bounds": {
+        "Min": {
+          "X": 100.245,
+          "Y": -5.38,
+          "Z": -967.479
+        },
+        "Max": {
+          "X": 120.245,
+          "Y": 14.62,
+          "Z": -947.479
+        }
+      },
+      "Colliders": [
+        {
+          "Type": "BoxCollider",
+          "Min": {
+            "X": 100.245,
+            "Y": -5.38,
+            "Z": -967.479
+          },
+          "Max": {
+            "X": 120.245,
+            "Y": 14.62,
+            "Z": -947.479
+          },
+          "Center": {
+            "X": 110.245,
+            "Y": 4.62,
+            "Z": -957.479
+          },
+          "Size": {
+            "X": 20.0,
+            "Y": 20.0,
+            "Z": 20.0
           },
           "Rotation": {
             "X": 0.0,
@@ -10008,6 +10062,384 @@
         "X": -75.38922,
         "Y": 10.1256714,
         "Z": -290.638458
+      }
+    }
+  ],
+  "Exits": [
+    {
+      "Name": " V-Ex_light",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -328.951263,
+        "Y": 16.73,
+        "Z": -784.3581
+      },
+      "Bounds": {
+        "Min": {
+          "X": -334.0501,
+          "Y": 15.1586914,
+          "Z": -791.829
+        },
+        "Max": {
+          "X": -323.852417,
+          "Y": 18.3013077,
+          "Z": -776.8872
+        }
+      }
+    },
+    {
+      "Name": "Alpinist_light",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -172.35,
+        "Y": 41.89,
+        "Z": -6.39
+      },
+      "Bounds": {
+        "Min": {
+          "X": -187.006561,
+          "Y": 31.9464455,
+          "Z": -17.97898
+        },
+        "Max": {
+          "X": -157.693451,
+          "Y": 51.8335533,
+          "Z": 5.19898033
+        }
+      }
+    },
+    {
+      "Name": "Coastal_South_Road",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -295.8,
+        "Y": 11.86,
+        "Z": 420.6
+      },
+      "Bounds": {
+        "Min": {
+          "X": -335.269836,
+          "Y": -1.830822,
+          "Z": 402.051422
+        },
+        "Max": {
+          "X": -256.330139,
+          "Y": 25.5508213,
+          "Z": 439.1486
+        }
+      }
+    },
+    {
+      "Name": "EXFIL_Train",
+      "Type": "SharedExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": 6.27001953,
+        "Y": 14.1133,
+        "Z": -873.78
+      },
+      "Bounds": {
+        "Min": {
+          "X": 4.77001667,
+          "Y": 12.2290764,
+          "Z": -891.730042
+        },
+        "Max": {
+          "X": 7.77002239,
+          "Y": 14.4583473,
+          "Z": -847.230042
+        }
+      }
+    },
+    {
+      "Name": "lighthouse_secret_minefield",
+      "Type": "SecretExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -360.0,
+        "Y": 27.19,
+        "Z": -564.87
+      },
+      "Bounds": {
+        "Min": {
+          "X": -370.0,
+          "Y": 22.1900024,
+          "Z": -574.87
+        },
+        "Max": {
+          "X": -350.0,
+          "Y": 32.1900024,
+          "Z": -554.87
+        }
+      }
+    },
+    {
+      "Name": "Nothern_Checkpoint",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": 113.22,
+        "Y": 11.86,
+        "Z": -989.23
+      },
+      "Bounds": {
+        "Min": {
+          "X": 90.63425,
+          "Y": 2.246334,
+          "Z": -1014.72778
+        },
+        "Max": {
+          "X": 135.805756,
+          "Y": 21.4736652,
+          "Z": -963.7322
+        }
+      }
+    },
+    {
+      "Name": "Scav_Coastal_South",
+      "Type": "ScavExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -281.3,
+        "Y": 11.86,
+        "Z": 420.8
+      },
+      "Bounds": {
+        "Min": {
+          "X": -313.819183,
+          "Y": -1.830822,
+          "Z": 402.335663
+        },
+        "Max": {
+          "X": -248.780792,
+          "Y": 25.5508213,
+          "Z": 439.2643
+        }
+      }
+    },
+    {
+      "Name": "Scav_Hideout_at_the_grotto",
+      "Type": "ScavExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": 180.66,
+        "Y": 1.18,
+        "Z": -485.94
+      },
+      "Bounds": {
+        "Min": {
+          "X": 170.608459,
+          "Y": -3.246935,
+          "Z": -493.012238
+        },
+        "Max": {
+          "X": 190.711548,
+          "Y": 5.60693455,
+          "Z": -478.867767
+        }
+      }
+    },
+    {
+      "Name": "Scav_Industrial_zone",
+      "Type": "ScavExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -152.56,
+        "Y": 12.25,
+        "Z": -794.1
+      },
+      "Bounds": {
+        "Min": {
+          "X": -165.741714,
+          "Y": 10.175415,
+          "Z": -807.1103
+        },
+        "Max": {
+          "X": -139.378281,
+          "Y": 14.324585,
+          "Z": -781.089661
+        }
+      }
+    },
+    {
+      "Name": "Scav_Underboat_Hideout",
+      "Type": "ScavExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": 133.068,
+        "Y": -0.467,
+        "Z": 286.842
+      },
+      "Bounds": {
+        "Min": {
+          "X": 125.930908,
+          "Y": -4.09765863,
+          "Z": 278.553955
+        },
+        "Max": {
+          "X": 140.205078,
+          "Y": 3.16365862,
+          "Z": 295.130066
+        }
+      }
+    },
+    {
+      "Name": "Shorl_free",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -364.4,
+        "Y": 28.758,
+        "Z": -121.4
+      },
+      "Bounds": {
+        "Min": {
+          "X": -441.717072,
+          "Y": 4.082901,
+          "Z": -192.82132
+        },
+        "Max": {
+          "X": -287.082916,
+          "Y": 53.4330978,
+          "Z": -49.97867
+        }
+      }
+    },
+    {
+      "Name": "Shorl_free_scav",
+      "Type": "ScavExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -364.4,
+        "Y": 28.758,
+        "Z": -121.4
+      },
+      "Bounds": {
+        "Min": {
+          "X": -444.344452,
+          "Y": 4.082901,
+          "Z": -197.247284
+        },
+        "Max": {
+          "X": -284.455536,
+          "Y": 53.4330978,
+          "Z": -45.5527039
+        }
+      }
+    },
+    {
+      "Name": "tunnel_shared",
+      "Type": "SharedExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": -68.3,
+        "Y": 6.83,
+        "Z": 318.11
+      },
+      "Bounds": {
+        "Min": {
+          "X": -77.8434448,
+          "Y": 3.83,
+          "Z": 313.207581
+        },
+        "Max": {
+          "X": -58.75656,
+          "Y": 9.83,
+          "Z": 323.0124
+        }
+      }
+    }
+  ],
+  "Transits": [
+    {
+      "Id": 1,
+      "Location": "",
+      "Active": false,
+      "Position": {
+        "X": -857.587,
+        "Y": -42.81,
+        "Z": 15.3769836
+      },
+      "Bounds": {
+        "Min": {
+          "X": -857.587,
+          "Y": -42.81,
+          "Z": 15.3769836
+        },
+        "Max": {
+          "X": -857.587,
+          "Y": -42.81,
+          "Z": 15.3769836
+        }
+      }
+    },
+    {
+      "Id": 21,
+      "Location": "Shoreline",
+      "Active": true,
+      "Position": {
+        "X": -338.6,
+        "Y": 17.5,
+        "Z": -168.9
+      },
+      "Bounds": {
+        "Min": {
+          "X": -399.3111,
+          "Y": 3.78969,
+          "Z": -206.264587
+        },
+        "Max": {
+          "X": -277.382263,
+          "Y": 31.28969,
+          "Z": -124.79715
+        }
+      }
+    },
+    {
+      "Id": 22,
+      "Location": "RezervBase",
+      "Active": true,
+      "Position": {
+        "X": -294.6,
+        "Y": 15.2591143,
+        "Z": -780.1
+      },
+      "Bounds": {
+        "Min": {
+          "X": -304.218475,
+          "Y": 12.4873486,
+          "Z": -788.983337
+        },
+        "Max": {
+          "X": -279.370148,
+          "Y": 18.1102619,
+          "Z": -770.9996
+        }
+      }
+    },
+    {
+      "Id": 23,
+      "Location": "Woods",
+      "Active": true,
+      "Position": {
+        "X": 106.3,
+        "Y": 6.74,
+        "Z": -958.1
+      },
+      "Bounds": {
+        "Min": {
+          "X": 94.84264,
+          "Y": 3.96823144,
+          "Z": -968.802246
+        },
+        "Max": {
+          "X": 123.016563,
+          "Y": 9.591148,
+          "Z": -945.4291
+        }
       }
     }
   ]

@@ -56,7 +56,8 @@ public class CatalogService(
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapPoint>>> QuestItemSpawns,
         IReadOnlyDictionary<string, string> LocationKeys,
         bool SnapshotMissing,
-        IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapArea>>> Areas);
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapArea>>> Areas,
+        IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationExits> Exits);
 
     /// <summary>핸드북 카테고리·아이템 부모. 언어와 무관해 한 번만. 모드가 추가한 아이템도 첫 요청 시점이면 들어와 있다.</summary>
     private readonly Lazy<(IReadOnlyDictionary<string, HandbookCategoryInput> Categories, IReadOnlyDictionary<string, string> ItemParents)> _handbook = new(() =>
@@ -126,7 +127,9 @@ public class CatalogService(
             HandbookCategories: _handbook.Value.Categories,
             HandbookItemParents: _handbook.Value.ItemParents,
             QuestZoneAreas: locations.Areas,
-            MapVariants: mapVariants.Active);
+            MapVariants: mapVariants.Active,
+            ExitPositions: questZoneSnapshot.Exits,
+            LocationExits: locations.Exits);
 
         var catalog = CatalogBuilder.Build(input, started);
 
@@ -161,7 +164,40 @@ public class CatalogService(
 
         // 지연 열거: 맵 하나의 looseLoot 만 메모리에 두고 다음 맵으로 넘어간다.
         var spawns = LooseLootSpawns.Forced(maps.Select(m => (m.Map, ReadLooseLoot(m.Map, m.Location))));
-        return new LocationData(zones, spawns, keys, questZoneSnapshot.Zones is null, areas);
+        var exits = new Dictionary<string, QuestCodex.Catalog.Models.LocationExits>(StringComparer.Ordinal);
+        foreach (var (map, location) in maps)
+        {
+            if (ReadExits(location) is { } e) exits[map] = e;
+        }
+
+        return new LocationData(zones, spawns, keys, questZoneSnapshot.Zones is null, areas, exits);
+
+        // allExtracts 는 PMC·스캐브·협동 탈출구를 진영(Side)과 함께 담는다(모드가 바꾼 목록 포함). 없으면 base.exits(PMC 만).
+        // 비밀 탈출구는 base.secretExits 에 따로 있다.
+        static QuestCodex.Catalog.Models.LocationExits? ReadExits(SPTarkov.Server.Core.Models.Eft.Common.Location location)
+        {
+            IEnumerable<SPTarkov.Server.Core.Models.Eft.Common.Exit>? all = location.AllExtracts;
+            if (all is null || !all.Any()) all = location.Base.Exits;
+            var rows = (all ?? [])
+                .Where(e => e is not null && !string.IsNullOrEmpty(e.Name))
+                .Select(e => new QuestCodex.Catalog.Models.LocationExitRow(
+                    e.Name!, string.IsNullOrEmpty(e.Side) ? "Pmc" : e.Side, e.PassageRequirement.ToString(), e.Count ?? 0,
+                    string.IsNullOrEmpty(e.Id) ? null : e.Id, e.RequirementTip, e.Chance))
+                .ToList();
+            // 비밀 탈출구(base.secretExits)는 allExtracts 에 없다. 진영은 EligibleFor* 로, 조건은 합성 값 "Secret" 으로 싣는다.
+            foreach (var s in location.Base.SecretExits ?? [])
+            {
+                if (s is null || string.IsNullOrEmpty(s.Name)) continue;
+                if (s.EligibleForPMC ?? true) rows.Add(new QuestCodex.Catalog.Models.LocationExitRow(s.Name, "Pmc", "Secret", 0, null, null, null));
+                if (s.EligibleForScav ?? true) rows.Add(new QuestCodex.Catalog.Models.LocationExitRow(s.Name, "Scav", "Secret", 0, null, null, null));
+            }
+
+            var transits = (location.Base.Transits ?? [])
+                .Where(t => t?.Id is not null)
+                .Select(t => new QuestCodex.Catalog.Models.LocationTransitRow(t.Id!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), t.IsActive ?? false, t.Location ?? ""))
+                .ToList();
+            return rows.Count == 0 && transits.Count == 0 ? null : new QuestCodex.Catalog.Models.LocationExits(rows, transits);
+        }
 
         SPTarkov.Server.Core.Models.Eft.Common.LooseLoot? ReadLooseLoot(string map, SPTarkov.Server.Core.Models.Eft.Common.Location location)
         {

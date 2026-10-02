@@ -130,7 +130,8 @@ Redistributed in wwwroot/maps/<map>/map.json and wwwroot/assets/main-*.js
 
 
 -------------------------------------------------------------------------------
-Redistributed in wwwroot/maps/interchange-manimal/map.json
+Redistributed in wwwroot/maps/interchange-manimal/map.json,
+wwwroot/maps/icons/extract_*.png and Data/quest-zones.json
 -------------------------------------------------------------------------------
 
   tarkov-dev   MIT   https://github.com/the-hideout/tarkov-dev
@@ -138,6 +139,15 @@ Redistributed in wwwroot/maps/interchange-manimal/map.json
   Calibration data for the expanded Interchange (coordinate rotation, image
   bounds, floor bounds) is converted from tarkov-dev's src/data/maps.json by
   tools/maps/build-tarkovdev-map.js.
+
+  The extract and transit marker icons (extract_pmc.png, extract_shared.png,
+  extract_scav.png, extract_transit.png) are copied unmodified from
+  public/maps/interactive/ in tarkov-dev (added by Shebuka in commit bb40b16).
+
+  Extract and transit positions and English extract names ("exits" in
+  Data/quest-zones.json) come from tarkov.dev's data service
+  (https://json.tarkov.dev/regular/maps and maps_en, fetched 2026-10-03 by
+  tools/maps/fetch-tarkovdev-exits.js).
 
   MIT License
 

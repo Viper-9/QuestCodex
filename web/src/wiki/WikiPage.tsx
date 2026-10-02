@@ -132,6 +132,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         quest={mapId ? catalog.quests[mapId] ?? null : null}
         traderName={mapId ? lookup.traderName(catalog.quests[mapId]?.traderId ?? '') : ''}
         lockedDoors={catalog.lockedDoors}
+        exits={catalog.exits}
         mapVariants={catalog.mapVariants}
         onClose={() => setMapId(null)}
       />

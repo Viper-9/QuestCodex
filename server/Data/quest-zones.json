@@ -917,6 +917,281 @@
       {"key":"6761a6ccd9bbb27ad703c48a","type":"Door","x":-655.17,"y":8.69,"z":183.09}
     ]
   },
+  "exits": {
+    "bigmap": {
+      "exits": [
+        {"key":"Administration Gate","name":"Administration Gate","x":664.71,"y":2.88,"z":-55.33},
+        {"key":"Beyond Fuel Tank","name":"Passage Between Rocks","x":539.39,"y":11.82,"z":200.34},
+        {"key":"Crossroads","name":"Crossroads","x":-334.8,"y":2.19,"z":-87.98},
+        {"key":"Custom_scav_pmc","name":"Boiler Room Basement (Co-op)","x":100.56,"y":-4.98,"z":-44.42},
+        {"key":"customs_secret_voron_boat","name":"Smugglers' Boat","x":-41.51,"y":-12.63,"z":122.67},
+        {"key":"customs_secret_voron_bunker","name":"Smugglers' Bunker (ZB-1012)","x":463.18,"y":-1.46,"z":-112.36},
+        {"key":"customs_sniper_exit","name":"Railroad Passage (Flare)","x":139.13,"y":3.8,"z":-324.62},
+        {"key":"Dorms V-Ex","name":"Dorms V-Ex","x":181.08,"y":-0.71,"z":213.25},
+        {"key":"EXFIL_ZB013","name":"ZB-013","x":200.98,"y":-1.15,"z":-153.09},
+        {"key":"Factory Far Corner","name":"Factory Far Corner","x":652.45,"y":3.2,"z":-160.49},
+        {"key":"Factory Shacks","name":"Factory Shacks","x":205.59,"y":3.72,"z":3.31},
+        {"key":"Military Checkpoint","name":"Scav Checkpoint","x":652.08,"y":1,"z":-27.42},
+        {"key":"Old Azs Gate","name":"Old Gas Station Gate","x":300.51,"y":3.47,"z":-198.52},
+        {"key":"Old Gas Station","name":"Old Gas Station","x":309.5,"y":-2.18,"z":-174.32},
+        {"key":"Old Road Gate","name":"Old Road Gate","x":181.77,"y":1.5,"z":214.01},
+        {"key":"Railroad To Military Base","name":"Railroad to Military Base","x":489.06,"y":3.95,"z":221.39},
+        {"key":"Railroad To Port","name":"Railroad to Port","x":-149.11,"y":-0.63,"z":46.68},
+        {"key":"Railroad To Tarkov","name":"Railroad to Tarkov","x":-163.47,"y":3.39,"z":-217.45},
+        {"key":"RUAF Roadblock","name":"RUAF Roadblock","x":-10.25,"y":1.92,"z":-138.45},
+        {"key":"RUAF Roadblock_scav","name":"RUAF Roadblock","x":-9.44,"y":1.65,"z":-138.74},
+        {"key":"Shack","name":"Military Base CP","x":644.88,"y":2.4,"z":126.87},
+        {"key":"Sniper Roadblock","name":"Sniper Roadblock","x":15.08,"y":0.14,"z":126.29},
+        {"key":"Trailer Park","name":"Trailer Park","x":-313.72,"y":-1.72,"z":-233.28},
+        {"key":"Trailer Park Workers Shack","name":"Trailer Park Workers' Shack","x":-248.54,"y":2.55,"z":-232.99},
+        {"key":"Warehouse 17","name":"Warehouse 17","x":50.74,"y":2.14,"z":-69.82},
+        {"key":"Warehouse 4","name":"Warehouse 4","x":341.57,"y":3.55,"z":-25.85},
+        {"key":"ZB-1011","name":"ZB-1011","x":621.5,"y":-2.07,"z":-128.6}
+      ],
+      "transits": [
+        {"id":"9","x":650.64,"y":1.59,"z":124.94},
+        {"id":"10","x":354.31,"y":2.31,"z":-190.1},
+        {"id":"11","x":-334.22,"y":2.11,"z":-211.95},
+        {"id":"42","x":20.94,"y":-0.58,"z":139.61}
+      ]
+    },
+    "factory4_day": {
+      "exits": [
+        {"key":"Camera Bunker Door","name":"Camera Bunker Door","x":-15.72,"y":-1.65,"z":40.11},
+        {"key":"Cellars","name":"Cellars","x":73.89,"y":-3.29,"z":-29.08},
+        {"key":"factory_secret_ark","name":"Smugglers' Passage","x":48.03,"y":-1.61,"z":-28.86},
+        {"key":"Gate 0","name":"Gate 0","x":-63.67,"y":2.85,"z":55.88},
+        {"key":"Gate 2","name":"Gate 2","x":44.89,"y":0.59,"z":-53.48},
+        {"key":"Gate 3","name":"Gate 3","x":58.71,"y":1.59,"z":60.87},
+        {"key":"Gate m","name":"Med Tent Gate","x":-17.53,"y":1.99,"z":-61.27},
+        {"key":"Gate_o","name":"Courtyard Gate","x":23.76,"y":1.36,"z":68.94},
+        {"key":"Office Window","name":"Office Window","x":17.83,"y":8.73,"z":39.89}
+      ],
+      "transits": [
+        {"id":"12","x":24.36,"y":2.24,"z":60.22},
+        {"id":"13","x":17.34,"y":0.58,"z":-49.62},
+        {"id":"14","x":-27.01,"y":-3.09,"z":-42.75}
+      ]
+    },
+    "factory4_night": {
+      "exits": [
+        {"key":"Camera Bunker Door","name":"Camera Bunker Door","x":-15.72,"y":-1.65,"z":40.11},
+        {"key":"Cellars","name":"Cellars","x":73.89,"y":-3.29,"z":-29.08},
+        {"key":"factory_secret_ark","name":"Smugglers' Passage","x":48.03,"y":-1.61,"z":-28.86},
+        {"key":"Gate 0","name":"Gate 0","x":-63.67,"y":2.85,"z":55.88},
+        {"key":"Gate 3","name":"Gate 3","x":58.71,"y":1.59,"z":60.87},
+        {"key":"Gate m","name":"Med Tent Gate","x":-17.53,"y":1.99,"z":-61.27},
+        {"key":"Gate_o","name":"Courtyard Gate","x":23.76,"y":1.36,"z":68.94},
+        {"key":"Office Window","name":"Office Window","x":17.83,"y":8.73,"z":39.89}
+      ],
+      "transits": [
+        {"id":"12","x":23.7,"y":0.84,"z":61.61},
+        {"id":"13","x":18.51,"y":-0.42,"z":-48.33},
+        {"id":"14","x":-26.54,"y":-4.08,"z":-42.01}
+      ]
+    },
+    "icebreaker": {
+      "exits": [
+        {"key":"Heli","name":"Helicopter","x":0.28,"y":22.56,"z":-66.03}
+      ],
+      "transits": [
+      ]
+    },
+    "interchange": {
+      "exits": [
+        {"key":"Hole Exfill","name":"Hole in the Fence","x":-219.92,"y":13.79,"z":-37.02},
+        {"key":"Interchange Cooperation","name":"Scav Camp (Co-Op)","x":-97.48,"y":18.12,"z":-73.09},
+        {"key":"interchange_secret_extraction","name":"Smugglers' Tunnel","x":-138.53,"y":22.51,"z":-175.11},
+        {"key":"NW Exfil","name":"Railway Exfil","x":474.57,"y":19.92,"z":-433.74},
+        {"key":"PP Exfil","name":"Power Station V-Ex","x":-302.89,"y":21.65,"z":-367.73},
+        {"key":"Saferoom Exfil","name":"Saferoom Exfil","x":-47.73,"y":22.97,"z":44.06},
+        {"key":"SE Exfil","name":"Emercom Checkpoint","x":-321.56,"y":24.18,"z":266.74}
+      ],
+      "transits": [
+        {"id":"6","x":280.26,"y":23.28,"z":435.08},
+        {"id":"7","x":271.85,"y":24.1,"z":-453.65}
+      ]
+    },
+    "laboratory": {
+      "exits": [
+        {"key":"lab_Elevator_Cargo","name":"Cargo Elevator","x":-111.79,"y":5.38,"z":-408.55},
+        {"key":"lab_Elevator_Main","name":"Main Elevator","x":-282.69,"y":-2.81,"z":-334.73},
+        {"key":"lab_Elevator_Med","name":"Medical Block Elevator","x":-112.3,"y":-3.11,"z":-344.04},
+        {"key":"lab_Hangar_Gate","name":"Hangar Gate","x":-170.49,"y":5.54,"z":-218.87},
+        {"key":"lab_Parking_Gate","name":"Parking Gate","x":-231.46,"y":6.19,"z":-457.77},
+        {"key":"lab_Under_Storage_Collector","name":"Sewage Conduit","x":-122.89,"y":-3.66,"z":-258.32},
+        {"key":"lab_Vent","name":"Ventilation Shaft","x":-145.06,"y":-2.46,"z":-396.83}
+      ],
+      "transits": [
+        {"id":"8","x":-170.14,"y":1.18,"z":-420.56}
+      ]
+    },
+    "labyrinth": {
+      "exits": [
+        {"key":"labir_exit","name":"The Way Up","x":-7.31,"y":-0.01,"z":40.13},
+        {"key":"labyrinth_secret_tagilla_key","name":"Ariadne's Path","x":19.44,"y":1.07,"z":0.5}
+      ],
+      "transits": [
+      ]
+    },
+    "lighthouse": {
+      "exits": [
+        {"key":" V-Ex_light","name":"Road to Military Base V-Ex","x":-328.95,"y":16.73,"z":-784.36},
+        {"key":"Alpinist_light","name":"Mountain Pass","x":-172.35,"y":41.89,"z":-6.39},
+        {"key":"Coastal_South_Road","name":"Southern Road","x":-295.8,"y":11.86,"z":420.6},
+        {"key":"EXFIL_Train","name":"Armored Train","x":6.27,"y":13.34,"z":-869.48},
+        {"key":"lighthouse_secret_minefield","name":"Passage by the Lake","x":-360,"y":27.19,"z":-564.87},
+        {"key":"Nothern_Checkpoint","name":"Northern Checkpoint","x":113.22,"y":11.86,"z":-989.23},
+        {"key":"Scav_Coastal_South","name":"Southern Road Landslide","x":-281.3,"y":11.86,"z":420.8},
+        {"key":"Scav_Hideout_at_the_grotto","name":"Scav Hideout at the Grotto","x":180.66,"y":1.18,"z":-485.94},
+        {"key":"Scav_Industrial_zone","name":"Industrial Zone Gates","x":-152.56,"y":12.25,"z":-794.1},
+        {"key":"Scav_Underboat_Hideout","name":"Hideout Under the Landing Stage","x":133.07,"y":-0.47,"z":286.84},
+        {"key":"Shorl_free","name":"Path to Shoreline","x":-364.4,"y":28.76,"z":-121.4},
+        {"key":"Shorl_free_scav","name":"Path to Shoreline","x":-364.4,"y":28.76,"z":-121.4},
+        {"key":"tunnel_shared","name":"Side Tunnel (Co-Op)","x":-68.3,"y":6.83,"z":318.11}
+      ],
+      "transits": [
+        {"id":"1","x":-857.59,"y":-42.81,"z":15.38},
+        {"id":"21","x":-338.35,"y":17.54,"z":-165.53},
+        {"id":"22","x":-291.79,"y":15.3,"z":-779.99},
+        {"id":"23","x":108.93,"y":6.78,"z":-957.12}
+      ]
+    },
+    "rezervbase": {
+      "exits": [
+        {"key":"Alpinist","name":"Cliff Descent","x":-9.24,"y":20.93,"z":208.43},
+        {"key":"EXFIL_Bunker","name":"Bunker Hermetic Door","x":61.92,"y":-5.26,"z":-190.54},
+        {"key":"EXFIL_Bunker_D2","name":"D-2","x":-121.48,"y":-17,"z":172.25},
+        {"key":"EXFIL_ScavCooperation","name":"Scav Lands (Co-Op)","x":-127.9,"y":-3.28,"z":-142.59},
+        {"key":"EXFIL_Train","name":"Armored Train","x":140.83,"y":-3.92,"z":-146.25},
+        {"key":"EXFIL_vent","name":"Sewer Manhole","x":40.18,"y":-5.12,"z":76.45},
+        {"key":"Exit1","name":"Hole in the Wall by the Mountains","x":-261.43,"y":-6.34,"z":48.52},
+        {"key":"Exit2","name":"Heating Pipe","x":-35.26,"y":-5.15,"z":-180.12},
+        {"key":"Exit3","name":"Depot Hermetic Door","x":120.78,"y":-10.27,"z":-120.35},
+        {"key":"Exit4","name":"Checkpoint Fence","x":61.97,"y":-4.43,"z":134.31},
+        {"key":"reserve_secret_minefield","name":"Exit to Woods","x":36.53,"y":-5.97,"z":-221.56}
+      ],
+      "transits": [
+        {"id":"18","x":-195.85,"y":-4.54,"z":-115.66},
+        {"id":"19","x":215.99,"y":-6.34,"z":-202.36},
+        {"id":"20","x":238.75,"y":-6.25,"z":-124.28}
+      ]
+    },
+    "sandbox": {
+      "exits": [
+        {"key":"East Gate","name":"Scav Bunker","x":220.43,"y":20.54,"z":-705.8},
+        {"key":"Exit_E10_coop","name":"Pinewood Basement (Co-Op)","x":-113.71,"y":-2.93,"z":65.63},
+        {"key":"groundzero_secret_adaptation","name":"Tartowers Sales Office","x":190.8,"y":17.64,"z":133.39},
+        {"key":"Nakatani_stairs_free_exit","name":"Nakatani Basement Stairs","x":-16.12,"y":14.76,"z":335.06},
+        {"key":"Sandbox_VExit","name":"Police Cordon V-Ex","x":-19.51,"y":23.71,"z":114.94},
+        {"key":"Scav_coop_exit","name":"Scav Checkpoint (Co-op)","x":25.22,"y":24.51,"z":-79.54},
+        {"key":"Sniper_exit","name":"Mira Ave (Flare)","x":218.23,"y":17.99,"z":-38.51},
+        {"key":"UN Roadblock","name":"UN Roadblock","x":-527.87,"y":1.68,"z":288.23},
+        {"key":"Unity_free_exit","name":"Emercom Checkpoint","x":151.63,"y":24.66,"z":-97.46}
+      ],
+      "transits": [
+        {"id":"1","x":229.6,"y":16.99,"z":65.36}
+      ]
+    },
+    "sandbox_high": {
+      "exits": [
+        {"key":"groundzero_secret_adaptation","name":"Tartowers Sales Office","x":190.8,"y":17.64,"z":133.39},
+        {"key":"Nakatani_stairs_free_exit","name":"Nakatani Basement Stairs","x":-16.12,"y":14.76,"z":335.06},
+        {"key":"Sandbox_VExit","name":"Police Cordon V-Ex","x":-19.51,"y":23.71,"z":114.94},
+        {"key":"Scav_coop_exit","name":"Scav Checkpoint (Co-op)","x":25.22,"y":24.51,"z":-79.54},
+        {"key":"Sniper_exit","name":"Mira Ave (Flare)","x":218.23,"y":17.99,"z":-38.51},
+        {"key":"Unity_free_exit","name":"Emercom Checkpoint","x":151.63,"y":24.66,"z":-97.46}
+      ],
+      "transits": [
+        {"id":"1","x":222.83,"y":15.99,"z":65.72}
+      ]
+    },
+    "shoreline": {
+      "exits": [
+        {"key":"Adm Basement","name":"Admin Basement","x":-256.87,"y":-7.71,"z":-149.78},
+        {"key":"Alpinist","name":"Cliff Descent","x":-196.08,"y":-10.27,"z":-360.04},
+        {"key":"CCP Temporary","name":"CCP Temporary","x":-855.85,"y":-59.44,"z":476.82},
+        {"key":"Lighthouse","name":"Lighthouse","x":-458.15,"y":-54.29,"z":567.29},
+        {"key":"Lighthouse_pass","name":"Path to Lighthouse","x":448.9,"y":-44.7,"z":-254.6},
+        {"key":"Pier Boat","name":"Pier Boat","x":-332.59,"y":-66.12,"z":561.26},
+        {"key":"RedRebel_alp","name":"Climber's Trail","x":-214.3,"y":-1,"z":-361.8},
+        {"key":"Road to Customs","name":"Road to Customs","x":-859.05,"y":-42.07,"z":0.49},
+        {"key":"Road_at_railbridge","name":"Railway Bridge","x":-1029.29,"y":-60.79,"z":307.59},
+        {"key":"Rock Passage","name":"Rock Passage","x":-200.8,"y":-13.35,"z":-358.34},
+        {"key":"Ruined House Fence","name":"Ruined House Fence","x":477.78,"y":-51.55,"z":-66.83},
+        {"key":"RWing Gym Entrance","name":"East Wing Gym Entrance","x":-296.95,"y":-6.63,"z":-100.89},
+        {"key":"Scav Road to Customs","name":"Road to Customs","x":-859.05,"y":-42.07,"z":0.49},
+        {"key":"shoreline_secret_heartbeat","name":"Mountain Bunker","x":-390.96,"y":-2.55,"z":-385.72},
+        {"key":"Shorl_V-Ex","name":"Road to North V-Ex","x":-543.13,"y":-16.97,"z":-378.59},
+        {"key":"Smugglers_Trail_coop","name":"Smugglers' Path (Co-op)","x":-729.4,"y":-26,"z":-255.1},
+        {"key":"Svetliy Dead End","name":"Svetliy Dead End","x":461.36,"y":-52.83,"z":120.6},
+        {"key":"Tunnel","name":"Tunnel","x":376.36,"y":-55.94,"z":319.25},
+        {"key":"Wrecked Road","name":"Ruined Road","x":366.62,"y":-61.13,"z":332.51}
+      ],
+      "transits": [
+        {"id":"1","x":-857.59,"y":-42.81,"z":15.38},
+        {"id":"24","x":416.78,"y":-56.06,"z":-214.15},
+        {"id":"25","x":-965.82,"y":-57.52,"z":364.49},
+        {"id":"43","x":-195.13,"y":-9.83,"z":-82.93}
+      ]
+    },
+    "tarkovstreets": {
+      "exits": [
+        {"key":"E1","name":"Stylobate Building Elevator","x":-44.74,"y":11.04,"z":-72.15},
+        {"key":"E2","name":"Sewer River","x":-267.04,"y":-1.53,"z":219.48},
+        {"key":"E3","name":"Damaged House","x":-245.41,"y":6.17,"z":344.82},
+        {"key":"E4","name":"Crash Site","x":312.74,"y":6.8,"z":405.96},
+        {"key":"E5","name":"Collapsed Crane","x":216.12,"y":3.44,"z":272.7},
+        {"key":"E6","name":"Scav Checkpoint","x":211.34,"y":-8.16,"z":82.31},
+        {"key":"E7","name":"Expo Checkpoint","x":213.12,"y":-0.74,"z":-104.96},
+        {"key":"E7_car","name":"Primorsky Ave Taxi V-Ex","x":-2.19,"y":3.2,"z":461.23},
+        {"key":"E8_yard","name":"Courtyard","x":-150.51,"y":2.55,"z":500.13},
+        {"key":"E9_sniper","name":"Klimov Street (Flare)","x":-263.41,"y":6.5,"z":43.19},
+        {"key":"Exit_E10_coop","name":"Pinewood Basement (Co-Op)","x":-114.28,"y":-2.05,"z":64.88},
+        {"key":"scav_e2","name":"Entrance to Catacombs","x":-249.01,"y":2.57,"z":243.8},
+        {"key":"scav_e3","name":"Ventilation Shaft","x":-124.13,"y":3.11,"z":423.93},
+        {"key":"scav_e4","name":"Sewer Manhole","x":276.11,"y":5.36,"z":345.39},
+        {"key":"scav_e5","name":"Near Kamchatskaya Arch","x":259.57,"y":-3.93,"z":48.72},
+        {"key":"scav_e6","name":"Basement Entrance","x":-249.01,"y":2.57,"z":243.8},
+        {"key":"scav_e7","name":"Cardinal Apartment Complex Parking","x":104.84,"y":0.13,"z":-161.17},
+        {"key":"scav_e8","name":"Klimov Shopping Mall Exfil","x":-163.82,"y":1.59,"z":-5.66},
+        {"key":"streets_secret_onyx","name":"Smugglers' Basement","x":75.99,"y":-0.6,"z":50.01}
+      ],
+      "transits": [
+        {"id":"3","x":-258.04,"y":3.19,"z":104.69},
+        {"id":"4","x":290.55,"y":4.39,"z":501.98},
+        {"id":"5","x":209.52,"y":-7.38,"z":82.4}
+      ]
+    },
+    "woods": {
+      "exits": [
+        {"key":"Dead Man's Place","name":"Dead Man's Place","x":195.55,"y":-16.69,"z":259.21},
+        {"key":"East Gate","name":"Scav Bunker","x":220.43,"y":20.54,"z":-705.8},
+        {"key":"Factory Gate","name":"Friendship Bridge (Co-Op)","x":93.17,"y":16.57,"z":-843.98},
+        {"key":"Mountain Stash","name":"Mountain Stash","x":-210.33,"y":31.47,"z":-213.5},
+        {"key":"Old Station","name":"Old Railway Depot","x":-517.93,"y":10.67,"z":149.19},
+        {"key":"Outskirts","name":"Outskirts","x":349.04,"y":-9.15,"z":358.58},
+        {"key":"RUAF Gate","name":"RUAF Gate","x":-142.5,"y":-2.37,"z":447.58},
+        {"key":"RUAF Roadblock","name":"RUAF Roadblock","x":-142.25,"y":0.97,"z":422.4},
+        {"key":"Scav House","name":"Scav House","x":413.69,"y":-12.56,"z":242.17},
+        {"key":"South V-Ex","name":"Bridge V-Ex","x":-485.33,"y":15.58,"z":-504.06},
+        {"key":"The Boat","name":"Boat","x":176.64,"y":-20.72,"z":215.86},
+        {"key":"UN Roadblock","name":"UN Roadblock","x":-535.24,"y":1.43,"z":287.05},
+        {"key":"un-sec","name":"Northern UN Roadblock","x":-557.32,"y":9.32,"z":-67.05},
+        {"key":"West Border","name":"Eastern Rocks","x":-509.36,"y":23.99,"z":-35.33},
+        {"key":"wood_sniper_exit","name":"Power Line Passage (Flare)","x":573.99,"y":-1.75,"z":-85.26},
+        {"key":"woods_secret_minefield","name":"Railway Bridge to Tarkov","x":-730.43,"y":8.7,"z":129.32},
+        {"key":"ZB-014","name":"ZB-014","x":447.24,"y":-13.46,"z":57.46},
+        {"key":"ZB-016","name":"ZB-016","x":-389.16,"y":4.15,"z":11.04}
+      ],
+      "transits": [
+        {"id":"15","x":-362.05,"y":1.28,"z":361.18},
+        {"id":"16","x":254.29,"y":-8.71,"z":362.62},
+        {"id":"17","x":496.04,"y":-16.73,"z":348.29},
+        {"id":"41","x":-150.37,"y":1.11,"z":403.41}
+      ]
+    }
+  },
   "variants": {
     "manimal": {
       "zones": {
@@ -1001,6 +1276,24 @@
           {"key":"664d3dd590294949fe2d81b7","type":"Door","x":-199.79,"y":22.34,"z":-348.21},
           {"key":"68cc09872bdcc15c010c2668","type":"KeycardDoor","x":-203.9,"y":18.64,"z":-355.38}
         ]
+      },
+      "exits": {
+        "interchange": {
+          "exits": [
+            {"key":"Hole Exfill","name":"Hole in the Fence","x":-219.92,"y":13.79,"z":-37.02},
+            {"key":"Interchange Cooperation","name":"Scav Camp (Co-Op)","x":-97.48,"y":18.12,"z":-73.09},
+            {"key":"interchange_secret_extraction","name":"Smugglers' Tunnel","x":-138.53,"y":22.51,"z":-175.11},
+            {"key":"NW Exfil","name":"Railway Exfil","x":474.57,"y":19.92,"z":-433.74},
+            {"key":"PP Exfil","name":"Power Station V-Ex","x":-302.89,"y":21.65,"z":-367.73},
+            {"key":"Saferoom Exfil","name":"Saferoom Exfil","x":-47.73,"y":22.97,"z":44.06},
+            {"key":"SE Exfil","name":"Emercom Checkpoint","x":-321.56,"y":24.18,"z":266.74},
+            {"key":"shopping_sniper_exit","name":"Path to River (Flare)","x":613.9,"y":27.9,"z":71.3}
+          ],
+          "transits": [
+            {"id":"6","x":280.26,"y":23.28,"z":435.08},
+            {"id":"7","x":271.85,"y":24.1,"z":-453.65}
+          ]
+        }
       }
     }
   }

@@ -1,4 +1,4 @@
-import type { LockedDoor, MapArea, MapPoint, Objective } from '../api/catalog'
+import type { LockedDoor, MapArea, MapExit, MapPoint, Objective } from '../api/catalog'
 
 // 위치정보 팝업의 계산부. React 없이 테스트된다(mapProjection.test.ts).
 // 맵 정의(public/maps/<key>/map.json)는 tools/maps/build-maps.js 가 DynamicMaps 의 jsonc 에서 만든 것이고,
@@ -223,6 +223,23 @@ export function doorsForTab(doors: Record<string, LockedDoor[]> | undefined, ind
       const p = d.position
       const dup = out.some((o) => o.keyTpl === d.keyTpl && o.position.x === p.x && o.position.y === p.y && o.position.z === p.z)
       if (!dup) out.push(d)
+    }
+  }
+  return out
+}
+
+/**
+ * 탭에 보이는 맵의 탈출구·환승(10 스펙). 짝 맵(공장 주간·야간, 그라운드 제로 고·저)은 같은 탈출구가 같은 좌표로
+ * 두 번 오므로 키 + 종류 + 좌표가 같으면 한 번만.
+ */
+export function exitsForTab(exits: Record<string, MapExit[]> | undefined, index: MapIndex, key: string): MapExit[] {
+  const out: MapExit[] = []
+  for (const [map, list] of Object.entries(exits ?? {})) {
+    if (mapKeyFor(index, map) !== key) continue
+    for (const e of list) {
+      const p = e.position
+      const dup = out.some((o) => o.key === e.key && o.kind === e.kind && o.position.x === p.x && o.position.y === p.y && o.position.z === p.z)
+      if (!dup) out.push(e)
     }
   }
   return out

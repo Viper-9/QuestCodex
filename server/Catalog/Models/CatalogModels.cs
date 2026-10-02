@@ -17,6 +17,8 @@ public static class WarningCodes
     public const string ModQuestIdCollision = "modQuestIdCollision";
     public const string QuestZoneSnapshotMissing = "questZoneSnapshotMissing";
     public const string QuestZoneNotFound = "questZoneNotFound";
+    /// <summary>서버 DB 의 탈출구·활성 환승인데 스냅샷(tarkov.dev)에 좌표가 없다. Detail = "map/key", 환승은 "map/transit id".</summary>
+    public const string ExitPositionMissing = "exitPositionMissing";
 }
 
 public sealed record CatalogWarning(string? QuestId, string Code, string Detail);
@@ -61,6 +63,34 @@ public sealed record SnapshotDoor(string KeyTpl, string Type, MapPoint Position)
 /// 대조해 보유 열쇠를 표시할 때의 키다(06 스펙 §4.3).
 /// </summary>
 public sealed record LockedDoor(string KeyTpl, string KeyName, string Kind, MapPoint Position);
+
+/// <summary>스냅샷의 탈출구(10 스펙 §1). Key = 서버 allExtracts 의 Name(게임 키), Name = tarkov.dev 영문 이름.</summary>
+public sealed record SnapshotExit(string Key, string Name, MapPoint Position);
+
+/// <summary>스냅샷의 환승 지점. Id = 서버 base.transits 의 id.</summary>
+public sealed record SnapshotTransit(string Id, MapPoint Position);
+
+public sealed record SnapshotExits(IReadOnlyList<SnapshotExit> Exits, IReadOnlyList<SnapshotTransit> Transits);
+
+/// <summary>
+/// 서버 DB allExtracts 한 행. 빌더가 SPT 타입을 모르게 CatalogService 가 옮겨 담는다. Requirement = PassageRequirement 이름
+/// (None·TransferItem·ScavCooperation·WorldEvent·Reference·Train·Empty …, base.secretExits 는 합성 값 "Secret"),
+/// ItemId = Exit.Id(화폐 tpl, "Alpinist" 등).
+/// </summary>
+public sealed record LocationExitRow(string Name, string Side, string Requirement, int Count, string? ItemId, string? Tip, double? Chance);
+
+/// <summary>서버 DB base.transits 한 행. Target = 목적지 Location(대소문자 섞임, 예: TarkovStreets).</summary>
+public sealed record LocationTransitRow(string Id, bool Active, string Target);
+
+public sealed record LocationExits(IReadOnlyList<LocationExitRow> Exits, IReadOnlyList<LocationTransitRow> Transits);
+
+/// <summary>
+/// 카탈로그에 싣는 탈출구·환승(10 스펙 §2.2). Kind = "pmc" | "shared" | "scav" | "transit".
+/// Requirement 는 로케일로 푼 조건 문구, 문구가 없는 조건은 RequirementKind("coop" | "train" | "secret" | "alpinist" | "switch")로 웹이 번역한다.
+/// Chance 는 100 미만일 때만, Target 은 환승 목적지 맵 키(소문자). 환승의 Key 는 transit id, Name 은 빈 문자열.
+/// </summary>
+public sealed record MapExit(
+    string Key, string Name, string Kind, MapPoint Position, string? Requirement, string? RequirementKind, int? Chance, string? Target);
 
 public sealed record FailTrigger(string QuestId, IReadOnlyList<string> Statuses);
 
@@ -120,4 +150,6 @@ public sealed record Catalog(
     /// <summary>map 키 → 잠긴 문. 퀘스트와 무관하게 맵마다 한 번만 싣는다(위치정보 팝업의 잠긴 문 토글).</summary>
     SortedDictionary<string, List<LockedDoor>> LockedDoors,
     /// <summary>map 키 → 활성 지도 변형 ID(맵 교체 모드가 로드됐을 때만, 예: interchange → manimal). 웹이 maps/index.json 의 변형 폴더를 고른다.</summary>
-    SortedDictionary<string, string> MapVariants);
+    SortedDictionary<string, string> MapVariants,
+    /// <summary>map 키 → 탈출구·환승. 잠긴 문처럼 맵마다 한 번만 싣는다(지도의 탈출구 토글).</summary>
+    SortedDictionary<string, List<MapExit>> Exits);

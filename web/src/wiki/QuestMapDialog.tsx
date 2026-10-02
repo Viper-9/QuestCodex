@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CatalogQuest, LockedDoor } from '../api/catalog'
+import type { CatalogQuest, LockedDoor, MapExit } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
-import type { T, UiKey } from '../i18n/index'
 import { formatObjective, lineText } from './format'
 import { MapCanvas } from './MapCanvas'
+import { mapName } from './mapNames'
+import { MapToggle } from './MapToggle'
 import { loadMapDef, loadMapIndex } from './mapAssets'
-import { areaLevels, buildTabs, objectiveColor, doorsForTab, firstLevel, fitView, layerFor, markerLevels, numberedObjectives, type MapDef, type MapIndex, type View } from './mapProjection'
+import { areaLevels, buildTabs, objectiveColor, doorsForTab, exitsForTab, firstLevel, fitView, layerFor, markerLevels, numberedObjectives, type MapDef, type MapIndex, type View } from './mapProjection'
 import { useDialogFrame } from './useDialogFrame'
 import { useLoaded, usePersistedFlag } from './useMapState'
 
@@ -15,13 +16,15 @@ interface QuestMapDialogProps {
   traderName: string
   /** catalog.lockedDoors — 서버 맵 키 → 잠긴 문. 구버전 서버면 undefined. */
   lockedDoors: Record<string, LockedDoor[]> | undefined
+  /** catalog.exits — 서버 맵 키 → 탈출구·환승. 구버전 서버면 undefined. */
+  exits: Record<string, MapExit[]> | undefined
   /** catalog.mapVariants — 맵 교체 모드가 로드된 서버면 그 맵을 변형 지도로 그린다 */
   mapVariants: Record<string, string> | undefined
   onClose(): void
 }
 
-/** 위치정보 팝업. 맵 탭(+ 잠긴 문 토글) → [지도(층 버튼·마커) | 목표 목록], 아래에 지도 출처. */
-export function QuestMapDialog({ quest, traderName, lockedDoors, mapVariants, onClose }: QuestMapDialogProps) {
+/** 위치정보 팝업. 맵 탭(+ 잠긴 문·탈출구 토글) → [지도(층 버튼·마커) | 목표 목록], 아래에 지도 출처. */
+export function QuestMapDialog({ quest, traderName, lockedDoors, exits, mapVariants, onClose }: QuestMapDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const frame = useDialogFrame(ref, 'map', quest !== null, onClose)
@@ -47,8 +50,8 @@ export function QuestMapDialog({ quest, traderName, lockedDoors, mapVariants, on
       {quest && (index.failed
         ? <p className="qc-map__msg qc-warn">{t('map.loadError')}</p>
         : index.data
-          // key: 다른 퀘스트로 다시 열면 탭·층·확대 상태를 초기화한다(잠긴 문 토글은 저장값이라 유지)
-          ? <MapBody key={quest.id} quest={quest} index={index.data} lockedDoors={lockedDoors} />
+          // key: 다른 퀘스트로 다시 열면 탭·층·확대 상태를 초기화한다(잠긴 문·탈출구 토글은 저장값이라 유지)
+          ? <MapBody key={quest.id} quest={quest} index={index.data} lockedDoors={lockedDoors} exits={exits} />
           : <p className="qc-map__msg">{t('map.loading')}</p>)}
     </dialog>
   )
@@ -58,9 +61,10 @@ interface MapBodyProps {
   quest: CatalogQuest
   index: MapIndex
   lockedDoors: Record<string, LockedDoor[]> | undefined
+  exits: Record<string, MapExit[]> | undefined
 }
 
-function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
+function MapBody({ quest, index, lockedDoors, exits }: MapBodyProps) {
   const t = useT()
   const tabs = useMemo(() => buildTabs(quest.objectives, index), [quest, index])
   const numbered = useMemo(() => numberedObjectives(quest.objectives), [quest])
@@ -69,9 +73,11 @@ function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
   const [view, setView] = useState<View>(fitView)
   const [hot, setHot] = useState<number | null>(null)
   const [showDoors, setShowDoors] = usePersistedFlag('qc.map.showDoors', true)
+  const [showExits, setShowExits] = usePersistedFlag('qc.map.showExits', true)
   const tab = tabs.find((x) => x.key === tabKey) ?? null
   const def = useLoaded(tabKey ? () => loadMapDef(tabKey) : null, [tabKey])
   const tabDoors = useMemo(() => (tabKey ? doorsForTab(lockedDoors, index, tabKey) : []), [lockedDoors, index, tabKey])
+  const tabExits = useMemo(() => (tabKey ? exitsForTab(exits, index, tabKey) : []), [exits, index, tabKey])
 
   // 처음 열 때·탭을 바꿀 때는 첫 마커가 있는 층을 보여 준다
   const level = chosenLevel ?? (def.data && tab ? firstLevel(def.data, tab) : 0)
@@ -79,6 +85,8 @@ function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
   // 영역이 있는 목표의 마커는 영역의 층을 따른다(08 스펙 §3.2)
   const markersHere = map && tab ? tab.markers.filter((m) => markerLevels(map, m, tab.areas).has(level)) : []
   const doorsHere = map && showDoors ? tabDoors.filter((d) => layerFor(map, d.position).level === level) : []
+  // 탈출구는 층과 무관하게 다 보인다 — 다른 층의 것은 MapCanvas 가 흐리게 그린다
+  const exitsShown = showExits ? tabExits : []
   // 영역은 높이 범위가 걸친 층들에서 보인다(구역 처치는 상자 높이 전체, 신호탄은 바닥 한 점)
   const areasHere = map && tab ? tab.areas.filter((a) => areaLevels(map, a.area).has(level)) : []
 
@@ -102,16 +110,8 @@ function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
               {mapName(x.key, t)}
             </button>
           ))}
-          <button
-            type="button"
-            className={showDoors && tabDoors.length > 0 ? 'qc-map__toggle is-on' : 'qc-map__toggle'}
-            aria-pressed={showDoors}
-            disabled={tabDoors.length === 0}
-            title={tabDoors.length === 0 ? t('map.doorsNone') : undefined}
-            onClick={() => setShowDoors(!showDoors)}
-          >
-            {t('map.doors')}
-          </button>
+          <MapToggle label={t('map.doors')} noneLabel={t('map.doorsNone')} on={showDoors} count={tabDoors.length} onToggle={setShowDoors} />
+          <MapToggle label={t('map.exits')} noneLabel={t('map.exitsNone')} on={showExits} count={tabExits.length} onToggle={setShowExits} />
         </div>
       )}
       <div className="qc-map__body">
@@ -121,7 +121,7 @@ function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
           {tab && !def.failed && !def.data && <p className="qc-map__msg">{t('map.loading')}</p>}
           {tab && def.data && (
             <MapCanvas
-              mapKey={tab.key} def={def.data} tab={tab} level={level} markers={markersHere} doors={doorsHere} areas={areasHere}
+              mapKey={tab.key} def={def.data} tab={tab} level={level} markers={markersHere} doors={doorsHere} exits={exitsShown} areas={areasHere}
               view={view} onView={setView} onLevel={(l) => { setChosenLevel(l); setHot(null) }}
               hot={hot} onHot={setHot}
             />
@@ -172,14 +172,4 @@ export function Credit({ def }: { def: MapDef }) {
       <a href={CC_BY_NC_SA} target="_blank" rel="noreferrer">{t('map.license')}</a>
     </footer>
   )
-}
-
-const MAP_NAMES = new Set([
-  'bigmap', 'factory4_day', 'sandbox', 'interchange', 'interchange-manimal', 'laboratory', 'labyrinth',
-  'lighthouse', 'rezervbase', 'shoreline', 'tarkovstreets', 'woods',
-])
-
-/** 탭 이름. 번역이 없는 새 맵 폴더면 폴더 키 그대로. */
-function mapName(key: string, t: T): string {
-  return MAP_NAMES.has(key) ? t(`map.name.${key}` as UiKey) : key
 }

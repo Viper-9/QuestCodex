@@ -467,6 +467,14 @@
   background: var(--bg-3); color: var(--fg); font-size: 11.5px; white-space: nowrap; box-shadow: var(--dialog-shadow);
 }
 .qc-map__door:hover .qc-map__tip { display: block; }
+/* 탈출구·환승(10 스펙) — 잠긴 문과 같은 층(z-index 0), DOM 순서로 문 위에 온다. tarkov.dev 아이콘은 색이 그림에 들어 있어 물들이지 않는다 */
+.qc-map__exit { position: absolute; z-index: 0; width: 26px; height: 26px; cursor: default; }
+.qc-map__exit > img { display: block; width: 100%; height: 100%; }
+.qc-map__exit.is-other > img { opacity: .45; }
+.qc-map__exit:hover { z-index: 3; }
+.qc-map__exit:hover .qc-map__tip { display: block; }
+.qc-map__tip > span { display: block; }
+.qc-map__tip-sub { color: var(--fg-2); }
 .qc-map__side { min-height: 0; overflow: auto; padding: 12px 14px; border-left: 1px solid var(--border); }
 .qc-map__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .qc-map__list > li { display: flex; gap: 8px; align-items: flex-start; padding: 4px 6px; border-radius: var(--radius); font-size: 12.5px; line-height: 1.5; }

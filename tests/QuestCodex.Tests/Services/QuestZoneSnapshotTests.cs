@@ -94,10 +94,38 @@ public class QuestZoneSnapshotTests
             "interchange": { "moved": [{ "x": 274, "y": 22, "z": 14, "sx": 2, "sz": 2 }], "gone": [{ "x": 1, "y": 1, "z": 1 }] },
             "woods": { "w": [{ "x": 5, "y": 5, "z": 5 }] } },
           "doors": { "interchange": [{ "key": "k1", "type": "Door", "x": 1, "y": 2, "z": 3 }] },
+          "exits": {
+            "interchange": { "exits": [{ "key": "SE Exfil", "name": "Emercom Checkpoint", "x": -321.56, "y": 24.18, "z": 266.74 }],
+                             "transits": [{ "id": "6", "x": 280.26, "y": 23.28, "z": 435.08 }] },
+            "woods": { "exits": [{ "key": "Outskirts", "name": "Outskirts", "x": 1, "y": 1, "z": 1 }], "transits": [] } },
           "variants": { "manimal": {
             "zones": { "interchange": { "moved": [{ "x": 429, "y": 28, "z": 125 }], "new_zone": [{ "x": 530, "y": 32, "z": 82 }] } },
-            "doors": { "interchange": [{ "key": "k2", "type": "Door", "x": -379, "y": 2, "z": -207 }] } } } }
+            "doors": { "interchange": [{ "key": "k2", "type": "Door", "x": -379, "y": 2, "z": -207 }] },
+            "exits": { "interchange": { "exits": [{ "key": "shopping_sniper_exit", "name": "Path to River (Flare)", "x": 2, "y": 2, "z": 2 }], "transits": [] } } } } }
         """;
+
+    [Fact]
+    public void Exits_and_transits_are_parsed()
+    {
+        var snapshot = QuestZoneSnapshot.Parse(VariantJson);
+
+        var interchange = snapshot.Exits["interchange"];
+        Assert.Equal(new SnapshotExit("SE Exfil", "Emercom Checkpoint", new MapPoint(-321.56, 24.18, 266.74)), Assert.Single(interchange.Exits));
+        Assert.Equal(new SnapshotTransit("6", new MapPoint(280.26, 23.28, 435.08)), Assert.Single(interchange.Transits));
+    }
+
+    [Fact]
+    public void Snapshot_without_exits_has_none()
+        => Assert.Empty(QuestZoneSnapshot.Parse("""{ "collectedWith": "x", "zones": {} }""").Exits);
+
+    [Fact]
+    public void Active_variant_replaces_the_exits_too()
+    {
+        var snapshot = QuestZoneSnapshot.Parse(VariantJson).WithVariants(new Dictionary<string, string> { ["interchange"] = "manimal" });
+
+        Assert.Equal(["shopping_sniper_exit"], snapshot.Exits["interchange"].Exits.Select(e => e.Key));
+        Assert.Equal(["Outskirts"], snapshot.Exits["woods"].Exits.Select(e => e.Key));
+    }
 
     [Fact]
     public void Variants_are_parsed_but_not_applied_without_an_active_mod()

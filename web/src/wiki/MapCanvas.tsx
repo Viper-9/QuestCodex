@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
-import type { LockedDoor, MapPoint } from '../api/catalog'
+import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react'
+import type { LockedDoor, MapExit, MapPoint } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
 import type { T } from '../i18n/index'
 import { mapAssetUrl } from './mapAssets'
+import { DoorMarker, ExitMarker } from './MapMarkers'
 import {
   areaDrawOrder, areaPolygon, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, objectiveColor, project, zoomAt,
   type AreaMarker, type MapDef, type MapTab, type Marker, type View,
@@ -17,6 +18,8 @@ interface MapCanvasProps {
   markers: Marker[]
   /** 현재 층의 잠긴 문. 토글이 꺼져 있으면 빈 배열. */
   doors: LockedDoor[]
+  /** 탭의 모든 탈출구·환승(층 무관 — 다른 층의 것은 흐리게). 토글이 꺼져 있으면 빈 배열. */
+  exits: MapExit[]
   /** 현재 층의 구역 영역(구역 처치·신호탄, 08 스펙) */
   areas: AreaMarker[]
   view: View
@@ -29,9 +32,9 @@ interface MapCanvasProps {
 /**
  * 층 SVG 를 겹친 캔버스를 뷰포트 안에 "contain" 으로 맞추고, CSS transform 으로 확대·이동한다.
  * 마커는 캔버스 안에 % 로 두고 1/배율로 되돌려 크기가 화면 기준으로 일정하다.
- * 쌓임 순서: 지도 < 구역 영역 < 잠긴 문 < 퀘스트 마커 < 층 버튼.
+ * 쌓임 순서: 지도 < 구역 영역 < 잠긴 문 < 탈출구 < 퀘스트 마커 < 층 버튼.
  */
-export function MapCanvas({ mapKey, def, tab, level, markers, doors, areas, view, onView, onLevel, hot, onHot }: MapCanvasProps) {
+export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, areas, view, onView, onLevel, hot, onHot }: MapCanvasProps) {
   const t = useT()
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -39,6 +42,10 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, areas, view
   const base = def.layers.find((l) => l.level === def.defaultLevel) ?? def.layers[0]
   const dotted = useMemo(() => floorsWithOtherMarkers(markerCountsByLevel(def, tab.markers, tab.areas), level), [def, tab, level])
   const floors = [...def.layers].sort((a, b) => b.level - a.level)
+  const exitsByFloor = useMemo(
+    () => exits.map((exit) => ({ exit, other: layerFor(def, exit.position).level !== level })).sort((a, b) => Number(b.other) - Number(a.other)),
+    [exits, def, level],
+  )
 
   // React 의 onWheel 은 passive 라 preventDefault 로 페이지 스크롤을 막을 수 없다 — 네이티브로 붙인다.
   useEffect(() => {
@@ -124,6 +131,8 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, areas, view
           </svg>
         )}
         {doors.map((d, i) => <DoorMarker key={`d${i}`} door={d} style={place(d.position)} />)}
+        {/* 다른 층의 탈출구를 먼저 — 현재 층의 것이 위에 온다 */}
+        {exitsByFloor.map(({ exit, other }, i) => <ExitMarker key={`e${i}`} exit={exit} other={other} style={place(exit.position)} />)}
         {markers.map((m, i) => (
           <span
             key={i}
@@ -157,35 +166,6 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, areas, view
         </div>
       )}
     </div>
-  )
-}
-
-interface DoorMarkerProps {
-  door: LockedDoor
-  style: CSSProperties
-  /**
-   * 보유 열쇠 표시 자리(06 스펙 §4.3). 위키는 프로필과 무관해서 지금은 넘기는 곳이 없다 — 진행현황 페이지에서
-   * 프로필 인벤토리와 door.keyTpl 을 대조해 넘기면 is-owned / is-missing 클래스가 붙는다.
-   */
-  owned?: boolean
-}
-
-/**
- * 잠긴 문: DynamicMaps 아이콘(흰 도형 + 검은 외곽선)에 DynamicMaps 처럼 색을 곱한다 — 흰 부분만 물들고 외곽선은
- * 검은 채로 남는다(LockedDoorMarkerMutator: 열쇠 없음 빨강, 보유 초록 + 열쇠 아이콘). 위키는 보유 여부를 모르므로
- * 기본은 빨강 자물쇠. 마우스를 올리면 열쇠 이름 말풍선(CSS :hover).
- */
-function DoorMarker({ door, style, owned }: DoorMarkerProps) {
-  const t = useT()
-  const icon = mapAssetUrl('icons', owned ? 'door_with_key.png' : 'door_with_lock.png')
-  const state = owned === undefined ? '' : owned ? ' is-owned' : ' is-missing'
-  const label = door.kind === 'keycard' ? `${t('map.keycard')} · ${door.keyName}` : door.keyName
-  return (
-    <span className={`qc-map__door${state}`} style={{ ...style, ['--icon' as string]: `url("${icon}")` }}>
-      <img src={icon} alt={label} draggable={false} />
-      <span className="qc-map__tint" aria-hidden />
-      <span className="qc-map__tip" role="tooltip">{label}</span>
-    </span>
   )
 }
 

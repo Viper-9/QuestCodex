@@ -24,6 +24,8 @@ public class QuestZoneSnapshot(MapVariantDetector mapVariants)
     public IReadOnlyDictionary<string, IReadOnlyList<SnapshotDoor>>? Doors => _data.Value?.Doors;
     /// <summary>map → zoneId → 영역(덤프 Bounds 의 x·z 크기). 크기가 없는 존은 빠진다.</summary>
     public AreaTable? Areas => _data.Value?.Areas;
+    /// <summary>map → 탈출구·환승 좌표(tarkov.dev, 10 스펙). 스냅샷이 없으면 null, exits 절이 없는 구버전이면 빈 사전.</summary>
+    public IReadOnlyDictionary<string, SnapshotExits>? Exits => _data.Value?.Exits;
 
     public sealed record Snapshot(string CollectedWith, PointTable Zones, IReadOnlyDictionary<string, IReadOnlyList<SnapshotDoor>> Doors)
     {
@@ -32,6 +34,8 @@ public class QuestZoneSnapshot(MapVariantDetector mapVariants)
 
         /// <summary>변형 ID → 그 변형이 바꾸는 맵들만 담은 스냅샷(collectedWith 는 부모 것). 변형 자체의 Variants 는 비어 있다.</summary>
         public IReadOnlyDictionary<string, Snapshot> Variants { get; init; } = new Dictionary<string, Snapshot>();
+
+        public IReadOnlyDictionary<string, SnapshotExits> Exits { get; init; } = new Dictionary<string, SnapshotExits>();
 
         /// <summary>
         /// 활성 변형(map → 변형 ID)마다 그 맵의 존·영역·문을 변형 것으로 바꾼다. 섞지 않고 통째로 — 확장 씬에서 옮겨진 존이
@@ -48,14 +52,16 @@ public class QuestZoneSnapshot(MapVariantDetector mapVariants)
             var zones = Zones.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
             var areas = Areas.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
             var doors = Doors.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            var exits = Exits.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
             foreach (var (map, data) in swaps)
             {
                 zones[map] = data.Zones[map];
                 if (data.Areas.TryGetValue(map, out var a)) areas[map] = a; else areas.Remove(map);
                 if (data.Doors.TryGetValue(map, out var d)) doors[map] = d; else doors.Remove(map);
+                if (data.Exits.TryGetValue(map, out var e)) exits[map] = e; else exits.Remove(map);
             }
 
-            return new Snapshot(CollectedWith, zones, doors) { Areas = areas, Variants = Variants };
+            return new Snapshot(CollectedWith, zones, doors) { Areas = areas, Variants = Variants, Exits = exits };
         }
     }
 
@@ -115,8 +121,28 @@ public class QuestZoneSnapshot(MapVariantDetector mapVariants)
             }
         }
 
-        return new Snapshot(collectedWith, builder.Build(), doors) { Areas = areas.Build() };
+        var exits = new Dictionary<string, SnapshotExits>(StringComparer.Ordinal);
+        if (root.TryGetProperty("exits", out var exitMaps))
+        {
+            foreach (var map in exitMaps.EnumerateObject())
+            {
+                var list = map.Value.TryGetProperty("exits", out var e) ? e.EnumerateArray()
+                    .Select(x => new SnapshotExit(
+                        x.GetProperty("key").GetString() ?? throw new InvalidOperationException("exit key is null"),
+                        x.GetProperty("name").GetString() ?? "",
+                        PointOf(x)))
+                    .ToList() : [];
+                var transits = map.Value.TryGetProperty("transits", out var t) ? t.EnumerateArray()
+                    .Select(x => new SnapshotTransit(x.GetProperty("id").GetString() ?? throw new InvalidOperationException("transit id is null"), PointOf(x)))
+                    .ToList() : [];
+                exits[map.Name.ToLowerInvariant()] = new SnapshotExits(list, transits);
+            }
+        }
+
+        return new Snapshot(collectedWith, builder.Build(), doors) { Areas = areas.Build(), Exits = exits };
     }
+
+    private static MapPoint PointOf(JsonElement e) => new(e.GetProperty("x").GetDouble(), e.GetProperty("y").GetDouble(), e.GetProperty("z").GetDouble());
 
     /// <summary>
     /// sx·sz 가 있으면 영역 하나. 중심은 cx·cz(없으면 존 위치), 높이 Center.Y 는 존 위치의 y, 회전 r(없으면 0),

@@ -22,7 +22,7 @@ public class ProfilesControllerTests
     private sealed class FakeCatalog : ICatalogSource
     {
         public IReadOnlySet<string> SupportedLangs { get; } = new HashSet<string> { "en" };
-        public CatalogModel Get(string lang) => new("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new());
+        public CatalogModel Get(string lang) => new("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new(), new());
     }
 
     [Fact]

@@ -123,5 +123,8 @@ const markersDir = path.join(repo, 'Plugin/Resources/Markers')
 const iconsDir = path.join(outDir, 'icons')
 fs.mkdirSync(iconsDir, { recursive: true })
 for (const file of ['door_with_lock.png', 'door_with_key.png', 'marker_credits.txt']) fs.copyFileSync(path.join(markersDir, file), path.join(iconsDir, file))
+// Extract icons (10 spec): tarkov.dev public/maps/interactive/extract_*.png (MIT, drawn by Shebuka), kept unmodified in
+// tools/maps/icons since DynamicMaps has no per-faction extract markers.
+for (const file of fs.readdirSync(path.join(__dirname, 'icons'))) fs.copyFileSync(path.join(__dirname, 'icons', file), path.join(iconsDir, file))
 console.log(`copied marker icons to ${iconsDir}`)
 console.log(`wrote ${index.length} maps to ${outDir}`)

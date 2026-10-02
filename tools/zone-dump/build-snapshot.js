@@ -4,6 +4,10 @@
   // Locked doors: only Door and KeycardDoor (same set DynamicMaps shows; containers, trunks and switches are dropped).
   // Map variants (09 spec): dumps/variants/<variant>/<map>.json are scenes a map-replacing mod swaps in (ManimalInterchange).
   // They go under "variants" and the server swaps a whole map for them only when that mod is loaded.
+  // Exits (10 spec): positions and English names come from exits/tarkovdev-exits.json (tools/maps/fetch-tarkovdev-exits.js),
+  // not from the dumps. tarkov.dev draws the live (expanded) Interchange, so a variant gets the same exits as vanilla.
+  // A dump from plugin 0.0.4+ carries Exits/Transits; such a map uses the dump positions instead (Lighthouse: the live game
+  // moved two exits and removed the taxi V-Ex, so tarkov.dev is wrong or silent there). Names still come from tarkov.dev.
   // Usage: node build-snapshot.js [dumpDir] [outFile] [collectedWith] [modsDir]
   const fs = require('fs')
   const path = require('path')
@@ -16,6 +20,10 @@
   
   const round = (n) => Math.round(n * 100) / 100
   const DOOR_TYPES = new Set(['Door', 'KeycardDoor'])
+  const exitsFile = path.join(__dirname, 'exits', 'tarkovdev-exits.json')
+  const exitsByMap = fs.existsSync(exitsFile) ? JSON.parse(fs.readFileSync(exitsFile, 'utf8')).maps : {}
+  // map -> exit key -> tarkov.dev English name, for dumped exits
+  const tdNames = Object.fromEntries(Object.entries(exitsByMap).map(([m, e]) => [m, Object.fromEntries(e.exits.map((x) => [x.key, x.name]))]))
   
   // WTT zones (map|id -> positions). A dumped zone is a mod copy only if a WTT zone has the same map, id and position
   // (within 1 m) — a mod that reuses a vanilla id at another spot must not knock the vanilla zone out.
@@ -42,6 +50,7 @@
   function collect(dir) {
   const zones = {}
   const doors = {}
+  const dumpedExits = {}
   for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
     const dump = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'))
     // The game reports some ids capitalized (Sandbox, RezervBase); the server's locations folder is lowercase.
@@ -64,10 +73,33 @@
       if (!list.some((o) => o.key === d.key && o.x === d.x && o.y === d.y && o.z === d.z)) list.push(d)
     }
     if (list.length === 0) delete doors[map]
+    if (dump.Exits) dumpedExits[map] = exitsOfDump(dump)
   }
-  return { zones, doors }
+  return { zones, doors, dumpedExits }
   }
   
+  // Live-removed exits have no tarkov.dev name and no SPT locale entry either.
+  const EXIT_NAMES = { ' V-Ex_light': 'Road to Military Base V-Ex' }
+
+  // tarkov.dev positions are the trigger collider's centre, so the dump uses the same point (falls back to the transform).
+  function exitsOfDump(dump) {
+    const centre = (row) => {
+      const b = row.Bounds
+      const p = b ? { X: (b.Min.X + b.Max.X) / 2, Y: (b.Min.Y + b.Max.Y) / 2, Z: (b.Min.Z + b.Max.Z) / 2 } : row.Position
+      return { x: round(p.X), y: round(p.Y), z: round(p.Z) }
+    }
+    const named = tdNames[dump.Location.toLowerCase()] ?? {}
+    const exits = []
+    for (const e of dump.Exits) {
+      if (!e.Name || exits.some((x) => x.key === e.Name)) continue
+      exits.push({ key: e.Name, name: named[e.Name] ?? EXIT_NAMES[e.Name] ?? e.Name.trim(), ...centre(e) })
+    }
+    const transits = (dump.Transits ?? []).filter((t) => t.Id >= 0).map((t) => ({ id: String(t.Id), ...centre(t) }))
+    exits.sort((a, b) => a.key.localeCompare(b.key))
+    transits.sort((a, b) => Number(a.id) - Number(b.id))
+    return { exits, transits }
+  }
+
   /**
    * Area boxes (08 spec). Dumps from plugin 0.0.2+ carry each collider: a BoxCollider gives the real box (centre, size,
    * yaw) — the old Bounds is only its axis-aligned envelope and over-states rotated zones. y0/y1 is the collider's height
@@ -90,7 +122,7 @@
   }
   
   // Stable key order so regenerating produces a readable diff. pad indents a block nested under "variants".
-function render({ zones, doors }, pad) {
+function render({ zones, doors, exits }, pad) {
   const lines = [`${pad}  "zones": {`]
   const maps = Object.keys(zones).sort()
   maps.forEach((map, i) => {
@@ -111,23 +143,49 @@ function render({ zones, doors }, pad) {
     list.forEach((d, j) => lines.push(`${pad}      ${JSON.stringify(d)}${j < list.length - 1 ? ',' : ''}`))
     lines.push(`${pad}    ]${i < doorMaps.length - 1 ? ',' : ''}`)
   })
+  lines.push(`${pad}  },`, `${pad}  "exits": {`)
+  const exitMaps = Object.keys(exits).sort()
+  exitMaps.forEach((map, i) => {
+    lines.push(`${pad}    ${JSON.stringify(map)}: {`)
+    for (const part of ['exits', 'transits']) {
+      const list = exits[map][part]
+      lines.push(`${pad}      ${JSON.stringify(part)}: [`)
+      list.forEach((e, j) => lines.push(`${pad}        ${JSON.stringify(e)}${j < list.length - 1 ? ',' : ''}`))
+      lines.push(`${pad}      ]${part === 'exits' ? ',' : ''}`)
+    }
+    lines.push(`${pad}    }${i < exitMaps.length - 1 ? ',' : ''}`)
+  })
   lines.push(`${pad}  }`)
   return lines
 }
 
-const summary = (label, { zones, doors }) => {
+const summary = (label, { zones, doors, exits }) => {
   const maps = Object.keys(zones)
   const total = maps.reduce((n, m) => n + Object.keys(zones[m]).length, 0)
   const doorTotal = Object.values(doors).reduce((n, list) => n + list.length, 0)
-  return `${label}: ${maps.length} maps, ${total} zone ids, ${doorTotal} locked doors`
+  const exitTotal = Object.values(exits).reduce((n, e) => n + e.exits.length, 0)
+  const transitTotal = Object.values(exits).reduce((n, e) => n + e.transits.length, 0)
+  return `${label}: ${maps.length} maps, ${total} zone ids, ${doorTotal} locked doors, ${exitTotal} exits, ${transitTotal} transits`
 }
 
-const vanilla = collect(dumpDir)
+// tarkov.dev draws the expanded Interchange; exits that only exist in the expanded area stay out of the vanilla map
+// (the variant keeps them). Path to River sits east of the vanilla map's edge.
+const EXPANDED_ONLY = { interchange: ['shopping_sniper_exit'] }
+const vanillaExits = Object.fromEntries(Object.entries(exitsByMap).map(([m, e]) =>
+  [m, { ...e, exits: e.exits.filter((x) => !(EXPANDED_ONLY[m] ?? []).includes(x.key)) }]))
+// A variant only swaps the maps it dumped, so it carries exits for those maps alone.
+const exitsFor = (maps) => Object.fromEntries(Object.entries(exitsByMap).filter(([m]) => maps.includes(m)))
+
+const dumped = collect(dumpDir)
+const vanilla = { zones: dumped.zones, doors: dumped.doors, exits: { ...vanillaExits, ...dumped.dumpedExits } }
 const variantsDir = path.join(dumpDir, 'variants')
 const variants = (fs.existsSync(variantsDir) ? fs.readdirSync(variantsDir) : [])
   .filter((v) => fs.statSync(path.join(variantsDir, v)).isDirectory())
   .sort()
-  .map((v) => [v, collect(path.join(variantsDir, v))])
+  .map((v) => {
+    const data = collect(path.join(variantsDir, v))
+    return [v, { zones: data.zones, doors: data.doors, exits: { ...exitsFor(Object.keys(data.zones)), ...data.dumpedExits } }]
+  })
 
 const lines = ['{', `  "collectedWith": ${JSON.stringify(collectedWith)},`, ...render(vanilla, '')]
 if (variants.length > 0) {
