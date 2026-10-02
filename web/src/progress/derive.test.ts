@@ -424,4 +424,18 @@ describe('questTab / countTabs / filterProgressQuests', () => {
     expect(countTabByTrader(cat, prog, 'active')).toEqual({ t1: 1, t2: 1 })
     expect(countTabByTrader(cat, prog, 'locked')).toEqual({ t1: 1 })
   })
+  it('출처 모드를 고르면 탭·상인 개수와 목록이 그 모드 퀘스트만', () => {
+    const cat = catalog([
+      quest('v', []),
+      quest('ice-a', [], { isVanilla: false, modName: 'ManimalIcebreaker' }),
+      quest('ice-b', [], { isVanilla: false, modName: 'ManimalIcebreaker', traderId: 't2' }),
+      quest('artem', [], { isVanilla: false, modName: 'WTT-Artem' }),
+    ])
+    const prog = progress({ v: qp('Started'), 'ice-a': qp('Started'), artem: qp('Started') })
+    const mods = new Set(['ManimalIcebreaker'])
+    expect(countTabs(cat, prog, mods)).toEqual({ active: 1, available: 0, locked: 1, done: 0, failed: 0 })
+    expect(countTabByTrader(cat, prog, 'locked', mods)).toEqual({ t2: 1 })
+    expect(filterProgressQuests(cat, prog, { tab: 'active', traderIds: new Set(), query: '', mods }).map((q) => q.id)).toEqual(['ice-a'])
+    expect(filterProgressQuests(cat, prog, { tab: 'active', traderIds: new Set(), query: '', mods: new Set() })).toHaveLength(3)
+  })
 })

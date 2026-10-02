@@ -51,6 +51,7 @@
 }
 .qc-card__bar .qc-card__h { margin: 0 4px 0 0; }
 .qc-card__bar .qc-chips { flex-wrap: wrap; }
+.qc-card .qc-modstrip { padding: 8px 14px; }   /* 카드 안에서는 카드 바와 같은 좌우 여백 */
 .qc-hint { margin: 6px 16px 0; color: var(--fg-3); font-size: 11px; }
 
 /* ---- 현황: 상인별 진행률 ---- */

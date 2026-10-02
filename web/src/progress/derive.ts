@@ -1,5 +1,6 @@
 import type { Catalog, CatalogQuest, ItemRef, Objective, ObjectivePrep, PrepItem } from '../api/catalog'
 import type { Holding, ObjectiveProgress, ProfileProgress, QuestProgress, QuestStatus } from '../api/progress'
+import { inMods } from '../wiki/derive'
 
 // 진행현황 화면의 파생값. wiki/derive.ts 와 같은 규칙 — React·DOM 없이 인자만으로 계산해 vitest 로 검증한다.
 
@@ -555,16 +556,19 @@ export function questTab(status: QuestStatus): QuestTab {
   }
 }
 
-export function countTabs(catalog: Catalog, progress: ProfileProgress): Record<QuestTab, number> {
+const NO_MODS: ReadonlySet<string> = new Set()
+
+/** 탭 개수. `mods` 는 위키와 같은 출처 모드 선택 — 비어 있으면 전체 */
+export function countTabs(catalog: Catalog, progress: ProfileProgress, mods = NO_MODS): Record<QuestTab, number> {
   const out: Record<QuestTab, number> = { active: 0, available: 0, locked: 0, done: 0, failed: 0 }
-  for (const id of Object.keys(catalog.quests)) out[questTab(questProgress(progress, id).status)]++
+  for (const q of inMods(Object.values(catalog.quests), mods)) out[questTab(questProgress(progress, q.id).status)]++
   return out
 }
 
-/** 상인 줄 개수: 고른 탭에 속한 퀘스트만 상인별로 센다 (탭을 바꾸면 숫자도 바뀐다) */
-export function countTabByTrader(catalog: Catalog, progress: ProfileProgress, tab: QuestTab): Record<string, number> {
+/** 상인 줄 개수: 고른 탭(과 출처 모드)에 속한 퀘스트만 상인별로 센다 (탭을 바꾸면 숫자도 바뀐다) */
+export function countTabByTrader(catalog: Catalog, progress: ProfileProgress, tab: QuestTab, mods = NO_MODS): Record<string, number> {
   const out: Record<string, number> = {}
-  for (const q of Object.values(catalog.quests)) {
+  for (const q of inMods(Object.values(catalog.quests), mods)) {
     if (questTab(questProgress(progress, q.id).status) === tab) out[q.traderId] = (out[q.traderId] ?? 0) + 1
   }
   return out
@@ -575,11 +579,13 @@ export interface QuestFilter {
   /** 비어 있으면 전체 (위키 상인 줄과 같은 다중 선택) */
   traderIds: ReadonlySet<string>
   query: string
+  /** 출처 모드. 없거나 비어 있으면 전체 */
+  mods?: ReadonlySet<string>
 }
 
 export function filterProgressQuests(catalog: Catalog, progress: ProfileProgress, f: QuestFilter): CatalogQuest[] {
   const q = searchKey(f.query)
-  const rows = Object.values(catalog.quests)
+  const rows = inMods(Object.values(catalog.quests), f.mods ?? NO_MODS)
     .filter((x) => questTab(questProgress(progress, x.id).status) === f.tab)
     .filter((x) => f.traderIds.size === 0 || f.traderIds.has(x.traderId))
     .filter((x) => q === '' || searchKey(x.name).includes(q))
