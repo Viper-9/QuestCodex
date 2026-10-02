@@ -1,30 +1,40 @@
 {%- comment -%}
-  Language switch: links to the same page in the other two languages
+  Language dropdown: shows the current language and links to the same page in each language
   (English at the root, Korean under /kr/, Russian under /ru/).
 {%- endcomment -%}
 {%- if page.collection == "kr" -%}
   {%- assign base_url = page.url | remove_first: "/kr" -%}
+  {%- assign current = "kr" -%}
 {%- elsif page.collection == "ru" -%}
   {%- assign base_url = page.url | remove_first: "/ru" -%}
+  {%- assign current = "ru" -%}
 {%- else -%}
   {%- assign base_url = page.url -%}
+  {%- assign current = "en" -%}
 {%- endif -%}
+{%- capture en_label -%}English{%- endcapture -%}
+{%- capture kr_label -%}한국어{%- endcapture -%}
+{%- capture ru_label -%}Русский{%- endcapture -%}
 <nav aria-label="Language" class="aux-nav lang-nav">
-  <ul class="aux-nav-list">
-    {%- if page.collection == "kr" or page.collection == "ru" %}
-    <li class="aux-nav-list-item">
-      <a href="{{ base_url | relative_url }}" class="site-button" hreflang="en">English</a>
-    </li>
-    {%- endif %}
-    {%- unless page.collection == "kr" %}
-    <li class="aux-nav-list-item">
-      <a href="{{ base_url | prepend: '/kr' | relative_url }}" class="site-button" hreflang="ko">한국어</a>
-    </li>
-    {%- endunless %}
-    {%- unless page.collection == "ru" %}
-    <li class="aux-nav-list-item">
-      <a href="{{ base_url | prepend: '/ru' | relative_url }}" class="site-button" hreflang="ru">Русский</a>
-    </li>
-    {%- endunless %}
-  </ul>
+  <details class="lang-menu">
+    <summary class="site-button">
+      <svg viewBox="0 0 24 24" class="lang-menu__icon" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm-9 9h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3Z"/></svg>
+      {% if current == "kr" %}{{ kr_label }}{% elsif current == "ru" %}{{ ru_label }}{% else %}{{ en_label }}{% endif %}
+      <svg viewBox="0 0 24 24" class="lang-menu__caret" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <ul class="lang-menu__list">
+      <li><a href="{{ base_url | relative_url }}" hreflang="en" lang="en"{% if current == "en" %} aria-current="true"{% endif %}>{{ en_label }}</a></li>
+      <li><a href="{{ base_url | prepend: '/kr' | relative_url }}" hreflang="ko" lang="ko"{% if current == "kr" %} aria-current="true"{% endif %}>{{ kr_label }}</a></li>
+      <li><a href="{{ base_url | prepend: '/ru' | relative_url }}" hreflang="ru" lang="ru"{% if current == "ru" %} aria-current="true"{% endif %}>{{ ru_label }}</a></li>
+    </ul>
+  </details>
 </nav>
+<script>
+  // Close the language dropdown on an outside click or Esc.
+  document.addEventListener("click", function (e) {
+    document.querySelectorAll(".lang-menu[open]").forEach(function (m) { if (!m.contains(e.target)) m.removeAttribute("open"); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") document.querySelectorAll(".lang-menu[open]").forEach(function (m) { m.removeAttribute("open"); });
+  });
+</script>
