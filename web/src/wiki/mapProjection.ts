@@ -22,6 +22,8 @@ export interface MapAttribution {
   modifiedBy: string | null
   license: string
   licenseFile: string
+  /** 좌표 보정 데이터 출처(크레딧 표기). 없으면 DynamicMaps — build-maps.js 산출물은 이 필드를 쓰지 않는다 */
+  calibration?: string
 }
 
 export interface MapDef {

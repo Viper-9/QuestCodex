@@ -129,6 +129,7 @@ for (const v of VARIANTS) {
       modifiedBy: null,
       license: 'CC BY-NC-SA 4.0',
       licenseFile: 'Shebuka-LICENSE.md',
+      calibration: 'tarkov.dev (MIT)',
     },
     source: `tarkov-dev-svg-maps @ ${svgCommit} (${v.svg}, split per floor), tarkov-dev maps.json @ ${devCommit}`,
     ...OVERRIDES[v.out],

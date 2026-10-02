@@ -154,7 +154,8 @@ function MapBody({ quest, index, lockedDoors }: MapBodyProps) {
 }
 
 /**
- * 지도 출처(05 스펙 §5): 원저작자, 수정자, 라이선스, 보정 데이터(DynamicMaps, MIT). 원본 라이선스 파일(.md)은 맵 폴더에
+ * 지도 출처(05 스펙 §5): 원저작자, 수정자, 라이선스, 보정 데이터(map.json attribution.calibration, 없으면 DynamicMaps — 09 스펙의
+ * 확장 인터체인지는 tarkov.dev). 원본 라이선스 파일(.md)은 맵 폴더에
  * 동봉하지만 링크는 CC 원문으로 건다 — 정적 파일 서버가 모르는 확장자(.md)는 서빙하지 않을 수 있다.
  * 잠긴 문 아이콘(CC BY 3.0)의 출처는 여기 넣지 않는다 — THIRD_PARTY_NOTICES 와 maps/icons/marker_credits.txt(06 스펙 §5).
  */
@@ -166,7 +167,7 @@ export function Credit({ def }: { def: MapDef }) {
   const author = a.modifiedBy ? `${a.author}, ${t('map.modifiedBy', { name: a.modifiedBy })}` : a.author
   return (
     <footer className="qc-map__credit">
-      {t('map.credit', { author, license: a.license })}
+      {t('map.credit', { author, license: a.license, calibration: a.calibration ?? 'DynamicMaps (MIT)' })}
       {' · '}
       <a href={CC_BY_NC_SA} target="_blank" rel="noreferrer">{t('map.license')}</a>
     </footer>
@@ -174,7 +175,7 @@ export function Credit({ def }: { def: MapDef }) {
 }
 
 const MAP_NAMES = new Set([
-  'bigmap', 'factory4_day', 'sandbox', 'interchange', 'laboratory', 'labyrinth',
+  'bigmap', 'factory4_day', 'sandbox', 'interchange', 'interchange-manimal', 'laboratory', 'labyrinth',
   'lighthouse', 'rezervbase', 'shoreline', 'tarkovstreets', 'woods',
 ])
 
