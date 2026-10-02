@@ -28,6 +28,11 @@ no file trace, so their source mod can't be identified. Those get a generic `mod
 - Mod quests show on the map only when the mod defines its zones in data the server can read.
 - QuestCodex doesn't track which keys you own. Lock icons tell you which key a door needs, nothing more.
 
+## Unlock paths
+
+The path summary checks the required level against your profile, but trader loyalty and standing are only
+listed, not checked. **Quests left** counts quests only.
+
 ## Local only
 
 The SPT server binds to `127.0.0.1`, so QuestCodex opens only in a browser on the machine running the server.
