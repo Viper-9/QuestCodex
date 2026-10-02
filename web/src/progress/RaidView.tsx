@@ -40,7 +40,7 @@ function mapName(key: string, t: T, variants: Record<string, string> | undefined
 export function RaidView({ catalog, progress, inventory, lookup, map }: RaidViewProps) {
   const t = useT()
   const entries = useMemo(() => raidEntries(catalog, progress), [catalog, progress])
-  const tabs = useMemo(() => mapTabs(entries), [entries])
+  const tabs = useMemo(() => mapTabs(entries, Object.keys(catalog.exits ?? {})), [entries, catalog.exits])
   const selected = tabs.some((x) => x.key === map) ? map! : (tabs.find((x) => x.count > 0) ?? tabs[0]).key
   const brief = useMemo(() => mapBrief(entries, selected, inventory), [entries, selected, inventory])
   const needs = useMemo(() => raidFinds(catalog, progress, inventory), [catalog, progress, inventory])

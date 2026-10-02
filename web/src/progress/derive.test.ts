@@ -249,6 +249,10 @@ describe('raidEntries / mapTabs / mapBrief', () => {
     expect(tabs[0]).toEqual({ key: 'bigmap', count: 0 })
     expect(tabs.find((t) => t.key === 'woods')?.count).toBe(2)
     expect(mapTabs([{ ...entries[0], maps: ['modmap'] }]).at(-1)).toEqual({ key: 'modmap', count: 1 })
+    // 모드 맵은 목표가 없어도 서버에 있으면(catalog.exits 키) 탭이 생긴다 — 변종 키는 한 탭으로
+    const withServer = mapTabs(entries, ['icebreaker', 'factory4_night', 'sandbox_high'])
+    expect(withServer.at(-1)).toEqual({ key: 'icebreaker', count: 0 })
+    expect(withServer).toHaveLength(tabs.length + 1)
   })
   it('브리핑: 설치 아이템 합산, 어느 맵이든 목표 포함, 장비·특수 조건', () => {
     const b = mapBrief(entries, 'woods', prog.inventory!)

@@ -403,11 +403,20 @@ export interface MapTab {
   count: number
 }
 
-/** 알려진 맵은 항상(0 이어도) 고정 순서로, 모르는 맵(모드 맵)은 목표가 있을 때만 뒤에 이름순 */
-export function mapTabs(entries: RaidEntry[]): MapTab[] {
+/**
+ * 알려진 맵은 항상(0 이어도) 고정 순서로, 모르는 맵(모드 맵)은 뒤에 이름순. 모드 맵은 목표가 있거나 서버에 그 맵이 있으면
+ * (serverMaps — catalog.exits 키, 모드가 로케이션을 추가한 서버만 생긴다) 보여 준다: 아이스브레이커 모드를 깔았으면 할 퀘스트가
+ * 없어도 지도·탈출구를 보려고 탭이 있어야 한다.
+ */
+export function mapTabs(entries: RaidEntry[], serverMaps: Iterable<string> = []): MapTab[] {
   const counts = new Map<string, number>()
   for (const e of entries) for (const m of e.maps) counts.set(m, (counts.get(m) ?? 0) + 1)
-  const extra = [...counts.keys()].filter((k) => !MAP_ORDER.includes(k)).sort()
+  const keys = new Set(counts.keys())
+  for (const k of serverMaps) {
+    const g = mapGroup(k)
+    if (g !== null) keys.add(g)
+  }
+  const extra = [...keys].filter((k) => !MAP_ORDER.includes(k)).sort()
   return [...MAP_ORDER, ...extra].map((key) => ({ key, count: counts.get(key) ?? 0 }))
 }
 
