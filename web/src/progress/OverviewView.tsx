@@ -4,7 +4,8 @@ import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
-import { assignModColors, branchIndex, orderTraders, toggleMember, type NameLookup } from '../wiki/derive'
+import { assignModColors, branchIndex, listMods, orderTraders, toggleMember, type NameLookup } from '../wiki/derive'
+import { ModStrip } from '../wiki/ModStrip'
 import { QuestDescriptionDialog } from '../wiki/QuestDescriptionDialog'
 import { QuestDetail } from '../wiki/QuestDetail'
 import { QuestMapDialog } from '../wiki/QuestMapDialog'
@@ -124,6 +125,7 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
   const [tab, setTab] = useState<QuestTab>('active')
   const [traderIds, setTraderIds] = useState<ReadonlySet<string>>(() => new Set())
   const [query, setQuery] = useState('')
+  const [mods, setMods] = useState<ReadonlySet<string>>(() => new Set())
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
   const [prepId, setPrepId] = useState<string | null>(null)
@@ -132,29 +134,31 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
   const [jumped, setJumped] = useState<string | null>(null)
   const jumpTimer = useRef<number | undefined>(undefined)
-  const counts = useMemo(() => countTabs(catalog, progress), [catalog, progress])
+  const counts = useMemo(() => countTabs(catalog, progress, mods), [catalog, progress, mods])
   // 위키와 같은 색이 나오도록 필터 결과가 아니라 카탈로그 전체로 정한다
   const modColors = useMemo(() => assignModColors(Object.values(catalog.quests)), [catalog])
+  const modList = useMemo(() => listMods(Object.values(catalog.quests)), [catalog])
   /** 택일 분기. 위키와 같이 카탈로그 전체로 한 번만 */
   const branches = useMemo(() => branchIndex(Object.values(catalog.quests)), [catalog])
-  const traderCounts = useMemo(() => countTabByTrader(catalog, progress, tab), [catalog, progress, tab])
+  const traderCounts = useMemo(() => countTabByTrader(catalog, progress, tab, mods), [catalog, progress, tab, mods])
   // 퀘스트가 하나도 없는 상인은 상인별 진행률과 같은 기준으로 뺀다
   const traders = useMemo(() => {
     const keep = new Set(traderOrder)
     return orderTraders(catalog.traders).filter((x) => keep.has(x.id))
   }, [catalog, traderOrder])
   const rows = useMemo(
-    () => filterProgressQuests(catalog, progress, { tab, traderIds, query }),
-    [catalog, progress, tab, traderIds, query],
+    () => filterProgressQuests(catalog, progress, { tab, traderIds, query, mods }),
+    [catalog, progress, tab, traderIds, query, mods],
   )
   const toggle = (id: string) => setExpanded((prev) => toggleMember(prev, id))
 
-  /** 연계 링크: 지금 목록에 없으면 그 퀘스트의 탭으로 옮기고 상인·검색 필터를 푼 뒤 펼침 → 스크롤 → 잠깐 강조 */
+  /** 연계 링크: 지금 목록에 없으면 그 퀘스트의 탭으로 옮기고 상인·모드·검색 필터를 푼 뒤 펼침 → 스크롤 → 잠깐 강조 */
   const jumpTo = (id: string) => {
     if (!catalog.quests[id]) return
     if (!rows.some((q) => q.id === id)) {
       setTab(questTab(questProgress(progress, id).status))
       setTraderIds(new Set())
+      setMods(new Set())
       setQuery('')
     }
     setExpanded((prev) => new Set(prev).add(id))
@@ -196,6 +200,12 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
+      {modList.length > 0 && (
+        <ModStrip
+          mods={modList} modColors={modColors}
+          selected={mods} onToggle={(key) => setMods((prev) => toggleMember(prev, key))} onClear={() => setMods(new Set())}
+        />
+      )}
       {rows.length === 0 ? <p className="qc-empty">{t('overview.empty')}</p> : (
         <ul>
           {rows.map((q) => {

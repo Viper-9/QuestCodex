@@ -21,7 +21,7 @@ export type LockReason =
   | { kind: 'traderLoyalty'; traderId: string; need: number; compare: string; current: number }
   | { kind: 'traderStanding'; traderId: string; need: number; compare: string; current: number }
   | { kind: 'faction'; need: string }
-  | { kind: 'other'; conditionType: string }
+  | { kind: 'other'; conditionType: string; text: string; targetName: string | null }
 
 /** 목표 카운터 — 제출한 수·처치 수 등. 퀘스트의 모든 목표에 대해 온다. */
 export interface ObjectiveProgress {

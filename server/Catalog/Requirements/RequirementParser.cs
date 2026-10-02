@@ -80,5 +80,9 @@ public static class RequirementParser
     }
 
     private static OtherRequirement Other(QuestCondition c, LocaleResolver locale)
-        => new(c.ConditionType, locale.TryResolve(c.Id.ToString()) ?? c.ConditionType);
+    {
+        var tpl = TargetOf(c);
+        var targetName = tpl is null ? null : locale.TryResolve($"{tpl} Name");
+        return new(c.ConditionType, locale.TryResolve(c.Id.ToString()) ?? "", targetName);
+    }
 }

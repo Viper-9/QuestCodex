@@ -83,7 +83,7 @@ public class ProgressBuilderTests
 
     [Fact]
     public void Other_requirement_is_reported_as_other_reason()
-        => Assert.Equal(new OtherLockReason("Skill"), Assert.Single(ProgressBuilder.Build(Cat, Pmc(), "p", false).Quests[Id(5)].LockReasons));
+        => Assert.Equal(new OtherLockReason("Skill", ""), Assert.Single(ProgressBuilder.Build(Cat, Pmc(), "p", false).Quests[Id(5)].LockReasons));
 
     [Fact]
     public void Status_and_times_come_from_profile()

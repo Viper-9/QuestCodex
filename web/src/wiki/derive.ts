@@ -14,6 +14,42 @@ export interface WikiFilters {
   traders: ReadonlySet<string>   // 비어 있으면 전체
   chips: Chips
   query: string
+  mods: ReadonlySet<string>      // 출처 모드(modKey). 비어 있거나 Mod 칩이 꺼져 있으면 무시
+}
+
+// ---- 출처 모드 ----
+/** 출처를 못 찾은 모드 퀘스트(C# 코드로 주입 등)의 키. 실제 모드 폴더명은 빈 문자열일 수 없다. */
+export const UNKNOWN_MOD = ''
+
+/** 퀘스트의 출처 모드 키. 바닐라면 null, 모드인데 출처 미상이면 UNKNOWN_MOD. */
+export function modKey(q: CatalogQuest): string | null {
+  return q.isVanilla ? null : (q.modName ?? UNKNOWN_MOD)
+}
+
+export interface ModEntry {
+  key: string
+  count: number
+}
+
+/** 모드 칩 줄의 항목. 모드 이름순, 출처 미상은 맨 뒤. 개수는 필터와 무관한 고정값. */
+export function listMods(quests: CatalogQuest[]): ModEntry[] {
+  const counts = new Map<string, number>()
+  for (const q of quests) {
+    const k = modKey(q)
+    if (k !== null) counts.set(k, (counts.get(k) ?? 0) + 1)
+  }
+  return [...counts]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => Number(a.key === UNKNOWN_MOD) - Number(b.key === UNKNOWN_MOD) || a.key.localeCompare(b.key))
+}
+
+/** 모드 선택이 걸린 상태면 그 모드들의 퀘스트만, 아니면 그대로. 목록 필터와 상인 개수가 같이 쓴다. */
+export function inMods(quests: CatalogQuest[], mods: ReadonlySet<string>): CatalogQuest[] {
+  if (mods.size === 0) return quests
+  return quests.filter((q) => {
+    const k = modKey(q)
+    return k !== null && mods.has(k)
+  })
 }
 
 // ---- 상인 줄 (§1.2 a) ----
@@ -25,7 +61,7 @@ export function orderTraders(traders: Record<string, CatalogTrader>): CatalogTra
   return [...vanilla, ...mods]
 }
 
-/** 상인별 퀘스트 수. 필터와 무관한 고정값. */
+/** 상인별 퀘스트 수. 모드 선택(`inMods`)만 반영하고 나머지 필터와는 무관하다. */
 export function countByTrader(quests: CatalogQuest[]): Record<string, number> {
   const out: Record<string, number> = {}
   for (const q of quests) out[q.traderId] = (out[q.traderId] ?? 0) + 1
@@ -42,7 +78,8 @@ export function initials(name: string): string {
 // ---- 리스트 (§3.2) ----
 export function filterQuests(quests: CatalogQuest[], f: WikiFilters): CatalogQuest[] {
   const q = f.query.trim().toLowerCase()
-  return quests.filter((x) => {
+  const source = f.chips.mod ? inMods(quests, f.mods) : quests
+  return source.filter((x) => {
     if (f.traders.size > 0 && !f.traders.has(x.traderId)) return false
     if (x.isVanilla ? !f.chips.vanilla : !f.chips.mod) return false
     if (f.chips.bear || f.chips.usec) {

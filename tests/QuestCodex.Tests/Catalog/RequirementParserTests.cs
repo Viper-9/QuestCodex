@@ -100,10 +100,26 @@ public class RequirementParserTests
     }
 
     [Fact]
-    public void Unknown_type_without_locale_uses_condition_type_as_text()
+    public void Unknown_type_without_locale_leaves_text_empty()
     {
         var req = RequirementParser.Parse(FinishCond(Id(100), "Skill"), Locale, Dict<SPTarkov.Server.Core.Models.Eft.Common.Tables.Quest>(), [], "q");
-        Assert.Equal("Skill", Assert.IsType<OtherRequirement>(req).Text);
+        var o = Assert.IsType<OtherRequirement>(req);
+        Assert.Equal("", o.Text);
+        Assert.Null(o.TargetName);
+    }
+
+    [Fact]
+    public void Unknown_type_without_locale_carries_target_item_name()
+    {
+        // Icebreaker "Boreas": 전단지를 주우면 시작하는 FindItem 시작 조건, 조건 로케일 없음
+        var locale = new LocaleResolver(new Dictionary<string, string> { [$"{Id(7)} Name"] = "Paradigm Shipping poster" }, new Dictionary<string, string>());
+
+        var req = RequirementParser.Parse(FinishCond(Id(100), "FindItem", 1, Id(7)), locale, Dict<SPTarkov.Server.Core.Models.Eft.Common.Tables.Quest>(), [], "q");
+
+        var o = Assert.IsType<OtherRequirement>(req);
+        Assert.Equal("FindItem", o.ConditionType);
+        Assert.Equal("", o.Text);
+        Assert.Equal("Paradigm Shipping poster", o.TargetName);
     }
 
     [Fact]

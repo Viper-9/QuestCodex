@@ -16,4 +16,5 @@ public sealed record LevelLockReason(double Need, string Compare, double Current
 public sealed record TraderLoyaltyLockReason(string TraderId, double Need, string Compare, double Current) : LockReason;
 public sealed record TraderStandingLockReason(string TraderId, double Need, string Compare, double Current) : LockReason;
 public sealed record FactionLockReason(string Need) : LockReason;
-public sealed record OtherLockReason(string ConditionType) : LockReason;
+/// <summary>시작 조건의 Text·TargetName 을 그대로 옮긴다 — 행 요약에 잠김 사유만으로 문구를 만들 수 있게</summary>
+public sealed record OtherLockReason(string ConditionType, string Text = "", string? TargetName = null) : LockReason;
