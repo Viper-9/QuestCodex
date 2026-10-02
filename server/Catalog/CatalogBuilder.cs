@@ -95,12 +95,21 @@ public static class CatalogBuilder
         foreach (var (map, list) in doors ?? new Dictionary<string, IReadOnlyList<SnapshotDoor>>())
         {
             result[map] = list
-                .Select(d => new LockedDoor(d.KeyTpl, nameOf(d.KeyTpl), d.Type == "KeycardDoor" ? "keycard" : "door", d.Position))
+                .Select(d => new LockedDoor(d.KeyTpl, d.KeyTpl.Length == 0 ? "" : nameOf(d.KeyTpl), KindOf(d.Type), d.Position, d.Code))
                 .ToList();
         }
 
         return result;
     }
+
+    private static string KindOf(string type) => type switch
+    {
+        "KeycardDoor" => "keycard",
+        "Keypad" => "keypad",
+        "Explosive" => "explosive",
+        "Hatch" => "hatch",
+        _ => "door",
+    };
 
     /// <summary>
     /// 핸드북 최상위 카테고리의 표시 순서. 무기, 무기 부품, 탄약, 장비, 방탄판, 의료품, 식량, 물물교환, 정보, 열쇠, 지도, 특수 장비, 퀘스트 아이템, 화폐.

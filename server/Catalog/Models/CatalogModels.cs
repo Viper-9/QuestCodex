@@ -55,14 +55,18 @@ public sealed record ObjectiveLocation(string Map, IReadOnlyList<MapPoint> Point
 /// </summary>
 public sealed record MapArea(MapPoint Center, double SizeX, double SizeZ, double Yaw, double MinY, double MaxY);
 
-/// <summary>스냅샷의 잠긴 문 한 개. Type = 덤프의 컴포넌트 이름("Door" | "KeycardDoor").</summary>
-public sealed record SnapshotDoor(string KeyTpl, string Type, MapPoint Position);
+/// <summary>
+/// 스냅샷의 잠긴 문 한 개. Type = 덤프의 컴포넌트 이름("Door" | "KeycardDoor"), 아이스브레이커의 열쇠 없는 문은
+/// "Keypad"(KeyTpl 빈 문자열) | "Explosive"(KeyTpl = SZ-1 폭약) | "Hatch"(KeyTpl = 가스 토치)(11 스펙 §3).
+/// Code = 고정 키패드 코드, 없으면 null.
+/// </summary>
+public sealed record SnapshotDoor(string KeyTpl, string Type, MapPoint Position, string? Code = null);
 
 /// <summary>
-/// 카탈로그에 싣는 잠긴 문. Kind = "door" | "keycard". KeyTpl 은 지금 화면에서 쓰지 않고, 나중에 프로필 인벤토리와
-/// 대조해 보유 열쇠를 표시할 때의 키다(06 스펙 §4.3).
+/// 카탈로그에 싣는 잠긴 문. Kind = "door" | "keycard" | "keypad" | "explosive" | "hatch". KeyTpl 은 열쇠(폭파문·해치는 필요한
+/// 아이템, 키패드는 빈 문자열)이고, 나중에 프로필 인벤토리와 대조해 보유 열쇠를 표시할 때의 키다(06 스펙 §4.3).
 /// </summary>
-public sealed record LockedDoor(string KeyTpl, string KeyName, string Kind, MapPoint Position);
+public sealed record LockedDoor(string KeyTpl, string KeyName, string Kind, MapPoint Position, string? Code = null);
 
 /// <summary>스냅샷의 탈출구(10 스펙 §1). Key = 서버 allExtracts 의 Name(게임 키), Name = tarkov.dev 영문 이름.</summary>
 public sealed record SnapshotExit(string Key, string Name, MapPoint Position);

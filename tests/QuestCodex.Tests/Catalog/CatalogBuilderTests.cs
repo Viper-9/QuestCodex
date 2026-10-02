@@ -468,6 +468,35 @@ public class CatalogBuilderTests
     }
 
     [Fact]
+    public void Icebreaker_keyless_doors_carry_their_kind_item_and_code()
+    {
+        var charge = Id(720);
+        var torch = Id(721);
+        var doors = new Dictionary<string, IReadOnlyList<SnapshotDoor>>
+        {
+            ["icebreaker"] =
+            [
+                new("", "Keypad", new MapPoint(1, 2, 3), "312220"),
+                new("", "Keypad", new MapPoint(4, 5, 6)),
+                new(charge.ToString(), "Explosive", new MapPoint(7, 8, 9)),
+                new(torch.ToString(), "Hatch", new MapPoint(10, 11, 12)),
+            ],
+        };
+        var locale = new Dictionary<string, string> { [$"{charge} Name"] = "SZ-1 폭약", [$"{torch} Name"] = "가스 토치" };
+
+        var cat = CatalogBuilder.Build(Input([], locale: locale) with { LockedDoors = doors }, Now);
+
+        Assert.Equal(
+            [
+                new LockedDoor("", "", "keypad", new MapPoint(1, 2, 3), "312220"),
+                new LockedDoor("", "", "keypad", new MapPoint(4, 5, 6)),
+                new LockedDoor(charge.ToString(), "SZ-1 폭약", "explosive", new MapPoint(7, 8, 9)),
+                new LockedDoor(torch.ToString(), "가스 토치", "hatch", new MapPoint(10, 11, 12)),
+            ],
+            cat.LockedDoors["icebreaker"]);
+    }
+
+    [Fact]
     public void Locked_doors_are_empty_without_input()
         => Assert.Empty(CatalogBuilder.Build(Input([]), Now).LockedDoors);
 

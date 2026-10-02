@@ -1,7 +1,8 @@
 // Dev tool: turns the   raw zone dumps into the bundled snapshot server/Data/quest-zones.json.
   // Keeps every vanilla zone (mod quests may reuse vanilla ids). Each point carries its collider boxes for area drawing.
   // Mod zones the dump picked up are dropped: the server reads them from each mod's WTT CustomQuestZones files at runtime.
-  // Locked doors: only Door and KeycardDoor (same set DynamicMaps shows; containers, trunks and switches are dropped).
+  // Locked doors: only Door and KeycardDoor (same set DynamicMaps shows; containers, trunks and switches are dropped),
+  // plus the Icebreaker's keypad, explosive and frozen hatch doors (11 spec §3; type Keypad / Explosive / Hatch).
   // Map variants (09 spec): dumps/variants/<variant>/<map>.json are scenes a map-replacing mod swaps in (ManimalInterchange).
   // They go under "variants" and the server swaps a whole map for them only when that mod is loaded.
   // Exits (10 spec): positions and English names come from exits/tarkovdev-exits.json (tools/maps/fetch-tarkovdev-exits.js),
@@ -20,6 +21,25 @@
   
   const round = (n) => Math.round(n * 100) / 100
   const DOOR_TYPES = new Set(['Door', 'KeycardDoor'])
+  // ManimalIcebreaker doors that open without a key (11 spec §3); the dump plugin 0.0.6 picks them up by Id or by
+  // object name. Keypad codes: the fixed ones in the mod's icebreaker_passcodes.json (the rest are random per raid).
+  const SZ1_CHARGE = '69a0174087a75d2cbd0842e8' // IcebreakerChainDoor.ChargeTpls[0]
+  const GAS_TORCH = '9a449693dff5334122ed7388' // BlowtorchIds.Tpl
+  const KEYLESS_DOORS = {
+    door_Icebreaker_Indoor_01_00001: { type: 'Keypad' },
+    door_Icebreaker_Indoor_01_00008: { type: 'Keypad' },
+    door_Icebreaker_Indoor_01_00010: { type: 'Keypad' },
+    door_Icebreaker_Indoor_01_00017: { type: 'Keypad' },
+    door_Icebreaker_Indoor_01_00051: { type: 'Keypad', code: '312220' },
+    door_Icebreaker_Indoor_01_00052: { type: 'Keypad', code: '312220' },
+    door_Icebreaker_Indoor_01_00059: { type: 'Keypad', code: '312220' },
+    door_Icebreaker_Indoor_01_00060: { type: 'Keypad', code: '312220' },
+    door_Icebreaker_Indoor_02_00084: { type: 'Keypad' },
+    door_Icebreaker_Outdoor_00000: { type: 'Explosive', key: SZ1_CHARGE },
+  }
+  const NAMED_DOORS = {
+    INTERACTIVE_Icebreaker_exterior_hatchway_door_frozen: { type: 'Hatch', key: GAS_TORCH },
+  }
   const exitsFile = path.join(__dirname, 'exits', 'tarkovdev-exits.json')
   const exitsByMap = fs.existsSync(exitsFile) ? JSON.parse(fs.readFileSync(exitsFile, 'utf8')).maps : {}
   // map -> exit key -> tarkov.dev English name, for dumped exits
@@ -67,10 +87,19 @@
       if (!points.some((p) => p.x === point.x && p.y === point.y && p.z === point.z)) points.push(point)
     }
     const list = (doors[map] ??= [])
-    for (const door of dump.Doors ?? []) {
-      if (!DOOR_TYPES.has(door.Type) || !door.KeyId) continue
-      const d = { key: door.KeyId, type: door.Type, x: round(door.Position.X), y: round(door.Position.Y), z: round(door.Position.Z) }
+    const add = (key, type, pos, code) => {
+      const d = { key, type, x: round(pos.X), y: round(pos.Y), z: round(pos.Z) }
+      if (code) d.code = code
       if (!list.some((o) => o.key === d.key && o.x === d.x && o.y === d.y && o.z === d.z)) list.push(d)
+    }
+    for (const door of dump.Doors ?? []) {
+      const keyless = KEYLESS_DOORS[door.Id]
+      if (keyless) add(keyless.key ?? '', keyless.type, door.Position, keyless.code)
+      else if (DOOR_TYPES.has(door.Type) && door.KeyId) add(door.KeyId, door.Type, door.Position)
+    }
+    for (const obj of dump.Named ?? []) {
+      const named = NAMED_DOORS[obj.Name]
+      if (named) add(named.key, named.type, obj.Position)
     }
     if (list.length === 0) delete doors[map]
     if (dump.Exits) dumpedExits[map] = exitsOfDump(dump)
@@ -80,6 +109,9 @@
   
   // Live-removed exits have no tarkov.dev name and no SPT locale entry either.
   const EXIT_NAMES = { ' V-Ex_light': 'Road to Military Base V-Ex' }
+  // Dumped exits whose tarkov.dev entry has another key. The Icebreaker helicopter trigger sits 1000 m under the ship
+  // until the flare is shot, so its height comes from tarkov.dev too (x, z match the dump).
+  const EXIT_ALIASES = { icebreaker: { Icebreaker_Exit_Heli: 'Heli' } }
 
   // tarkov.dev positions are the trigger collider's centre, so the dump uses the same point (falls back to the transform).
   function exitsOfDump(dump) {
@@ -88,11 +120,16 @@
       const p = b ? { X: (b.Min.X + b.Max.X) / 2, Y: (b.Min.Y + b.Max.Y) / 2, Z: (b.Min.Z + b.Max.Z) / 2 } : row.Position
       return { x: round(p.X), y: round(p.Y), z: round(p.Z) }
     }
-    const named = tdNames[dump.Location.toLowerCase()] ?? {}
+    const map = dump.Location.toLowerCase()
+    const named = tdNames[map] ?? {}
+    const aliases = EXIT_ALIASES[map] ?? {}
     const exits = []
     for (const e of dump.Exits) {
       if (!e.Name || exits.some((x) => x.key === e.Name)) continue
-      exits.push({ key: e.Name, name: named[e.Name] ?? EXIT_NAMES[e.Name] ?? e.Name.trim(), ...centre(e) })
+      const alias = (exitsByMap[map]?.exits ?? []).find((x) => x.key === aliases[e.Name])
+      const pos = centre(e)
+      if (alias) exits.push({ key: e.Name, name: alias.name, ...pos, y: alias.y })
+      else exits.push({ key: e.Name, name: named[e.Name] ?? EXIT_NAMES[e.Name] ?? e.Name.trim(), ...pos })
     }
     const transits = (dump.Transits ?? []).filter((t) => t.Id >= 0).map((t) => ({ id: String(t.Id), ...centre(t) }))
     exits.sort((a, b) => a.key.localeCompare(b.key))

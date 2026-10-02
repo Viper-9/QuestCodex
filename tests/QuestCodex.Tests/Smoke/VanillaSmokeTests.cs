@@ -135,8 +135,9 @@ public class VanillaSmokeTests
         ];
         Assert.Equal(remaining.ToHashSet(), notFound);
 
-        // 잠긴 문(06 스펙): 모든 문의 열쇠가 실제 아이템 이름으로 풀린다(tpl 그대로 남은 것 0개)
-        var doors = catalog.LockedDoors.Values.SelectMany(d => d).ToList();
+        // 잠긴 문(06 스펙): 모든 문의 열쇠가 실제 아이템 이름으로 풀린다(tpl 그대로 남은 것 0개). 아이스브레이커는 모드 맵이라
+        // 열쇠도 모드 아이템이다 — 바닐라 DB 에는 이름이 없다(11 스펙).
+        var doors = catalog.LockedDoors.Where(kv => kv.Key != "icebreaker").SelectMany(kv => kv.Value).ToList();
         Assert.Equal(34, catalog.LockedDoors["bigmap"].Count);
         Assert.All(doors, d => Assert.NotEqual(d.KeyTpl, d.KeyName));
         Assert.Contains(catalog.LockedDoors["laboratory"], d => d.Kind == "keycard");

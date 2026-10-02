@@ -40,7 +40,8 @@ public class QuestZoneSnapshotTests
         Assert.All(zones.Keys, map => Assert.Equal(map.ToLowerInvariant(), map));
         foreach (var fuel in new[] { "fuel1", "fuel2", "fuel3", "fuel4" }) Assert.True(zones["bigmap"].ContainsKey(fuel), fuel);
         Assert.Equal(34, doors["bigmap"].Count); // 10/1 재덤프에서 Military checkpoint 문 하나 추가
-        Assert.All(doors.Values.SelectMany(d => d), d => Assert.Contains(d.Type, new[] { "Door", "KeycardDoor" }));
+        Assert.All(doors.Values.SelectMany(d => d), d => Assert.Contains(d.Type, new[] { "Door", "KeycardDoor", "Keypad", "Explosive", "Hatch" }));
+        Assert.Equal(22, doors["icebreaker"].Count); // 11 스펙: 키카드 11 + 키패드 9 + 폭파문 + 해치, 스위치 제외
     }
 
     [Fact]
@@ -196,5 +197,25 @@ public class QuestZoneSnapshotTests
         var labs = doors["laboratory"];
         Assert.Equal(2, labs.Count);
         Assert.Equal(new SnapshotDoor("5c1d0efb86f7744baf2e7b7b", "KeycardDoor", new MapPoint(-120.5, 0.1, -330.2)), labs[0]);
+    }
+
+    [Fact]
+    public void Parse_reads_keypad_codes_of_keyless_doors()
+    {
+        const string json = """
+            { "zones": {},
+              "doors": { "icebreaker": [
+                { "key": "", "type": "Keypad", "x": 5.9, "y": 32.95, "z": 21.46, "code": "312220" },
+                { "key": "", "type": "Keypad", "x": 5.24, "y": 30.24, "z": 34.1 } ] } }
+            """;
+
+        var (_, _, doors) = QuestZoneSnapshot.Parse(json);
+
+        Assert.Equal(
+            [
+                new SnapshotDoor("", "Keypad", new MapPoint(5.9, 32.95, 21.46), "312220"),
+                new SnapshotDoor("", "Keypad", new MapPoint(5.24, 30.24, 34.1)),
+            ],
+            doors["icebreaker"]);
     }
 }
