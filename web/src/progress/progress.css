@@ -250,7 +250,9 @@
 .qc-table__detail > td { padding: 4px 14px 10px 36px; background: var(--bg-hover); }
 .qc-table__detail .qc-lines { margin: 0; }
 .qc-items__toggle { padding: 0; border: 0; background: none; text-align: left; }
+.qc-items__toggle + .qc-tag { margin-left: 6px; }
 .qc-items__quests { color: var(--fg-2); }
+.qc-unlock .qc-muted .qc-link { color: inherit; } /* 잠긴 선행 퀘스트 — 링크는 되지만 지금 할 것처럼 보이지 않게 */
 
 /* 카테고리 줄 — 아이콘은 SPT 핸드북 PNG(밝은 회색). 라이트 테마에서는 뒤집어 어둡게 */
 .qc-cats {
@@ -297,19 +299,30 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-tag--ok, .qc-tag--bad { white-space: nowrap; }
 .qc-tag--ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 12%, transparent); }
 .qc-tag--bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: color-mix(in srgb, var(--danger) 12%, transparent); }
-.qc-udone { margin: 2px 0 8px; color: var(--ok); }
-.qc-ucards { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.qc-table__detail .qc-udone { margin: 2px 0 12px; color: var(--ok); } /* 앞 클래스: `.qc-shell p { margin: 0 }` 를 이기려고 */
+/* 펼친 행 — 왼쪽 큰 카드(3/4) + 오른쪽 입수처 목록(1/4, 입수처가 하나여도 자리 유지). 좁아지면 같이 줄다가 최소 폭에서 멈춘다 */
+.qc-ucards { display: grid; grid-template-columns: minmax(440px, 3fr) minmax(200px, 1fr); gap: 10px; align-items: start; }
 .qc-ucard {
-  flex: 1 1 320px; min-width: 260px; max-width: 520px; padding: 10px 12px;
+  padding: 10px 12px;
   border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); font-size: 12px; text-align: left;
+  animation: qc-ucard-in .2s ease-out; /* 고른 입수처가 바뀔 때마다 다시 마운트되어 새로 돈다 */
 }
-.qc-ucard.is-best { border-color: var(--accent); }
-.qc-ucard--compact { flex: 0 1 240px; min-width: 200px; display: flex; flex-direction: column; align-items: stretch; gap: 2px; color: var(--fg-2); text-align: left; cursor: pointer; }
-.qc-ucard--compact:hover { background: var(--bg-hover); }
-.qc-ucard__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; color: var(--fg); }
-.qc-ucard__n { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.qc-ucard__meta { margin: 0 0 8px; color: var(--fg-2); font-size: 11px; }
-.qc-ucard--compact .qc-ucard__meta { margin: 0; }
+@keyframes qc-ucard-in { from { opacity: 0; transform: translateY(2px); } }
+.qc-usrc { min-width: 0; }
+.qc-usrc .qc-tag--mod { margin-left: 6px; }
+.qc-ucard__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: var(--fg); }
+.qc-ucard__meta { color: var(--fg-2); font-size: 11px; font-weight: 400; }
+.qc-ucard__aside { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+/* 오른쪽 입수처 목록 — 고른 항목은 강조색 테두리 */
+.qc-ulist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.qc-ulist__item {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 6px 10px;
+  border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); font-size: 12px; text-align: left; cursor: pointer;
+  transition: border-color .2s, background-color .2s, box-shadow .2s;
+}
+.qc-ulist__item:hover { background: var(--bg-hover); }
+.qc-ulist__item.is-on { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 1px var(--accent) inset; }
+@media (prefers-reduced-motion: reduce) { .qc-ucard { animation: none; } .qc-ulist__item { transition: none; } }
 /* 경로 줄 — 점 + 세로 선. 지금 할 수 있는 단계는 강조색 점, 목표는 경고색 점 */
 .qc-usteps { list-style: none; margin: 0; padding: 0; }
 .qc-usteps li { position: relative; display: flex; justify-content: space-between; gap: 8px; padding: 3px 0 3px 18px; }
@@ -336,13 +349,24 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
   display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
   background: var(--bg-hover); color: var(--fg-2); font-size: 11px; font-variant-numeric: tabular-nums;
 }
-.qc-utier.is-now .qc-utier__n { background: var(--accent); color: var(--accent-contrast); }
+.qc-utier.is-now .qc-utier__n { background: var(--accent); color: var(--accent-contrast); } /* 지금 손댈 수 있는 퀘스트가 있는 단계 */
 .qc-utier.is-goal .qc-utier__n { background: var(--warn); color: var(--obj-fg); }
+.qc-utier__groups { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.qc-utier__group { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.qc-utier__trader { overflow: hidden; color: var(--fg-2); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .qc-utier__qs { display: flex; flex-wrap: wrap; gap: 6px; }
-.qc-utier__q { padding: 3px 8px; border-radius: var(--radius); background: var(--bg-2); font-size: 12px; }
-.qc-utier__q.is-now { background: var(--accent-bg); }
+.qc-utier__q { padding: 3px 8px; border: 0; border-radius: var(--radius); background: var(--bg-2); color: var(--fg); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.qc-utier__q:hover { background: var(--bg-hover); }
+.qc-utier__q.is-focus { box-shadow: 0 0 0 1px var(--accent) inset; }
+.qc-utier__name { font-weight: 600; }
+.qc-utier__q > span + span { margin-left: 5px; }
+.qc-utier__more { font-size: 11px; color: var(--fg-3); }
+.qc-udialog__sum { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
+.qc-udialog__tip { color: var(--fg-2); font-size: 11px; text-align: right; }
+/* 걸러 보기 줄 — 고른 퀘스트 + 위키 열기 + 전체 보기 */
+.qc-udialog .qc-udialog__focus { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: -4px 0 10px; padding: 6px 10px; border-radius: var(--radius); background: var(--accent-bg); font-size: 12px; }
+.qc-udialog__focus > span { margin-right: auto; color: var(--fg); }
 .qc-utier.is-goal .qc-utier__q { outline: 1px solid var(--warn); }
 .qc-utier__lv { font-size: 11px; color: var(--fg-2); }
 .qc-utier__lv.qc-warn { color: var(--warn); }
 .qc-utier__tail { font-size: 11px; color: var(--fg-2); white-space: nowrap; }
-.qc-utier.is-now .qc-utier__tail { color: var(--accent-fg); }

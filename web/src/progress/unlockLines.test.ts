@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Catalog, CatalogQuest } from '../api/catalog'
 import type { PathStep } from './unlock'
-import { pathLines, pathTiers } from './unlockLines'
+import { pathFocus, pathLines, pathTiers } from './unlockLines'
 
 function catalog(names: Record<string, string>, trader: Record<string, string> = {}): Catalog {
   const quests: Record<string, CatalogQuest> = {}
@@ -41,14 +41,14 @@ describe('pathLines', () => {
     expect(shape(pathLines(['a', 'b'].map(step), cat))).toEqual(['a', 'b'])
   })
 
-  it('10c. 5줄 이하는 그대로, 상인이 다르면 연작이 아니다', () => {
-    const cat = catalog({ a: 'Chem - Part 1', b: 'Chem - Part 2', c: 'C', d: 'D', e: 'E' }, { b: 'other' })
-    expect(shape(pathLines(['a', 'b', 'c', 'd', 'e'].map(step), cat))).toEqual(['a', 'b', 'c', 'd', 'e'])
+  it('10c. 7줄 이하는 그대로, 상인이 다르면 연작이 아니다', () => {
+    const cat = catalog({ a: 'Chem - Part 1', b: 'Chem - Part 2', c: 'C', d: 'D', e: 'E', f: 'F', g: 'G' }, { b: 'other' })
+    expect(shape(pathLines(['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(step), cat))).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g'])
   })
 
-  it('10d. 7줄 → 앞 2 + gap(3) + 뒤 2, 숨긴 수는 퀘스트 수', () => {
-    const cat = catalog({ a: 'A', b: 'B', s1: 'Saw 1부', s2: 'Saw 2부', c: 'C', d: 'D', e: 'E', f: 'F' })
-    expect(shape(pathLines(['a', 'b', 's1', 's2', 'c', 'd', 'e', 'f'].map(step), cat))).toEqual(['a', 'b', 'gap 4', 'e', 'f'])
+  it('10d. 9줄 → 앞 3 + gap + 뒤 3, 숨긴 수는 퀘스트 수', () => {
+    const cat = catalog({ a: 'A', b: 'B', c: 'C', s1: 'Saw 1부', s2: 'Saw 2부', d: 'D', e: 'E', f: 'F', g: 'G', h: 'H' })
+    expect(shape(pathLines(['a', 'b', 'c', 's1', 's2', 'd', 'e', 'f', 'g', 'h'].map(step), cat))).toEqual(['a', 'b', 'c', 'gap 4', 'f', 'g', 'h'])
   })
 })
 
@@ -56,5 +56,34 @@ describe('pathTiers', () => {
   it('depth 별로 묶는다', () => {
     const tiers = pathTiers([step('r1', 0), step('r2', 0), step('m', 1), step('t', 2)])
     expect(tiers.map((t) => t.map((s) => s.questId))).toEqual([['r1', 'r2'], ['m'], ['t']])
+  })
+})
+
+describe('pathFocus', () => {
+  // Audiophile 경로: biz → (store, audit, ultra), store+ultra → db1 → db2 → mini, audit → ballet, ballet+mini → goal
+  const pre: Record<string, string[]> = {
+    biz: [], store: ['biz'], audit: ['biz'], ultra: ['biz'], db1: ['store', 'ultra'], ballet: ['audit'], db2: ['db1'], mini: ['db2'], goal: ['ballet', 'mini'],
+  }
+  const cat = catalog(Object.fromEntries(Object.keys(pre).map((id) => [id, id])))
+  for (const [id, ps] of Object.entries(pre)) {
+    cat.quests[id].requirements = ps.map((questId) => ({ kind: 'quest' as const, questId, needStatuses: ['Success'], availableAfterSec: 0, resolved: true }))
+  }
+  const steps = Object.keys(pre).map((id) => step(id, 0))
+  const sorted = (s: Set<string>) => [...s].sort()
+
+  it('루트를 고르면 후행만(전부)', () => {
+    expect(sorted(pathFocus(steps, cat, 'biz').shown)).toEqual(sorted(new Set(Object.keys(pre))))
+  })
+
+  it('중간을 고르면 선행 + 후행, 다른 갈래 선행은 숫자로', () => {
+    const f = pathFocus(steps, cat, 'audit')
+    expect(sorted(f.shown)).toEqual(['audit', 'ballet', 'biz', 'goal'])
+    expect([...f.hiddenPrereqs]).toEqual([['goal', 1]])
+  })
+
+  it('경로 밖(이미 끝낸) 선행은 세지 않는다', () => {
+    const f = pathFocus(steps.filter((s) => s.questId !== 'biz'), cat, 'store')
+    expect(sorted(f.shown)).toEqual(['db1', 'db2', 'goal', 'mini', 'store'])
+    expect(Object.fromEntries(f.hiddenPrereqs)).toEqual({ db1: 1, goal: 1 })
   })
 })

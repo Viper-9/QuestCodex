@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState } from 'react'
 import type { Catalog } from '../api/catalog'
-import type { ProfileProgress } from '../api/progress'
+import type { LockReason, ProfileProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { assignModColors, type NameLookup } from '../wiki/derive'
@@ -9,7 +9,7 @@ import { CategoryBar, countBy } from './CategoryBar'
 import { lockReasonText, statusLabel } from './format'
 import { QuestLink } from './parts'
 import { filterUnlockRows, nextStep, UNLOCK_CHIPS, unlockCounts, unlockRows, type UnlockChip, type UnlockRow } from './unlock'
-import { ModTag, UnlockDetail } from './UnlockDetail'
+import { UnlockDetail } from './UnlockDetail'
 import { UnlockPathDialog } from './UnlockPathDialog'
 import { blockText, sourceLabel } from './unlockText'
 
@@ -63,7 +63,6 @@ export function UnlocksView({ catalog, progress, lookup }: UnlocksViewProps) {
               <th>{t('unlock.col.item')}</th>
               <th>{t('unlock.col.source')}</th>
               <th>{t('unlock.col.now')}</th>
-              <th className="qc-num">{t('unlock.col.remaining')}</th>
             </tr>
           </thead>
           <tbody>
@@ -71,11 +70,11 @@ export function UnlocksView({ catalog, progress, lookup }: UnlocksViewProps) {
               const open = openOf(r.tpl, i)
               return (
                 <Fragment key={r.tpl}>
-                  <UnlockTableRow row={r} catalog={catalog} progress={progress} lookup={lookup} modColors={modColors} open={open !== null}
+                  <UnlockTableRow row={r} catalog={catalog} progress={progress} lookup={lookup} open={open !== null}
                     onToggle={() => setOpen(r.tpl, open === null ? 0 : null)} />
                   {open !== null && (
                     <tr className="qc-table__detail">
-                      <td colSpan={4}>
+                      <td colSpan={3}>
                         <UnlockDetail row={r} catalog={catalog} progress={progress} lookup={lookup} modColors={modColors} open={open}
                           onOpen={(index) => setOpen(r.tpl, index)} onShowPath={(index) => setDialog({ tpl: r.tpl, index })} />
                       </td>
@@ -92,17 +91,26 @@ export function UnlocksView({ catalog, progress, lookup }: UnlocksViewProps) {
   )
 }
 
+/** "지금 할 것" 칸의 잠김 이유 — 현재 값("(지금 …)")은 빼고, 선행 퀘스트는 위키 링크로(색은 흐리게) */
+function LockText({ reason, catalog, lookup }: { reason: LockReason; catalog: Catalog; lookup: NameLookup }) {
+  const t = useT()
+  if (reason.kind === 'level') return <>{t('unlock.levelShort', { n: reason.need })}</>
+  if (reason.kind !== 'quest') return <>{lockReasonText(reason, lookup, t)}</>
+  const quest = catalog.quests[reason.questId]
+  const need = t('unlock.questNeed', { need: reason.needStatuses.map((s) => statusLabel(s, t)).join('/') })
+  return <>{quest ? <QuestLink quest={quest} /> : reason.questId}: {need}</>
+}
+
 interface RowProps {
   row: UnlockRow
   catalog: Catalog
   progress: ProfileProgress
   lookup: NameLookup
-  modColors: Record<string, number>
   open: boolean
   onToggle(): void
 }
 
-function UnlockTableRow({ row, catalog, progress, lookup, modColors, open, onToggle }: RowProps) {
+function UnlockTableRow({ row, catalog, progress, lookup, open, onToggle }: RowProps) {
   const t = useT()
   const shown = row.best ?? row.plans.find((p) => p.state === 'unlocked' && p.source.kind === 'sale') ?? row.plans.find((p) => p.state === 'unlocked') ?? row.plans[0]
   const quest = catalog.quests[shown.source.questId]
@@ -115,8 +123,7 @@ function UnlockTableRow({ row, catalog, progress, lookup, modColors, open, onTog
         <button type="button" className="qc-items__toggle" aria-expanded={open} onClick={onToggle}>
           <span className="qc-row__caret">{open ? '▾' : '▸'}</span> {row.name}
         </button>
-        {row.craftUnlocked && <> <span className="qc-tag qc-tag--ok" title={t('unlock.craftDoneHint')}>{t('unlock.craftDone')}</span></>}
-        {quest && !quest.isVanilla && <> <ModTag quest={quest} colors={modColors} /></>}
+        {row.craftUnlocked && <span className="qc-tag qc-tag--ok" title={t('unlock.craftDoneHint')}>{t('unlock.craftDone')}</span>}
       </td>
       <td className="qc-items__quests">
         {row.state === 'unlocked'
@@ -125,18 +132,14 @@ function UnlockTableRow({ row, catalog, progress, lookup, modColors, open, onTog
         {row.state !== 'unlocked' && more > 0 && <span className="qc-muted"> {t('unlock.moreSources', { n: more })}</span>}
       </td>
       {row.state === 'unreachable' && shown.blockReason ? (
-        <td colSpan={2} className="qc-bad">{blockText(shown.blockReason, catalog, t)}</td>
+        <td className="qc-bad">{blockText(shown.blockReason, catalog, t)}</td>
       ) : row.best ? (
-        <>
-          <td>
-            {now && catalog.quests[now.questId] && <><QuestLink quest={catalog.quests[now.questId]} /> <span className="qc-muted">{statusLabel(now.status, t)}</span></>}
-            {firstLock && <span className="qc-muted">{lockReasonText(firstLock, lookup, t)}</span>}
-            {row.best.maxLevel !== null && row.best.maxLevel > progress.level && <> <span className="qc-warn">{t('unlock.levelNeed', { n: row.best.maxLevel })}</span></>}
-          </td>
-          <td className="qc-num">{formatInt(row.best.remaining)}</td>
-        </>
+        <td>
+          {now && catalog.quests[now.questId] && <><QuestLink quest={catalog.quests[now.questId]} /> <span className="qc-muted">{statusLabel(now.status, t)}</span></>}
+          {firstLock && <span className="qc-muted"><LockText reason={firstLock} catalog={catalog} lookup={lookup} /></span>}
+        </td>
       ) : (
-        <><td className="qc-muted">—</td><td className="qc-num qc-muted">—</td></>
+        <td className="qc-muted">—</td>
       )}
     </tr>
   )

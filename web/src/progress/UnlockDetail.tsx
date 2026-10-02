@@ -22,26 +22,34 @@ interface UnlockDetailProps {
   onShowPath(index: number): void
 }
 
-/** 펼친 행: 이미 해금된 입수처 안내 줄 + 큰 카드 1장(펼친 입수처) + 접힌 작은 카드들. 접힌 카드를 누르면 그 카드가 펼쳐진다. */
+/** 펼친 행: 이미 해금된 입수처 안내 줄 + 왼쪽 큰 카드(고른 입수처) + 오른쪽 입수처 목록(1개여도 표시). 목록을 누르면 왼쪽 카드가 바뀐다. */
 export function UnlockDetail({ row, catalog, progress, lookup, modColors, open, onOpen, onShowPath }: UnlockDetailProps) {
   const t = useT()
   const done = row.plans.filter((p) => p.state === 'unlocked')
-  const doneLine = (p: SourcePlan, key: 'unlock.done' | 'unlock.doneCraft') => (
+  const doneLine = (p: SourcePlan) => (
     <p key={p.source.questId + p.source.kind} className="qc-udone">
-      {t(key, { source: sourceLabel(p.source, lookup, t), quest: questNameOf(catalog, p.source.questId, t) })}
+      {t('unlock.done', { source: sourceLabel(p.source, lookup, t), quest: questNameOf(catalog, p.source.questId, t) })}
     </p>
   )
-  if (row.state === 'unlocked') return <>{done.map((p) => doneLine(p, 'unlock.done'))}</>
+  if (row.state === 'unlocked') return <>{done.map((p) => doneLine(p))}</>
 
   const cards = row.plans.map((plan, index) => ({ plan, index })).filter(({ plan }) => plan.state !== 'unlocked')
   const big = cards.find((c) => c.index === open) ?? cards[0]
   return (
     <>
-      {row.craftUnlocked && done.filter((p) => p.source.kind === 'craft').slice(0, 1).map((p) => doneLine(p, 'unlock.doneCraft'))}
+      {row.craftUnlocked && done.filter((p) => p.source.kind === 'craft').slice(0, 1).map((p) => doneLine(p))}
       <div className="qc-ucards">
-        {cards.map(({ plan, index }) => index === big.index
-          ? <PlanCard key={index} plan={plan} best={plan === row.best} catalog={catalog} progress={progress} lookup={lookup} modColors={modColors} onShowPath={() => onShowPath(index)} />
-          : <PlanCompact key={index} plan={plan} catalog={catalog} progress={progress} lookup={lookup} modColors={modColors} onOpen={() => onOpen(index)} />)}
+        <PlanCard key={big.index} plan={big.plan} catalog={catalog} progress={progress} lookup={lookup} modColors={modColors} onShowPath={() => onShowPath(big.index)} />
+        <ul className="qc-ulist">
+          {cards.map(({ plan, index }) => (
+            <li key={index}>
+              <button type="button" className={cls('qc-ulist__item', index === big.index && 'is-on')} aria-pressed={index === big.index} onClick={() => onOpen(index)}>
+                <SourceName plan={plan} catalog={catalog} lookup={lookup} modColors={modColors} />
+                {plan.state === 'blocked' && <span className="qc-tag qc-tag--bad">{t('unlock.chip.unreachable')}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   )
@@ -58,20 +66,28 @@ export function ModTag({ quest, colors }: { quest: CatalogQuest; colors: Record<
 
 interface CardProps { plan: SourcePlan; catalog: Catalog; progress: ProfileProgress; lookup: NameLookup; modColors: Record<string, number> }
 
-function CardHead({ plan, catalog, lookup, modColors }: Omit<CardProps, 'progress'>) {
+/** 입수처 이름 + 모드 태그 — 카드 머리와 오른쪽 목록이 같이 쓴다 */
+function SourceName({ plan, catalog, lookup, modColors }: Omit<CardProps, 'progress'>) {
   const t = useT()
   const quest = catalog.quests[plan.source.questId]
+  return <span className="qc-usrc">{sourceLabel(plan.source, lookup, t)}{quest && !quest.isVanilla && <ModTag quest={quest} colors={modColors} />}</span>
+}
+
+/** aside = 우측 끝 보조 텍스트("○○ 완료 시 해금") */
+function CardHead({ plan, catalog, lookup, modColors, aside }: Omit<CardProps, 'progress'> & { aside: string }) {
+  const t = useT()
   return (
     <span className="qc-ucard__head">
-      <span>{sourceLabel(plan.source, lookup, t)}{quest && !quest.isVanilla && <> <ModTag quest={quest} colors={modColors} /></>}</span>
-      {plan.state === 'blocked'
-        ? <span className="qc-tag qc-tag--bad">{t('unlock.chip.unreachable')}</span>
-        : <span className="qc-ucard__n">{t('unlock.count', { n: formatInt(plan.remaining) })}</span>}
+      <SourceName plan={plan} catalog={catalog} lookup={lookup} modColors={modColors} />
+      <span className="qc-ucard__aside">
+        <span className="qc-ucard__meta">{aside}</span>
+        {plan.state === 'blocked' && <span className="qc-tag qc-tag--bad">{t('unlock.chip.unreachable')}</span>}
+      </span>
     </span>
   )
 }
 
-function PlanCard({ plan, best, catalog, progress, lookup, modColors, onShowPath }: CardProps & { best: boolean; onShowPath(): void }) {
+function PlanCard({ plan, catalog, progress, lookup, modColors, onShowPath }: CardProps & { onShowPath(): void }) {
   const t = useT()
   const now = nextStep(plan)
   const goal = plan.source.questId
@@ -90,9 +106,8 @@ function PlanCard({ plan, best, catalog, progress, lookup, modColors, onShowPath
     </>
   )
   return (
-    <div className={cls('qc-ucard', best && 'is-best')}>
-      <CardHead plan={plan} catalog={catalog} lookup={lookup} modColors={modColors} />
-      <p className="qc-ucard__meta">{t(on, { quest: questNameOf(catalog, goal, t) })}{best && ` · ${t('unlock.card.best')}`}</p>
+    <div className="qc-ucard">
+      <CardHead plan={plan} catalog={catalog} lookup={lookup} modColors={modColors} aside={t(on, { quest: questNameOf(catalog, goal, t) })} />
       <ol className="qc-usteps">
         {pathLines(plan.steps, catalog).map((l, i) => {
           if (l.kind === 'gap') {
@@ -126,20 +141,5 @@ function PlanCard({ plan, best, catalog, progress, lookup, modColors, onShowPath
         <button type="button" className="qc-link qc-ucard__path" onClick={onShowPath}>{t('unlock.sum.path')}</button>
       </div>
     </div>
-  )
-}
-
-function PlanCompact({ plan, catalog, progress, lookup, modColors, onOpen }: CardProps & { onOpen(): void }) {
-  const t = useT()
-  const now = nextStep(plan)
-  return (
-    <button type="button" className="qc-ucard qc-ucard--compact" onClick={onOpen}>
-      <CardHead plan={plan} catalog={catalog} lookup={lookup} modColors={modColors} />
-      <span className="qc-ucard__meta">
-        {plan.blockReason ? blockText(plan.blockReason, catalog, t) : now ? questNameOf(catalog, now.questId, t) : questNameOf(catalog, plan.source.questId, t)}
-        {plan.maxLevel !== null && plan.maxLevel > progress.level && <> · <span className="qc-warn">{t('unlock.levelNeed', { n: plan.maxLevel })}</span></>}
-        {' · '}{t('unlock.card.expand')}
-      </span>
-    </button>
   )
 }
