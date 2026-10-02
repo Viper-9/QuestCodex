@@ -25,7 +25,10 @@
       "key": "interchange",
       "internalNames": [
         "Interchange"
-      ]
+      ],
+      "variants": {
+        "manimal": "interchange-manimal"
+      }
     },
     {
       "key": "laboratory",

@@ -35,7 +35,24 @@ export interface MapDef {
 }
 
 export interface MapIndex {
-  maps: { key: string; internalNames: string[] }[]
+  /** variants: 변형 ID → 그 변형의 맵 폴더 키(09 스펙, 예: manimal → interchange-manimal) */
+  maps: { key: string; internalNames: string[]; variants?: Record<string, string> }[]
+}
+
+/**
+ * 서버가 알려 준 활성 변형(catalog.mapVariants: 서버 맵 키 → 변형 ID)을 index 에 적용한다. 변형 폴더가 있는 항목은
+ * key 만 그 폴더로 바꾸므로 mapKeyFor·탭·잠긴 문이 그대로 변형 지도를 쓴다. 변형이 없거나 모르는 ID 면 그대로.
+ */
+export function applyMapVariants(index: MapIndex, active: Record<string, string> | undefined): MapIndex {
+  if (!active || Object.keys(active).length === 0) return index
+  return {
+    ...index,
+    maps: index.maps.map((d) => {
+      const variant = d.internalNames.map((n) => active[n.toLowerCase()]).find((v) => v !== undefined)
+      const folder = variant === undefined ? undefined : d.variants?.[variant]
+      return folder ? { ...d, key: folder } : d
+    }),
+  }
 }
 
 /** 마커 하나. n = 위치가 있는 목표 중 몇 번째인가(1부터). 한 목표에 점이 여럿이면 같은 n 이 여럿. */

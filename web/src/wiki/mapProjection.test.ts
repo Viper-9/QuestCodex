@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import type { LockedDoor, MapArea, Objective, ObjectiveLocation } from '../api/catalog'
 import customsJson from '../../public/maps/bigmap/map.json'
 import indexJson from '../../public/maps/index.json'
-import { areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, firstLevel, markerLevels, doorsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
+import expandedJson from '../../public/maps/interchange-manimal/map.json'
+import { applyMapVariants, areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, firstLevel, markerLevels, doorsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
 
+const expanded = expandedJson as MapDef
 const customs = customsJson as MapDef
 const index = indexJson as MapIndex
 const ground = customs.layers.find((l) => l.level === 0)!
@@ -265,5 +267,36 @@ describe('zoomAt / fitView', () => {
   it('배율은 1~12 로 제한된다', () => {
     expect(zoomAt(fitView(), 0.5, 10, 10)).toEqual(fitView())
     expect(zoomAt({ scale: 10, x: 0, y: 0 }, 2, 0, 0).scale).toBe(12)
+  })
+})
+
+describe('applyMapVariants (09 지도 변형)', () => {
+  it('모드가 없는 서버면 index 를 그대로 둔다', () => {
+    expect(applyMapVariants(index, undefined)).toBe(index)
+    expect(applyMapVariants(index, {})).toBe(index)
+    expect(buildTabs([obj('a', [at('Interchange', [0, 0, 0])])], applyMapVariants(index, undefined)).map((t) => t.key)).toEqual(['interchange'])
+  })
+
+  it('확장 인터체인지가 활성이면 인터체인지 탭·잠긴 문이 변형 폴더를 쓰고 다른 맵은 그대로다', () => {
+    const active = applyMapVariants(index, { interchange: 'manimal' })
+    const tabs = buildTabs([obj('a', [at('Interchange', [0, 0, 0])]), obj('b', [at('bigmap', [0, 0, 0])])], active)
+    expect(tabs.map((t) => t.key)).toEqual(['interchange-manimal', 'bigmap'])
+    const door: LockedDoor = { keyTpl: 'k', keyName: 'k', kind: 'door', position: { x: -379, y: 2, z: -207 } }
+    expect(doorsForTab({ interchange: [door] }, active, 'interchange-manimal')).toEqual([door])
+  })
+
+  it('모르는 변형 ID 는 바닐라로 둔다', () => {
+    expect(buildTabs([obj('a', [at('Interchange', [0, 0, 0])])], applyMapVariants(index, { interchange: 'other' }))[0].key).toBe('interchange')
+  })
+
+  it('확장 지도는 바닐라 범위 밖 서쪽 문(x −379)과 동쪽 존(x 530)도 지도 안에 들어온다', () => {
+    const ground = expanded.layers[0]
+    for (const p of [{ x: -379.33, y: 2, z: -207.43 }, { x: 530.33, y: 32.86, z: 82.37 }]) {
+      const q = project(expanded, ground, p)
+      expect(q.x).toBeGreaterThan(0)
+      expect(q.x).toBeLessThan(ground.viewBox.width)
+      expect(q.y).toBeGreaterThan(0)
+      expect(q.y).toBeLessThan(ground.viewBox.height)
+    }
   })
 })

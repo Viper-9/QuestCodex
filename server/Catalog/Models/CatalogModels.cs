@@ -118,4 +118,6 @@ public sealed record Catalog(
     /// 제출·설치 아이템 tpl → 최상위 카테고리 Id. 핸드북에 없는 아이템은 빠진다.
     SortedDictionary<string, string> ItemCategoryOf,
     /// <summary>map 키 → 잠긴 문. 퀘스트와 무관하게 맵마다 한 번만 싣는다(위치정보 팝업의 잠긴 문 토글).</summary>
-    SortedDictionary<string, List<LockedDoor>> LockedDoors);
+    SortedDictionary<string, List<LockedDoor>> LockedDoors,
+    /// <summary>map 키 → 활성 지도 변형 ID(맵 교체 모드가 로드됐을 때만, 예: interchange → manimal). 웹이 maps/index.json 의 변형 폴더를 고른다.</summary>
+    SortedDictionary<string, string> MapVariants);

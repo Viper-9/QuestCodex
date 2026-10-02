@@ -88,6 +88,71 @@ public class QuestZoneSnapshotTests
         Assert.Equal([new MapPoint(1, 2, 3)], snapshot.Zones["tarkovstreets"]["two_boxes"]);
     }
 
+    private const string VariantJson = """
+        { "collectedWith": "x",
+          "zones": {
+            "interchange": { "moved": [{ "x": 274, "y": 22, "z": 14, "sx": 2, "sz": 2 }], "gone": [{ "x": 1, "y": 1, "z": 1 }] },
+            "woods": { "w": [{ "x": 5, "y": 5, "z": 5 }] } },
+          "doors": { "interchange": [{ "key": "k1", "type": "Door", "x": 1, "y": 2, "z": 3 }] },
+          "variants": { "manimal": {
+            "zones": { "interchange": { "moved": [{ "x": 429, "y": 28, "z": 125 }], "new_zone": [{ "x": 530, "y": 32, "z": 82 }] } },
+            "doors": { "interchange": [{ "key": "k2", "type": "Door", "x": -379, "y": 2, "z": -207 }] } } } }
+        """;
+
+    [Fact]
+    public void Variants_are_parsed_but_not_applied_without_an_active_mod()
+    {
+        var snapshot = QuestZoneSnapshot.Parse(VariantJson);
+
+        Assert.Single(snapshot.Variants);
+        Assert.Same(snapshot, snapshot.WithVariants(new Dictionary<string, string>()));
+        Assert.Equal(274, snapshot.Zones["interchange"]["moved"][0].X);
+        Assert.Equal("k1", snapshot.Doors["interchange"][0].KeyTpl);
+    }
+
+    /// <summary>
+    /// 확장 인터체인지: 맵 하나를 통째로 바꾼다. 옮겨진 존은 새 좌표, 변형에 없는 존은 바닐라로 돌아가지 않고 빠지고,
+    /// 변형 존에 크기가 없으면 바닐라 영역도 남지 않는다. 다른 맵은 그대로.
+    /// </summary>
+    [Fact]
+    public void Active_variant_replaces_the_whole_map()
+    {
+        var snapshot = QuestZoneSnapshot.Parse(VariantJson).WithVariants(new Dictionary<string, string> { ["interchange"] = "manimal" });
+
+        var interchange = snapshot.Zones["interchange"];
+        Assert.Equal([new MapPoint(429, 28, 125)], interchange["moved"]);
+        Assert.True(interchange.ContainsKey("new_zone"));
+        Assert.False(interchange.ContainsKey("gone"));
+        Assert.False(snapshot.Areas.ContainsKey("interchange"));
+        Assert.Equal(["k2"], snapshot.Doors["interchange"].Select(d => d.KeyTpl));
+        Assert.Equal(5, snapshot.Zones["woods"]["w"][0].X);
+    }
+
+    [Fact]
+    public void Unknown_variant_or_map_keeps_vanilla()
+    {
+        var snapshot = QuestZoneSnapshot.Parse(VariantJson);
+
+        Assert.Same(snapshot, snapshot.WithVariants(new Dictionary<string, string> { ["interchange"] = "other" }));
+        Assert.Same(snapshot, snapshot.WithVariants(new Dictionary<string, string> { ["woods"] = "manimal" }));
+    }
+
+    [Fact]
+    public void Bundled_snapshot_carries_the_expanded_interchange_variant()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Data", "quest-zones.json");
+        var snapshot = QuestZoneSnapshot.Parse(File.ReadAllText(path));
+
+        var vanilla = snapshot.Zones["interchange"]["place_WARBLOOD_04_2"][0];
+        var expanded = snapshot.WithVariants(new Dictionary<string, string> { ["interchange"] = "manimal" });
+        var moved = expanded.Zones["interchange"]["place_WARBLOOD_04_2"][0];
+
+        // 2026-10-03 확장 덤프: 바닐라 퀘스트 존이 동쪽 확장 구역으로 190m 옮겨졌다
+        Assert.True(Math.Abs(moved.X - vanilla.X) > 100, $"{vanilla} -> {moved}");
+        Assert.True(expanded.Zones["interchange"].ContainsKey("shorl_exit_sniper_opt"));
+        Assert.False(snapshot.Zones["interchange"].ContainsKey("shorl_exit_sniper_opt"));
+    }
+
     [Fact]
     public void Parse_reads_locked_doors_per_map()
     {

@@ -40,6 +40,8 @@ public sealed record CatalogInput(
     /// <summary>아이템 tpl → 핸드북 카테고리 Id(가장 안쪽).</summary>
     IReadOnlyDictionary<string, string>? HandbookItemParents = null,
     /// <summary>map → zoneId → 영역(스냅샷 Bounds + 모드 WTT Scale·Rotation). InZone·LaunchFlare 목표에만 붙는다.</summary>
-    AreaTable? QuestZoneAreas = null);
+    AreaTable? QuestZoneAreas = null,
+    /// <summary>map 키 → 활성 지도 변형 ID(MapVariantDetector). 그대로 Catalog.MapVariants 로 낸다.</summary>
+    IReadOnlyDictionary<string, string>? MapVariants = null);
 
 public sealed record HandbookCategoryInput(string? ParentId, string? Icon);
