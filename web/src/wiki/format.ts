@@ -1,4 +1,4 @@
-import type { Objective, Requirement, Reward } from '../api/catalog'
+import type { LockedDoor, Objective, Requirement, Reward } from '../api/catalog'
 import type { T, UiKey } from '../i18n/index'
 import type { NameLookup } from './derive'
 
@@ -123,4 +123,15 @@ export function formatObjective(o: Objective, t: T): FormattedLine {
   }
   if (o.targetCount !== null) text += t('fmt.objectiveCount', { n: formatInt(o.targetCount) })
   return plain(text)
+}
+
+/** 잠긴 문 말풍선(06·11 스펙): 열쇠는 이름만, 키카드·폭파문·해치는 종류 + 필요한 아이템, 키패드는 고정 코드가 있으면 코드. */
+export function doorLabel(door: LockedDoor, t: T): string {
+  switch (door.kind) {
+    case 'keycard': return `${t('map.keycard')} · ${door.keyName}`
+    case 'keypad': return door.code ? `${t('map.keypad')} · ${t('map.keypadCode', { code: door.code })}` : t('map.keypad')
+    case 'explosive': return t('map.explosiveDoor', { item: door.keyName })
+    case 'hatch': return t('map.frozenHatch', { item: door.keyName })
+    default: return door.keyName
+  }
 }

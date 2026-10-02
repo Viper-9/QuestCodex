@@ -9,7 +9,8 @@ import type { NameLookup } from '../wiki/derive'
 import { formatInt, formatObjective, lineText } from '../wiki/format'
 import { distinctNames, exitText, optionText } from '../wiki/prep'
 import { objectiveColor } from '../wiki/mapProjection'
-import { dedupeRows, entryPlace, groupByQuest, MAP_ORDER, orderRaidQuests, mapBrief, mapTabs, missing, placeFinds, raidEntries, raidFinds, raidMapPlan, type NeedRow, type PlacedRow, type RuleRow, type RaidEntry } from './derive'
+import { mapName as wikiMapName } from '../wiki/mapNames'
+import { dedupeRows, entryPlace, groupByQuest, orderRaidQuests, mapBrief, mapTabs, missing, placeFinds, raidEntries, raidFinds, raidMapPlan, type NeedRow, type PlacedRow, type RuleRow, type RaidEntry } from './derive'
 import { Counter, ItemName, QuestLink } from './parts'
 import { RaidMap } from './RaidMap'
 
@@ -26,13 +27,13 @@ interface RaidViewProps {
 const VARIANT_NAMES = new Set(['interchange-manimal'])
 
 /**
- * 탭 이름. 번역이 없는 맵(모드 맵)은 키 그대로 — feature/quest-map 의 mapName 과 같은 규칙.
+ * 탭 이름. 위치정보 팝업 탭과 같은 이름(wiki/mapNames — 번역이 없는 모드 맵은 키 그대로).
  * 맵 교체 모드가 로드된 서버(catalog.mapVariants)면 변형 이름("확장된 인터체인지").
  */
 function mapName(key: string, t: T, variants: Record<string, string> | undefined): string {
   const variant = variants?.[key] && `${key}-${variants[key]}`
   if (variant && VARIANT_NAMES.has(variant)) return t(`map.name.${variant}` as UiKey)
-  return MAP_ORDER.includes(key) ? t(`map.name.${key}` as UiKey) : key
+  return wikiMapName(key, t)
 }
 
 /** 레이드 준비 — 맵 브리핑(B1~B6) + 위치 지도. 지도 번호는 퀘스트 단위라 "이 맵" 목록 줄에도 같은 번호를 붙인다. */

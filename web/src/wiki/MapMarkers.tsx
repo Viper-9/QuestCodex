@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import type { LockedDoor, MapExit } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
 import type { UiKey } from '../i18n/index'
+import { doorLabel } from './format'
 import { mapAssetUrl } from './mapAssets'
 import { serverMapName } from './mapNames'
 
@@ -24,7 +25,7 @@ export function DoorMarker({ door, style, owned }: DoorMarkerProps) {
   const t = useT()
   const icon = mapAssetUrl('icons', owned ? 'door_with_key.png' : 'door_with_lock.png')
   const state = owned === undefined ? '' : owned ? ' is-owned' : ' is-missing'
-  const label = door.kind === 'keycard' ? `${t('map.keycard')} · ${door.keyName}` : door.keyName
+  const label = doorLabel(door, t)
   return (
     <span className={`qc-map__door${state}`} style={{ ...style, ['--icon' as string]: `url("${icon}")` }}>
       <img src={icon} alt={label} draggable={false} />

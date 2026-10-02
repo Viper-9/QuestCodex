@@ -22,8 +22,11 @@ export interface MapAttribution {
   modifiedBy: string | null
   license: string
   licenseFile: string
-  /** 좌표 보정 데이터 출처(크레딧 표기). 없으면 DynamicMaps — build-maps.js 산출물은 이 필드를 쓰지 않는다 */
-  calibration?: string
+  /**
+   * 좌표 보정 데이터 출처(크레딧 표기). 없으면 DynamicMaps — build-maps.js 산출물은 이 필드를 쓰지 않는다.
+   * null 이면 표기하지 않는다(수정자가 직접 맞춘 지도).
+   */
+  calibration?: string | null
 }
 
 export interface MapDef {
@@ -31,6 +34,8 @@ export interface MapDef {
   internalNames: string[]
   coordinateRotation: number
   defaultLevel: number
+  /** 층 버튼 이름 방식. 없으면 지하·지상·n층, 'deck' 이면 "데크 n"(층 번호 그대로, 11 스펙) */
+  floorNames?: 'deck'
   layers: MapLayerDef[]
   attribution: MapAttribution
   source: string

@@ -86,12 +86,17 @@ export interface MapArea {
   maxY?: number
 }
 
-/** 열쇠가 필요한 문. keyTpl 은 지금 쓰지 않고, 보유 열쇠 표시(06 스펙 §4.3)를 붙일 때의 대조 키다. */
+/**
+ * 열쇠가 필요한 문. keyTpl 은 지금 쓰지 않고, 보유 열쇠 표시(06 스펙 §4.3)를 붙일 때의 대조 키다.
+ * 아이스브레이커(11 스펙)의 열쇠 없는 문: keypad(keyTpl·keyName 빈 문자열, 고정 코드면 code), explosive(SZ-1 폭약),
+ * hatch(가스 토치) — keyName 은 필요한 아이템 이름.
+ */
 export interface LockedDoor {
   keyTpl: string
   keyName: string
-  kind: 'door' | 'keycard'
+  kind: 'door' | 'keycard' | 'keypad' | 'explosive' | 'hatch'
   position: MapPoint
+  code?: string | null
 }
 
 /**

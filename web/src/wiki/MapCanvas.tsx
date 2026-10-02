@@ -149,7 +149,7 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, area
         <div className="qc-map__floors" role="group" aria-label={t('map.floors')}>
           {floors.map((f) => {
             const dot = dotted.has(f.level)
-            const name = floorName(f.level, t)
+            const name = floorName(f.level, def.floorNames, t)
             return (
               <button
                 key={f.level} type="button"
@@ -175,7 +175,9 @@ function emphasis(hot: number | null, n: number): string {
   return hot === n ? ' is-hot' : ' is-dim'
 }
 
-function floorName(level: number, t: T): string {
+/** 층 버튼 이름. 배(아이스브레이커, 11 스펙)는 층 번호가 곧 포스터·공략의 데크 번호라 "데크 n". */
+function floorName(level: number, names: MapDef['floorNames'], t: T): string {
+  if (names === 'deck') return t('map.floor.deck', { n: level })
   if (level < 0) return t('map.floor.underground')
   if (level === 0) return t('map.floor.ground')
   return t('map.floor.upper', { n: level + 1 })
