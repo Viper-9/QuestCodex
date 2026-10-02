@@ -94,6 +94,22 @@ export interface LockedDoor {
   position: MapPoint
 }
 
+/**
+ * 탈출구·환승(10 스펙). name 은 tarkov.dev 영문 이름(모든 UI 언어 공통), 환승은 빈 문자열이고 target 이 목적지 맵 키.
+ * requirement 는 서버가 로케일로 푼 조건 문구, 문구가 없는 조건은 requirementKind 코드로 와서 웹 i18n 이 번역한다.
+ * chance 는 등장 확률이 100% 미만일 때만.
+ */
+export interface MapExit {
+  key: string
+  name: string
+  kind: 'pmc' | 'shared' | 'scav' | 'transit'
+  position: MapPoint
+  requirement?: string | null
+  requirementKind?: 'coop' | 'train' | 'secret' | 'alpinist' | 'switch' | null
+  chance?: number | null
+  target?: string | null
+}
+
 export interface Objective {
   conditionId: string
   conditionType: string
@@ -183,6 +199,8 @@ export interface Catalog {
   lockedDoors?: Record<string, LockedDoor[]>
   /** 서버 맵 키 → 활성 지도 변형 ID(맵 교체 모드가 로드된 서버만, 예: interchange → manimal). 구버전 서버는 보내지 않는다. */
   mapVariants?: Record<string, string>
+  /** 서버 맵 키 → 탈출구·환승. 구버전 서버면 undefined. */
+  exits?: Record<string, MapExit[]>
 }
 
 export interface CatalogItemCategory {

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { LockedDoor, MapArea, Objective, ObjectiveLocation } from '../api/catalog'
+import type { LockedDoor, MapArea, MapExit, Objective, ObjectiveLocation } from '../api/catalog'
 import customsJson from '../../public/maps/bigmap/map.json'
 import indexJson from '../../public/maps/index.json'
 import expandedJson from '../../public/maps/interchange-manimal/map.json'
-import { applyMapVariants, areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, firstLevel, markerLevels, doorsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
+import { applyMapVariants, areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, firstLevel, markerLevels, doorsForTab, exitsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
 
 const expanded = expandedJson as MapDef
 const customs = customsJson as MapDef
@@ -213,6 +213,26 @@ describe('buildTabs areas', () => {
 
   it('areas 가 없는(구버전 서버) 위치도 그대로 동작', () => {
     expect(buildTabs([obj('a', [at('bigmap', [1, 0, 1])])], index)[0].areas).toEqual([])
+  })
+})
+
+describe('exitsForTab', () => {
+  const exit = (key: string, x: number, kind: MapExit['kind'] = 'pmc'): MapExit =>
+    ({ key, name: key, kind, position: { x, y: 0, z: 0 }, requirement: null, requirementKind: null, chance: null, target: null })
+
+  it('탭의 맵 정의에 속한 서버 맵 키의 탈출구를 모으고, 짝 맵의 같은 탈출구는 한 번만', () => {
+    const exits = {
+      factory4_day: [exit('Gate 3', 1), exit('12', 9, 'transit')],
+      factory4_night: [exit('Gate 3', 1), exit('Office', 3, 'scav')],
+      bigmap: [exit('Crossroads', 4)],
+    }
+    expect(exitsForTab(exits, index, 'factory4_day').map((e) => e.key)).toEqual(['Gate 3', '12', 'Office'])
+  })
+
+  it('맵 키는 대소문자를 무시하고, 탈출구 정보가 없으면 빈 배열', () => {
+    expect(exitsForTab({ sandbox_high: [exit('a', 1)] }, index, 'sandbox')).toHaveLength(1)
+    expect(exitsForTab(undefined, index, 'bigmap')).toEqual([])
+    expect(exitsForTab({}, index, 'labyrinth')).toEqual([])
   })
 })
 

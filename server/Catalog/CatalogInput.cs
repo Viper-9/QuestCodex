@@ -42,6 +42,10 @@ public sealed record CatalogInput(
     /// <summary>map → zoneId → 영역(스냅샷 Bounds + 모드 WTT Scale·Rotation). InZone·LaunchFlare 목표에만 붙는다.</summary>
     AreaTable? QuestZoneAreas = null,
     /// <summary>map 키 → 활성 지도 변형 ID(MapVariantDetector). 그대로 Catalog.MapVariants 로 낸다.</summary>
-    IReadOnlyDictionary<string, string>? MapVariants = null);
+    IReadOnlyDictionary<string, string>? MapVariants = null,
+    /// <summary>map → 스냅샷의 탈출구·환승 좌표(tarkov.dev). 서버 DB 목록(LocationExits)과 합쳐 Catalog.Exits 로 낸다.</summary>
+    IReadOnlyDictionary<string, Models.SnapshotExits>? ExitPositions = null,
+    /// <summary>map → 서버 DB 의 탈출구(allExtracts)·환승(base.transits). 무엇을 그릴지는 이 목록이 정한다.</summary>
+    IReadOnlyDictionary<string, Models.LocationExits>? LocationExits = null);
 
 public sealed record HandbookCategoryInput(string? ParentId, string? Icon);

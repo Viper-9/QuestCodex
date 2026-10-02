@@ -154,6 +154,68 @@ public class VanillaSmokeTests
         Assert.True(huntsmanFlare.MaxY < 2, $"flare anchored at {huntsmanFlare.MinY}..{huntsmanFlare.MaxY}");
     }
 
+    /// <summary>
+    /// 탈출구(10 스펙 §4): 실제 DB(allExtracts·secretExits·base.transits) + 동봉 스냅샷(tarkov.dev, 등대는 덤프). 모든 탈출구가
+    /// 좌표를 가져야 한다. 경고가 생기면 SPT 업데이트로 키가 바뀌었거나 스냅샷 데이터가 빠진 것이다.
+    /// </summary>
+    [Fact]
+    public void Vanilla_exits_have_positions()
+    {
+        var questsPath = Path.Combine(DataDir, "templates", "quests.json");
+        if (!File.Exists(questsPath))
+        {
+            return; // skip: no local SPT install
+        }
+
+        var en = Deserialize<Dictionary<string, string>>(Path.Combine(DataDir, "locales", "global", "en.json"));
+        var db = new Dictionary<string, LocationExits>(StringComparer.Ordinal);
+        foreach (var dir in Directory.GetDirectories(Path.Combine(DataDir, "locations")))
+        {
+            var extractsPath = Path.Combine(dir, "allExtracts.json");
+            if (!File.Exists(extractsPath)) continue;
+            using var extracts = JsonDocument.Parse(File.ReadAllText(extractsPath));
+            using var baseJson = JsonDocument.Parse(File.ReadAllText(Path.Combine(dir, "base.json")));
+            var rows = extracts.RootElement.EnumerateArray().Select(e => new LocationExitRow(
+                e.GetProperty("Name").GetString()!, e.GetProperty("Side").GetString()!, e.GetProperty("PassageRequirement").GetString()!,
+                e.GetProperty("Count").GetInt32(), e.GetProperty("Id").GetString(), e.GetProperty("RequirementTip").GetString(),
+                e.GetProperty("Chance").GetDouble())).ToList();
+            if (baseJson.RootElement.TryGetProperty("secretExits", out var secrets))
+            {
+                foreach (var s in secrets.EnumerateArray())
+                {
+                    rows.Add(new LocationExitRow(s.GetProperty("Name").GetString()!, "Pmc", "Secret", 0, null, null, null));
+                    rows.Add(new LocationExitRow(s.GetProperty("Name").GetString()!, "Scav", "Secret", 0, null, null, null));
+                }
+            }
+
+            var transits = baseJson.RootElement.TryGetProperty("transits", out var t)
+                ? t.EnumerateArray().Select(x => new LocationTransitRow(
+                    x.GetProperty("id").GetInt32().ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    x.GetProperty("active").GetBoolean(), x.GetProperty("location").GetString()!)).ToList()
+                : [];
+            db[baseJson.RootElement.GetProperty("Id").GetString()!.ToLowerInvariant()] = new LocationExits(rows, transits);
+        }
+
+        var snapshot = QuestZoneSnapshot.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Data", "quest-zones.json")));
+        var warnings = new List<CatalogWarning>();
+        var exits = ExitBuilder.Build(snapshot.Exits, db, new LocaleResolver(en, en), tpl => tpl, warnings);
+
+        Assert.Empty(warnings.Select(w => w.Detail));
+        // 등대는 덤프 좌표: 라이브에서 없어진 택시 V-Ex 가 있고, 이름은 build-snapshot.js 의 EXIT_NAMES
+        Assert.Contains(exits["lighthouse"], e => e is { Key: " V-Ex_light", Name: "Road to Military Base V-Ex", Kind: "pmc", Chance: 50 });
+        // 인터체인지: 공용 EMERCOM, PMC 전용 발전소(5,000 RUB, 50%), 협동은 공용, 환승 2개(세관·시내)
+        var interchange = exits["interchange"];
+        Assert.Contains(interchange, e => e is { Key: "SE Exfil", Kind: "shared", Name: "Emercom Checkpoint" });
+        Assert.Contains(interchange, e => e is { Key: "PP Exfil", Kind: "pmc", Requirement: "Bring 5,000 RUB", Chance: 50 });
+        Assert.Contains(interchange, e => e is { Key: "Interchange Cooperation", Kind: "shared", RequirementKind: "coop" });
+        Assert.Equal(["bigmap", "tarkovstreets"], interchange.Where(e => e.Kind == "transit").Select(e => e.Target));
+        Assert.Contains(exits["bigmap"], e => e.Kind == "scav");
+        // 진영별로 키가 다른 같은 탈출구는 공용 하나로(해안선 Road to Customs)
+        Assert.Single(exits["shoreline"], e => e.Name == "Road to Customs" && e.Kind == "shared");
+        // 비밀 탈출구(base.secretExits): 삼림 "Railway Bridge to Tarkov"는 공용 + secret
+        Assert.Contains(exits["woods"], e => e is { Key: "woods_secret_minefield", Kind: "shared", RequirementKind: "secret", Name: "Railway Bridge to Tarkov" });
+    }
+
     private static T Deserialize<T>(string path)
     {
         try

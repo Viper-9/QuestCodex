@@ -79,7 +79,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
           )}
           {/* 오른쪽 칸이 길어 왼쪽 아래가 비므로 거기에 두고, 스크롤해도 따라오게 sticky(progress.css) */}
           <RaidMap
-            map={selected} mapLabel={mapName(selected, t, catalog.mapVariants)} plan={plan} lockedDoors={catalog.lockedDoors}
+            map={selected} mapLabel={mapName(selected, t, catalog.mapVariants)} plan={plan} lockedDoors={catalog.lockedDoors} mapExits={catalog.exits}
             mapVariants={catalog.mapVariants} hot={hot} onHot={setHot}
           />
         </div>

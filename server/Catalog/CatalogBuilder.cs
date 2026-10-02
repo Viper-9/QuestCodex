@@ -81,9 +81,10 @@ public static class CatalogBuilder
 
         var (itemCategories, itemCategoryOf) = BuildItemCategories(quests, input);
         var lockedDoors = BuildLockedDoors(input.LockedDoors, rewardParser.NameOf);
+        var exits = ExitBuilder.Build(input.ExitPositions, input.LocationExits, locale, rewardParser.NameOf, warnings);
 
         return new Models.Catalog(input.SptVersion, input.ModVersion, now, input.Lang, traders, quests, rewardIndex, warnings, itemCategories, itemCategoryOf, lockedDoors,
-            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal));
+            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal), exits);
     }
 
     /// <summary>스냅샷 문에 열쇠 이름을 붙인다. 이름은 보상 아이템과 같은 규칙(로케일 → 템플릿 이름 → tpl).</summary>
