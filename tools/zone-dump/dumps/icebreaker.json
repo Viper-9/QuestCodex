@@ -1,0 +1,403 @@
+{
+  "Location": "icebreaker",
+  "DumpedAtUtc": "2026-10-02T18:21:47.4144567Z",
+  "Zones": [
+    {
+      "Id": "icebreaker_heli_zone",
+      "Type": "FlareShootDetectorZone",
+      "Active": true,
+      "Position": {
+        "X": 0.0690296441,
+        "Y": 21.7244358,
+        "Z": -63.4931335
+      },
+      "Bounds": {
+        "Min": {
+          "X": -12.7164392,
+          "Y": 21.053772,
+          "Z": -76.19041
+        },
+        "Max": {
+          "X": 12.9903994,
+          "Y": 32.93863,
+          "Z": -48.6165466
+        }
+      },
+      "Colliders": [
+        {
+          "Type": "BoxCollider",
+          "Min": {
+            "X": -12.7164392,
+            "Y": 21.053772,
+            "Z": -76.19041
+          },
+          "Max": {
+            "X": 12.9903994,
+            "Y": 32.93863,
+            "Z": -48.6165466
+          },
+          "Center": {
+            "X": 0.1369799,
+            "Y": 26.9962,
+            "Z": -62.4034767
+          },
+          "Size": {
+            "X": 25.7068386,
+            "Y": 11.8848591,
+            "Z": 27.57386
+          },
+          "Rotation": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "Yaw": 0.0
+        }
+      ]
+    },
+    {
+      "Id": "install_device",
+      "Type": "PlaceItemTrigger",
+      "Active": true,
+      "Position": {
+        "X": -0.11,
+        "Y": 16.0,
+        "Z": 31.6
+      },
+      "Bounds": {
+        "Min": {
+          "X": -4.11,
+          "Y": 14.9,
+          "Z": 30.8000031
+        },
+        "Max": {
+          "X": 3.88999987,
+          "Y": 17.1,
+          "Z": 32.4
+        }
+      },
+      "Colliders": [
+        {
+          "Type": "BoxCollider",
+          "Min": {
+            "X": -4.11,
+            "Y": 14.9,
+            "Z": 30.8000031
+          },
+          "Max": {
+            "X": 3.88999987,
+            "Y": 17.1,
+            "Z": 32.4
+          },
+          "Center": {
+            "X": -0.11,
+            "Y": 16.0,
+            "Z": 31.6
+          },
+          "Size": {
+            "X": 8.0,
+            "Y": 2.2,
+            "Z": 1.6
+          },
+          "Rotation": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "Yaw": 0.0
+        }
+      ]
+    }
+  ],
+  "Doors": [
+    {
+      "Id": "door_Icebreaker_Indoor_01_00059",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -7.00484228,
+        "Y": 32.96047,
+        "Z": 21.4645786
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00052",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": 5.90564,
+        "Y": 35.65247,
+        "Z": 24.8195782
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00001",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": 5.24097872,
+        "Y": 27.5341549,
+        "Z": 45.0516777
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_02_00084",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -0.0475667566,
+        "Y": 8.657899,
+        "Z": -16.87664
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00017",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -5.24724436,
+        "Y": 30.2396126,
+        "Z": 33.20791
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00010",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": 5.24496126,
+        "Y": 30.2396126,
+        "Z": 34.1034241
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00051",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": 5.90015745,
+        "Y": 32.9504662,
+        "Z": 21.4645786
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00060",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -7.00484657,
+        "Y": 35.65347,
+        "Z": 24.7915783
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00008",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -5.24724436,
+        "Y": 27.5396175,
+        "Z": 44.1472969
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Outdoor_00000",
+      "KeyId": "",
+      "Type": "Door",
+      "Operatable": true,
+      "Position": {
+        "X": -11.11436,
+        "Y": 24.866703,
+        "Z": 18.916256
+      }
+    },
+    {
+      "Id": "Rezak_Disable",
+      "KeyId": "67ab3d4b83869afd170fdd3f",
+      "Type": "Switch",
+      "Operatable": true,
+      "Position": {
+        "X": -1.52499986,
+        "Y": 43.446846,
+        "Z": 36.41532
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_02_00001",
+      "KeyId": "69bb3e54d6c67f6265004ab9",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 10.5037956,
+        "Y": 16.7611065,
+        "Z": 25.5869389
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Scripts_00006",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": -7.67465162,
+        "Y": 27.5396175,
+        "Z": 32.6302032
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00031",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": -7.65773535,
+        "Y": 30.2396126,
+        "Z": 25.9816265
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Scripts_00002",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": -7.67465162,
+        "Y": 24.8311787,
+        "Z": 33.1270065
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Scripts_00013",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 7.668512,
+        "Y": 30.2393913,
+        "Z": 37.8183556
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00030",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": -7.67465162,
+        "Y": 27.5396175,
+        "Z": 42.4310074
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Scripts_00000",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 7.668512,
+        "Y": 24.8396168,
+        "Z": 32.2370872
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00028",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 7.668512,
+        "Y": 24.8396168,
+        "Z": 24.0801
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00029",
+      "KeyId": "69bb3ec9f609db77390b0e1a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 7.668512,
+        "Y": 27.5396137,
+        "Z": 23.6170979
+      }
+    },
+    {
+      "Id": "door_Icebreaker_Indoor_01_00012",
+      "KeyId": "69bb3f278af9f360ee010a7a",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": -5.24553061,
+        "Y": 35.6396065,
+        "Z": 28.3906174
+      }
+    },
+    {
+      "Id": "door_Icebreaker_ADD_LABS_00000",
+      "KeyId": "69bb3f7df94327bc0f0230c9",
+      "Type": "KeycardDoor",
+      "Operatable": true,
+      "Position": {
+        "X": 11.4261217,
+        "Y": 19.4597931,
+        "Z": 41.6308022
+      }
+    }
+  ],
+  "Exits": [
+    {
+      "Name": "Icebreaker_Exit_Heli",
+      "Type": "ExfiltrationPoint",
+      "Active": true,
+      "Position": {
+        "X": 0.28,
+        "Y": -977.44,
+        "Z": -66.03
+      },
+      "Bounds": {
+        "Min": {
+          "X": -4.9884243,
+          "Y": -978.94,
+          "Z": -73.7062149
+        },
+        "Max": {
+          "X": 5.54842472,
+          "Y": -975.94,
+          "Z": -58.3537827
+        }
+      }
+    }
+  ],
+  "Transits": [],
+  "Named": [
+    {
+      "Name": "Icebreaker_chain_door",
+      "Active": true,
+      "Position": {
+        "X": -10.56,
+        "Y": 23.7763729,
+        "Z": 19.0906773
+      }
+    },
+    {
+      "Name": "INTERACTIVE_Icebreaker_exterior_hatchway_door_frozen",
+      "Active": true,
+      "Position": {
+        "X": -1.52499986,
+        "Y": 43.331,
+        "Z": 35.686
+      }
+    }
+  ]
+}
