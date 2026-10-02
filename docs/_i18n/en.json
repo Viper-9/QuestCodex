@@ -16,7 +16,7 @@
     "whats-inside.table1.r4c1": "[Quest guide](wiki/quest-guide.html)",
     "whats-inside.table1.r4c2": "What to bring before a raid: maps, weapons, gear, items to hand over or plant",
     "whats-inside.table1.r5c1": "[Progress](progress/)",
-    "whats-inside.table1.r5c2": "Your profile's quest progress, raid prep per map and the items you still need",
+    "whats-inside.table1.r5c2": "Your profile's quest progress, raid prep per map, the items you still need and the quests that unlock items",
     "translation-note": "Screenshots show the English UI."
   },
   "getting-started": {
@@ -107,7 +107,7 @@
   },
   "progress/index": {
     "title": "Progress",
-    "intro.p1": "The Progress menu shows where a profile stands and what it still needs. It has three pages:",
+    "intro.p1": "The Progress menu shows where a profile stands and what it still needs. It has four pages:",
     "intro.table1.r1c1": "Page",
     "intro.table1.r1c2": "What it does",
     "intro.table1.r3c1": "[Overview](overview.html)",
@@ -116,8 +116,10 @@
     "intro.table1.r4c2": "Everything to do on the map you're about to play",
     "intro.table1.r5c1": "[Needed items](needed-items.html)",
     "intro.table1.r5c2": "Items your remaining quests still ask for, against what you have",
+    "intro.table1.r6c1": "[Unlock paths](unlock-paths.html)",
+    "intro.table1.r6c2": "Quests left before an item is sold by a trader or can be crafted",
     "choosing-a-profile.heading": "Choosing a profile",
-    "choosing-a-profile.p1": "The profile bar at the top is shared by all three pages. It starts on the profile that is currently online and remembers your choice in the browser.",
+    "choosing-a-profile.p1": "The profile bar at the top is shared by all four pages. It starts on the profile that is currently online and remembers your choice in the browser.",
     "choosing-a-profile.img.progress-profile": "Profile bar",
     "live-updates.heading": "Live updates",
     "live-updates.p1": "The pages refresh on their own when the game saves your profile (for example after a raid or a turn-in) and when you come back to the tab. Quests that changed are briefly highlighted."
@@ -192,6 +194,36 @@
     "what-counts-as-in-stash.heading": "What counts as \"in stash\"",
     "what-counts-as-in-stash.p1": "Your stash and the gear you're wearing, the same as the in-game hand-over window. Hideout stashes are not counted."
   },
+  "progress/unlock-paths": {
+    "title": "Unlock paths",
+    "intro.p1": "Items that a quest unlocks for sale at a trader or as a craft, and the quests you still have to finish to get there.",
+    "intro.img.progress-unlocks-full": "Unlock paths page",
+    "the-list.heading": "The list",
+    "the-list.p1": "Each row is one item, sorted by how many quests are left before you can get it.",
+    "the-list.li1": "**Closest source**: the trader sale or craft that takes the fewest quests, with `+N` when there are more",
+    "the-list.li2": "**Do now**: the quest to work on next, or what's blocking it (a level or a quest status you need first)",
+    "the-list.p2": "Use the chips (**All**, **Trader sale**, **Crafting**, **Unlocked**, **Unreachable**), the category icon row and the search box to narrow the list. Search ignores spaces.",
+    "the-list.p3": "One-time quest rewards and items a trader sells at a loyalty level alone aren't listed. They don't need a quest path.",
+    "closest-path.heading": "Closest path",
+    "closest-path.p1": "Click a row to see the path for its closest source. The card lists the quests in order, from what you can do now to the goal quest, and long paths fold in the middle. The bottom line sums up the quests left, the highest level required on the way and any trader loyalty or standing the quests ask for.",
+    "closest-path.p2": "When an item has several sources, the list on the right switches between them.",
+    "closest-path.img.progress-unlocks-detail": "Expanded row with the closest path",
+    "full-path.heading": "Full path",
+    "full-path.p1": "**Full path ›** opens every quest on the path, step by step. Quests in the same step can be done in any order, and each step groups them by trader. Quests above your level and branch quests that would fail another quest are marked. Drag the window's edges to resize it.",
+    "full-path.img.progress-unlocks-path": "Full path window",
+    "focusing-on-one-quest.heading": "Focusing on one quest",
+    "focusing-on-one-quest.p1": "Some paths branch out a lot. Searching `kit` and opening **Weapon repair kit** on a level 47 profile, for example, gives 38 quests across many traders, which is hard to follow at once.",
+    "focusing-on-one-quest.p2": "Click the quest you're on, such as **The Survivalist Path - Tough Guy**, and the window keeps only the quests connected to it: the quests it needs and the quests that need it, down to the goal. The result is one short route you can follow from start to end.",
+    "focusing-on-one-quest.li1": "**+ N other prereq(s)** marks a quest that also needs quests from other branches, which are hidden while focusing",
+    "focusing-on-one-quest.li2": "**Open in wiki** opens the focused quest in the wiki, and **Show all** goes back to the full path",
+    "focusing-on-one-quest.img.progress-unlocks-focus": "Path focused on one quest",
+    "unreachable-sources.heading": "Unreachable sources",
+    "unreachable-sources.p1": "A source is marked unreachable when its path goes through a quest you can no longer finish on this profile:",
+    "unreachable-sources.li1": "A quest you failed",
+    "unreachable-sources.li2": "The other side of an exclusive branch you already took",
+    "unreachable-sources.li3": "A quest for the other faction only",
+    "unreachable-sources.li4": "A quest the server keeps locked (events and the like)"
+  },
   "limitations": {
     "title": "Known limitations",
     "mods-that-hook-responses-at-runtime.heading": "Mods that hook responses at runtime",
@@ -204,6 +236,8 @@
     "quest-map-coverage.li1": "A few quests have no location data, so their objectives don't appear on the map.",
     "quest-map-coverage.li2": "Mod quests show on the map only when the mod defines its zones in data the server can read.",
     "quest-map-coverage.li3": "QuestCodex doesn't track which keys you own. Lock icons tell you which key a door needs, nothing more.",
+    "unlock-paths.heading": "Unlock paths",
+    "unlock-paths.p1": "The path summary checks the required level against your profile, but trader loyalty and standing are only listed, not checked. **Quests left** counts quests only.",
     "local-only.heading": "Local only",
     "local-only.p1": "The SPT server binds to `127.0.0.1`, so QuestCodex opens only in a browser on the machine running the server."
   }
