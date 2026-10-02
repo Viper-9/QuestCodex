@@ -24,6 +24,8 @@
   "filter.bear": "Только BEAR",
   "filter.usec": "Только USEC",
   "filter.count": "Задания: {n}",
+  "modFilter.label": "Мод-источник",
+  "modFilter.all": "Все моды",
   "sort.label": "Сортировка",
   "sort.level": "По уровню",
   "sort.chain": "По цепочке",

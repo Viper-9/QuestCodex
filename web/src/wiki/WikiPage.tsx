@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
 import { hashFor, replaceHash, type Route } from '../shell/router'
-import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips, type SortKey } from './derive'
+import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, inMods, listMods, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips, type SortKey } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
+import { ModStrip } from './ModStrip'
 import { QuestDetail } from './QuestDetail'
 import { QuestDescriptionDialog } from './QuestDescriptionDialog'
 import { QuestPrepDialog } from './QuestPrepDialog'
@@ -12,6 +13,9 @@ import { QuestList } from './QuestList'
 import { rowId } from './QuestRow'
 import { WikiSkeleton } from './WikiSkeleton'
 import './wiki.css'
+
+/** Mod 칩이 꺼졌을 때 모드 선택 대신 쓰는 빈 집합. 렌더마다 새로 만들면 useMemo 가 매번 다시 돈다 */
+const EMPTY: ReadonlySet<string> = new Set()
 
 interface WikiPageProps {
   catalog: Catalog | null
@@ -23,6 +27,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const [traders, setTraders] = useState<ReadonlySet<string>>(() => new Set())
   const [chips, setChips] = useState<Chips>(DEFAULT_CHIPS)
   const [query, setQuery] = useState('')
+  const [mods, setMods] = useState<ReadonlySet<string>>(() => new Set())
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
@@ -35,7 +40,11 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   // 파생값은 전부 useMemo (§3.2). 카탈로그가 바뀔 때(언어 전환)만 다시 계산된다.
   const quests = useMemo(() => (catalog ? Object.values(catalog.quests) : []), [catalog])
   const orderedTraders = useMemo(() => (catalog ? orderTraders(catalog.traders) : []), [catalog])
-  const counts = useMemo(() => countByTrader(quests), [quests])
+  const modList = useMemo(() => listMods(quests), [quests])
+  /** 모드 칩 줄은 Mod 칩이 켜져 있을 때만 보이고, 그때만 모드 선택이 상인 개수·목록에 걸린다(filterQuests 와 같은 규칙) */
+  const modsActive = chips.mod ? mods : EMPTY
+  const traderBase = useMemo(() => inMods(quests, modsActive), [quests, modsActive])
+  const counts = useMemo(() => countByTrader(traderBase), [traderBase])
   const lookup = useMemo(() => (catalog ? makeLookup(catalog) : null), [catalog])
   /** 필터가 아니라 `quests`(카탈로그 전체)로 계산 — 검색·필터에 따라 색이 바뀌면 안 된다. */
   const modColors = useMemo(() => assignModColors(quests), [quests])
@@ -45,8 +54,8 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   const branches = useMemo(() => branchIndex(quests), [quests])
   const branchIds = useMemo(() => new Set(branches.keys()), [branches])
   const visible = useMemo(
-    () => sortQuests(filterQuests(quests, { traders, chips, query }), sort, chainOrder),
-    [quests, traders, chips, query, sort, chainOrder],
+    () => sortQuests(filterQuests(quests, { traders, chips, query, mods }), sort, chainOrder),
+    [quests, traders, chips, query, mods, sort, chainOrder],
   )
   const visibleIds = useMemo(() => new Set(visible.map((q) => q.id)), [visible])
 
@@ -56,6 +65,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
       setTraders(new Set())
       setChips(DEFAULT_CHIPS)
       setQuery('')
+      setMods(new Set())
     }
     setExpanded((prev) => new Set(prev).add(id))
     setScrollTarget(id)
@@ -81,18 +91,22 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
 
   const toggleTrader = (id: string) => setTraders((prev) => toggleMember(prev, id))
   const toggleChip = (key: ChipKey) => setChips((prev) => ({ ...prev, [key]: !prev[key] }))
+  const toggleMod = (key: string) => setMods((prev) => toggleMember(prev, key))
   const toggleExpanded = (id: string) => setExpanded((prev) => toggleMember(prev, id))
 
   return (
     <div className="qc-wiki">
       <TraderStrip
-        traders={orderedTraders} counts={counts} total={quests.length}
+        traders={orderedTraders} counts={counts} total={traderBase.length}
         selected={traders} onToggle={toggleTrader} onClear={() => setTraders(new Set())}
       />
       <FilterBar
         query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip}
         sort={sort} onSortChange={setSort}
       />
+      {chips.mod && modList.length > 0 && (
+        <ModStrip mods={modList} modColors={modColors} selected={mods} onToggle={toggleMod} onClear={() => setMods(new Set())} />
+      )}
       <QuestList
         quests={visible}
         lookup={lookup}

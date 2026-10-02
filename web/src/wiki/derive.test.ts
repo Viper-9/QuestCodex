@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogQuest, CatalogTrader } from '../api/catalog'
-import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, makeLookup, MOD_COLOR_COUNT, orderTraders, sortQuests, toggleMember } from './derive'
+import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, inMods, listMods, makeLookup, MOD_COLOR_COUNT, modKey, orderTraders, sortQuests, toggleMember, UNKNOWN_MOD } from './derive'
 
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
@@ -44,7 +44,7 @@ describe('filterQuests', () => {
     quest({ id: 'v-none', traderId: 'b', isVanilla: true, name: 'Shootout Picnic' }),
     quest({ id: 'm-none', traderId: 'c', isVanilla: false, name: "Painter's Request" }),
   ]
-  const base = { traders: new Set<string>(), chips: DEFAULT_CHIPS, query: '' }
+  const base = { traders: new Set<string>(), chips: DEFAULT_CHIPS, query: '', mods: new Set<string>() }
   const ids = (out: CatalogQuest[]) => out.map((q) => q.id)
 
   it('기본값은 전부', () => expect(ids(filterQuests(qs, base))).toEqual(['v-bear', 'v-usec', 'v-none', 'm-none']))
@@ -58,6 +58,44 @@ describe('filterQuests', () => {
     expect(ids(filterQuests(qs, { ...base, query: 'OUT' }))).toEqual(['v-none'])
     expect(ids(filterQuests(qs, { ...base, query: "painter's" }))).toEqual(['m-none'])
     expect(ids(filterQuests(qs, { ...base, query: '  ' }))).toHaveLength(4)
+  })
+})
+
+describe('출처 모드', () => {
+  const qs = [
+    quest({ id: 'v', traderId: 'prapor', isVanilla: true }),
+    quest({ id: 'ice-1', traderId: 'prapor', isVanilla: false, modName: 'ManimalIcebreaker' }),
+    quest({ id: 'ice-2', traderId: 'mechanic', isVanilla: false, modName: 'ManimalIcebreaker' }),
+    quest({ id: 'artem', traderId: 'artem', isVanilla: false, modName: 'WTT-Artem' }),
+    quest({ id: 'unknown', traderId: 'prapor', isVanilla: false, modName: null }),
+  ]
+  const base = { traders: new Set<string>(), chips: DEFAULT_CHIPS, query: '', mods: new Set<string>() }
+  const ids = (out: CatalogQuest[]) => out.map((q) => q.id)
+
+  it('modKey: 바닐라 null, 출처 미상은 UNKNOWN_MOD', () => {
+    expect(qs.map(modKey)).toEqual([null, 'ManimalIcebreaker', 'ManimalIcebreaker', 'WTT-Artem', UNKNOWN_MOD])
+  })
+  it('listMods: 이름순, 출처 미상은 맨 뒤, 바닐라 제외', () => {
+    expect(listMods(qs)).toEqual([
+      { key: 'ManimalIcebreaker', count: 2 }, { key: 'WTT-Artem', count: 1 }, { key: UNKNOWN_MOD, count: 1 },
+    ])
+    expect(listMods([qs[0]])).toEqual([])
+  })
+  it('모드 선택 → 그 모드 퀘스트만 (바닐라 제외)', () => {
+    expect(ids(filterQuests(qs, { ...base, mods: new Set(['ManimalIcebreaker']) }))).toEqual(['ice-1', 'ice-2'])
+  })
+  it('여러 모드는 합집합, 상인과는 AND', () => {
+    const mods = new Set(['ManimalIcebreaker', UNKNOWN_MOD])
+    expect(ids(filterQuests(qs, { ...base, mods }))).toEqual(['ice-1', 'ice-2', 'unknown'])
+    expect(ids(filterQuests(qs, { ...base, mods, traders: new Set(['prapor']) }))).toEqual(['ice-1', 'unknown'])
+  })
+  it('Mod 칩이 꺼져 있으면 모드 선택은 무시', () => {
+    const chips = { ...DEFAULT_CHIPS, mod: false }
+    expect(ids(filterQuests(qs, { ...base, chips, mods: new Set(['ManimalIcebreaker']) }))).toEqual(['v'])
+  })
+  it('inMods + countByTrader: 상인 개수가 고른 모드 기준', () => {
+    expect(countByTrader(inMods(qs, new Set(['ManimalIcebreaker'])))).toEqual({ prapor: 1, mechanic: 1 })
+    expect(inMods(qs, new Set())).toBe(qs)
   })
 })
 

@@ -24,6 +24,8 @@
   "filter.bear": "BEAR only",
   "filter.usec": "USEC only",
   "filter.count": "Quests {n}",
+  "modFilter.label": "Source mod",
+  "modFilter.all": "All mods",
   "sort.label": "Sort",
   "sort.level": "By level",
   "sort.chain": "By chain",
