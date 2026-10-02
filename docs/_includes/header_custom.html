@@ -1,17 +1,30 @@
 {%- comment -%}
-  Language switch: English page <-> the same page under /kr/.
+  Language switch: links to the same page in the other two languages
+  (English at the root, Korean under /kr/, Russian under /ru/).
 {%- endcomment -%}
 {%- if page.collection == "kr" -%}
-  {%- assign lang_url = page.url | remove_first: "/kr" -%}
-  {%- assign lang_label = "English" -%}
+  {%- assign base_url = page.url | remove_first: "/kr" -%}
+{%- elsif page.collection == "ru" -%}
+  {%- assign base_url = page.url | remove_first: "/ru" -%}
 {%- else -%}
-  {%- assign lang_url = page.url | prepend: "/kr" -%}
-  {%- assign lang_label = "한국어" -%}
+  {%- assign base_url = page.url -%}
 {%- endif -%}
 <nav aria-label="Language" class="aux-nav lang-nav">
   <ul class="aux-nav-list">
+    {%- if page.collection == "kr" or page.collection == "ru" %}
     <li class="aux-nav-list-item">
-      <a href="{{ lang_url | relative_url }}" class="site-button">{{ lang_label }}</a>
+      <a href="{{ base_url | relative_url }}" class="site-button" hreflang="en">English</a>
     </li>
+    {%- endif %}
+    {%- unless page.collection == "kr" %}
+    <li class="aux-nav-list-item">
+      <a href="{{ base_url | prepend: '/kr' | relative_url }}" class="site-button" hreflang="ko">한국어</a>
+    </li>
+    {%- endunless %}
+    {%- unless page.collection == "ru" %}
+    <li class="aux-nav-list-item">
+      <a href="{{ base_url | prepend: '/ru' | relative_url }}" class="site-button" hreflang="ru">Русский</a>
+    </li>
+    {%- endunless %}
   </ul>
 </nav>

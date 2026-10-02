@@ -18,6 +18,9 @@ collections:
   kr:
     permalink: "/:collection/:path:output_ext"
     output: true
+  ru:
+    permalink: "/:collection/:path:output_ext"
+    output: true
 
 defaults:
   - scope:
@@ -25,11 +28,18 @@ defaults:
       type: kr
     values:
       layout: default
+  - scope:
+      path: ""
+      type: ru
+    values:
+      layout: default
 
 just_the_docs:
   collections:
     kr:
       name: 한국어
+    ru:
+      name: Русский
 
 aux_links:
   GitHub: https://github.com/Viper-9/QuestCodex
@@ -52,6 +62,12 @@ callouts:
     color: blue
   warning-kr:
     title: 주의
+    color: yellow
+  note-ru:
+    title: Примечание
+    color: blue
+  warning-ru:
+    title: Внимание
     color: yellow
 
 footer_content: "Copyright &copy; 2026 Viper-9. All Rights Reserved."
