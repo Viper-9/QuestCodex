@@ -8,4 +8,4 @@ has_children: true
 
 Все задания, загруженные на вашем сервере, в одном списке — и ванильные, и модовые.
 
-[![Список заданий](../assets/images/wiki-full.png)](../assets/images/wiki-full.png)
+[![Список заданий]({{ '/assets/images/wiki-full.png' | relative_url }})]({{ '/assets/images/wiki-full.png' | relative_url }})

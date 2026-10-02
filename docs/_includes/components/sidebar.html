@@ -1,11 +1,14 @@
 {%- comment -%}
   Override of Just the Docs v0.10.1 components/sidebar.html:
-  shows only the current language's pages (English pages or the kr collection)
+  shows only the current language's pages (English pages or the kr/ru collection)
   and links the site title to that language's home.
 {%- endcomment -%}
 {%- if page.collection == "kr" -%}
   {%- assign nav_lang = "kr" -%}
   {%- assign home_url = "/kr/" -%}
+{%- elsif page.collection == "ru" -%}
+  {%- assign nav_lang = "ru" -%}
+  {%- assign home_url = "/ru/" -%}
 {%- else -%}
   {%- assign nav_lang = "en" -%}
   {%- assign home_url = "/" -%}

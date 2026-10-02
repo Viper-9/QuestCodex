@@ -14,13 +14,13 @@ nav_order: 1
 
 Выберите торговца из ряда аватарок, чтобы видеть только его задания. Торговцы, добавленные модами, тоже перечислены.
 
-[![Фильтр по торговцу](../assets/images/wiki-traders.png)](../assets/images/wiki-traders.png)
+[![Фильтр по торговцу]({{ '/assets/images/wiki-traders.png' | relative_url }})]({{ '/assets/images/wiki-traders.png' | relative_url }})
 
 ## Поиск и чипы фильтров
 
 Ищите по названию задания и сужайте список чипами `Vanilla` / `Mod` и `BEAR only` / `USEC only`.
 
-[![Поиск, чипы фильтров и сортировка](../assets/images/wiki-filters.png)](../assets/images/wiki-filters.png)
+[![Поиск, чипы фильтров и сортировка]({{ '/assets/images/wiki-filters.png' | relative_url }})]({{ '/assets/images/wiki-filters.png' | relative_url }})
 
 ## Сортировка
 

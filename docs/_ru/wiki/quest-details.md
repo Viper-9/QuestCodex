@@ -14,7 +14,7 @@ nav_order: 2
 
 Нажмите на строку задания — она развернётся на месте с целями, требованиями, наградами (включая награды при принятии и при провале) и ссылками на предварительные условия и открываемые задания. Несколько строк могут оставаться открытыми одновременно.
 
-[![Развёрнутое задание](../assets/images/wiki-quest-detail.png)](../assets/images/wiki-quest-detail.png)
+[![Развёрнутое задание]({{ '/assets/images/wiki-quest-detail.png' | relative_url }})]({{ '/assets/images/wiki-quest-detail.png' | relative_url }})
 
 ## Переходы по цепочке
 
@@ -24,7 +24,7 @@ nav_order: 2
 
 Полное описание задания открывается во всплывающем окне, чтобы длинный текст не растягивал список.
 
-[![Всплывающее описание](../assets/images/wiki-description.png)](../assets/images/wiki-description.png)
+[![Всплывающее описание]({{ '/assets/images/wiki-description.png' | relative_url }})]({{ '/assets/images/wiki-description.png' | relative_url }})
 
 ## Карта локаций задания
 
@@ -37,19 +37,19 @@ nav_order: 2
 
 QuestCodex не знает, каким заданиям нужен ключ, но карта доводит вас почти до конца: если маркер стоит рядом со значком замка, наведите на него, чтобы увидеть, какой ключ открывает эту дверь, и сами решите, брать ли его.
 
-[![Карта локаций задания](../assets/images/wiki-quest-map.png)](../assets/images/wiki-quest-map.png)
+[![Карта локаций задания]({{ '/assets/images/wiki-quest-map.png' | relative_url }})]({{ '/assets/images/wiki-quest-map.png' | relative_url }})
 
 ## Предупреждения о ветках
 
 Некоторые задания находятся на взаимоисключающих ветках: завершение одного проваливает или блокирует другое. Такие задания несут метку ветки в списке, а детали предупреждают, какие задания вы заблокируете.
 
-[![Предупреждение о ветке](../assets/images/wiki-branch.png)](../assets/images/wiki-branch.png)
+[![Предупреждение о ветке]({{ '/assets/images/wiki-branch.png' | relative_url }})]({{ '/assets/images/wiki-branch.png' | relative_url }})
 
 ## Указание мода
 
 Задания из модов несут название мода-источника, с цветовой кодировкой по моду.
 
-[![Задания модов с метками источников](../assets/images/wiki-mod-list.png)](../assets/images/wiki-mod-list.png)
+[![Задания модов с метками источников]({{ '/assets/images/wiki-mod-list.png' | relative_url }})]({{ '/assets/images/wiki-mod-list.png' | relative_url }})
 
-{: .note }
+{: .note-ru }
 Задания, которые мод внедряет из кода C#, а не из JSON-файлов, не оставляют файлового следа, поэтому их мод-источник невозможно определить. Такие задания получают общую метку `mod`.

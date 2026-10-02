@@ -16,11 +16,11 @@ nav_order: 2
 
 ## Установка
 
-- Скачайте `QuestCodex-<версия>.zip` со страницы [Releases](https://github.com/Viper-9/QuestCodex/releases).
-- Распакуйте и перезапишите папку `SPT_Runtime` в корне вашей установки SPT (например, `C:\SPT` — родительская папка для `SPT_Runtime`, в которой лежит `SPT.Server.exe`).
-- Перезапустите сервер.
+1. Скачайте `QuestCodex-<версия>.zip` со страницы [Releases](https://github.com/Viper-9/QuestCodex/releases).
+2. Распакуйте и перезапишите папку `SPT_Runtime` в корне вашей установки SPT (например, `C:\SPT` — родительская папка для `SPT_Runtime`, в которой лежит `SPT.Server.exe`).
+3. Перезапустите сервер.
 
-{: .note }
+{: .note-ru }
 Если корень вашего сервера — это сама папка `SPT_Runtime` (старая раскладка SPT), скопируйте только папку `SPT_Runtime\user\mods\QuestCodex` из архива в `user\mods\` корня сервера.
 
 ## Запуск
@@ -35,6 +35,8 @@ nav_order: 2
 
 - Язык: English / 한국어 / Русский. Строки интерфейса и названия заданий/предметов меняются вместе (игровой текст берётся из таблиц локализации сервера).
 - Тема: System / Light / Dark, запоминается в браузере.
+
+[![Переключатели темы и языка]({{ '/assets/images/topbar-switches.png' | relative_url }})]({{ '/assets/images/topbar-switches.png' | relative_url }})
 
 ## Боковое меню
 

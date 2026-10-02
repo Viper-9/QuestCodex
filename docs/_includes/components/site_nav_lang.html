@@ -1,10 +1,12 @@
 {%- comment -%}
-  Main navigation for one language. Pass lang as "en" or "kr":
-  English shows the top-level pages, kr shows the kr collection.
+  Main navigation for one language. Pass lang as "en", "kr" or "ru":
+  English shows the top-level pages, kr and ru show their collections.
 {%- endcomment -%}
 <nav aria-label="Main" id="site-nav" class="site-nav">
   {% if include.lang == "kr" %}
     {% include components/nav/pages.html pages=site.kr %}
+  {% elsif include.lang == "ru" %}
+    {% include components/nav/pages.html pages=site.ru %}
   {% else %}
     {% include components/nav/pages.html pages=site.html_pages %}
   {% endif %}

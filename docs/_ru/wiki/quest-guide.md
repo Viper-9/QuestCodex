@@ -22,11 +22,11 @@ nav_order: 3
 
 Предметы модов тоже включены.
 
-[![Предметы для установки](../assets/images/wiki-guide-plant.png)](../assets/images/wiki-guide-plant.png)
+[![Предметы для установки]({{ '/assets/images/wiki-guide-plant.png' | relative_url }})]({{ '/assets/images/wiki-guide-plant.png' | relative_url }})
 
 Длинные списки сворачиваются до первых нескольких записей. Нажмите **+N ещё**, чтобы увидеть все.
 
-[![Разрешённое оружие](../assets/images/wiki-guide-weapons.png)](../assets/images/wiki-guide-weapons.png)
+[![Разрешённое оружие]({{ '/assets/images/wiki-guide-weapons.png' | relative_url }})]({{ '/assets/images/wiki-guide-weapons.png' | relative_url }})
 
 ## Перемещение и изменение размера
 
