@@ -43,8 +43,13 @@ describe('formatRequirement (§4.1)', () => {
     expect(lineText(formatRequirement({ kind: 'traderStanding', traderId: 'skier', value: 0.5, compare: '>' }, lookup, ko))).toBe('Skier 평판 > 0.5')
   })
   it('other: text 있으면 text, 없으면 conditionType 회색', () => {
-    expect(formatRequirement({ kind: 'other', conditionType: 'Skill', text: '근력 10' }, lookup, ko)).toEqual({ parts: [{ text: '근력 10' }], tone: 'normal' })
-    expect(formatRequirement({ kind: 'other', conditionType: 'Skill', text: '' }, lookup, ko)).toEqual({ parts: [{ text: 'Skill' }], tone: 'muted' })
+    expect(formatRequirement({ kind: 'other', conditionType: 'Skill', text: '근력 10', targetName: null }, lookup, ko)).toEqual({ parts: [{ text: '근력 10' }], tone: 'normal' })
+    expect(formatRequirement({ kind: 'other', conditionType: 'Skill', text: '', targetName: null }, lookup, ko)).toEqual({ parts: [{ text: 'Skill' }], tone: 'muted' })
+    // 로케일 없는 FindItem 시작 조건(Icebreaker "Boreas") → 전용 문구, 모르는 타입은 "타입: 아이템"
+    expect(formatRequirement({ kind: 'other', conditionType: 'FindItem', text: '', targetName: 'Paradigm Shipping poster' }, lookup, ko))
+      .toEqual({ parts: [{ text: 'Paradigm Shipping poster 획득 시 시작' }], tone: 'muted' })
+    expect(formatRequirement({ kind: 'other', conditionType: 'Weird', text: '', targetName: '전단지' }, lookup, ko))
+      .toEqual({ parts: [{ text: 'Weird: 전단지' }], tone: 'muted' })
   })
 })
 

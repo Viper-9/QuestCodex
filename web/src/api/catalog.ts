@@ -15,7 +15,7 @@ export type Requirement =
   | { kind: 'level'; value: number; compare: string }
   | { kind: 'traderLoyalty'; traderId: string; value: number; compare: string }
   | { kind: 'traderStanding'; traderId: string; value: number; compare: string }
-  | { kind: 'other'; conditionType: string; text: string }
+  | { kind: 'other'; conditionType: string; text: string; targetName: string | null }   // text 가 비면 조건 로케일 없음
 
 export interface ItemRef {
   tpl: string

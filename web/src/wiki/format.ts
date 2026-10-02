@@ -1,5 +1,5 @@
 import type { Objective, Requirement, Reward } from '../api/catalog'
-import type { T } from '../i18n/index'
+import type { T, UiKey } from '../i18n/index'
 import type { NameLookup } from './derive'
 
 // UI 에 의존하지 않는 표시 문자열 계산 (스펙 §4.1, §4.2). JSX 를 만들지 않고
@@ -70,8 +70,23 @@ export function formatRequirement(r: Requirement, lookup: NameLookup, t: T): For
     case 'traderStanding':
       return plain(t('fmt.standing', { trader: lookup.traderName(r.traderId), compare: r.compare, value: r.value }))
     case 'other':
-      return r.text !== '' ? plain(r.text) : plain(r.conditionType, 'muted')
+      return r.text !== '' ? plain(r.text) : plain(otherConditionText(r.conditionType, r.targetName, t), 'muted')
   }
+}
+
+/** 문구를 따로 둔 시작 조건 타입. 여기 없는 타입은 objectiveFallback("타입: 아이템") 으로 */
+const OTHER_CONDITION_KEYS: Partial<Record<string, UiKey>> = {
+  FindItem: 'fmt.findItemToStart',   // Icebreaker "Boreas": 전단지를 주우면 시작
+}
+
+/**
+ * 해석하지 않는 시작 조건에 로케일이 없을 때의 문구. 목표의 대체 문구(formatObjective)와 같은 규칙 —
+ * 서버가 대상 아이템 이름만 주고 문장 조립은 여기서 한다. 잠김 사유 요약(progress/format)도 이걸 쓴다.
+ */
+export function otherConditionText(conditionType: string, targetName: string | null, t: T): string {
+  if (targetName === null) return conditionType
+  const key = OTHER_CONDITION_KEYS[conditionType]
+  return key ? t(key, { name: targetName }) : t('fmt.objectiveFallback', { type: conditionType, name: targetName })
 }
 
 export function formatReward(r: Reward, lookup: NameLookup, t: T): FormattedLine {

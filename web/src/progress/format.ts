@@ -2,7 +2,7 @@ import type { CatalogQuest, Requirement } from '../api/catalog'
 import type { LockReason, QuestProgress, QuestStatus } from '../api/progress'
 import type { T, UiKey } from '../i18n/index'
 import type { NameLookup } from '../wiki/derive'
-import { formatInt, formatRequirement } from '../wiki/format'
+import { formatInt, formatRequirement, otherConditionText } from '../wiki/format'
 import type { ListLine } from '../wiki/LineList'
 
 // 진행현황 표시 문자열. wiki/format.ts 와 같은 규칙 — t 를 인자로 받아 React 없이 테스트된다.
@@ -51,7 +51,7 @@ export function lockReasonText(r: LockReason, lookup: NameLookup, t: T): string 
     case 'faction':
       return t('lock.faction', { side: r.need.toUpperCase() })
     case 'other':
-      return r.conditionType
+      return r.text !== '' ? r.text : otherConditionText(r.conditionType, r.targetName, t)
   }
 }
 

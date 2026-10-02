@@ -171,7 +171,7 @@ public static class ProgressBuilder
                     break;
                 }
                 case OtherRequirement o:
-                    reasons.Add(new OtherLockReason(o.ConditionType));
+                    reasons.Add(new OtherLockReason(o.ConditionType, o.Text, o.TargetName));
                     break;
             }
         }
