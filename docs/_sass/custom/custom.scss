@@ -60,9 +60,17 @@ h1, .text-alpha { font-weight: 700; }
 h2, .text-beta { font-weight: 600; }
 h3, .text-gamma { font-weight: 600; }
 
+// Keep the top bar (and its language dropdown) above the page body, whose headings are positioned.
+.main-header {
+  position: relative;
+  z-index: 10;
+}
+
 .main-header .lang-nav {
   margin-left: auto;
   padding-right: 0;
+  // The theme gives .aux-nav overflow-x: auto, which clips the dropdown and scrolls it inside the bar.
+  overflow: visible;
 }
 
 // Language dropdown in the top bar (header_custom.html).
