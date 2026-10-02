@@ -66,9 +66,15 @@ h3, .text-gamma { font-weight: 600; }
   z-index: 10;
 }
 
-.main-header .lang-nav {
+// Top bar right side: GitHub / Download / Forge links, then the language dropdown at the far right.
+.main-header .aux-nav:not(.lang-nav) {
   margin-left: auto;
   padding-right: 0;
+}
+
+.main-header .lang-nav {
+  order: 1;
+  padding-right: 1rem;
   // The theme gives .aux-nav overflow-x: auto, which clips the dropdown and scrolls it inside the bar.
   overflow: visible;
 }
@@ -76,14 +82,17 @@ h3, .text-gamma { font-weight: 600; }
 // Language dropdown in the top bar (header_custom.html).
 .lang-menu {
   position: relative;
+  height: 100%;
 
   > summary {
     display: inline-flex;
     align-items: center;
     gap: .375rem;
+    height: 100%;
     list-style: none;
     cursor: pointer;
     user-select: none;
+    color: $link-color;
 
     &::-webkit-details-marker { display: none; }
   }
@@ -95,7 +104,7 @@ h3, .text-gamma { font-weight: 600; }
   &__list {
     position: absolute;
     right: 0;
-    top: calc(100% + .375rem);
+    top: calc(100% - .25rem);
     z-index: 100;
     min-width: 9rem;
     margin: 0;
