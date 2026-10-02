@@ -121,7 +121,8 @@
     "authorLink": "https://github.com/the-hideout/tarkov-dev-svg-maps",
     "modifiedBy": null,
     "license": "CC BY-NC-SA 4.0",
-    "licenseFile": "Shebuka-LICENSE.md"
+    "licenseFile": "Shebuka-LICENSE.md",
+    "calibration": "tarkov.dev (MIT)"
   },
   "source": "tarkov-dev-svg-maps @ 5a8b611 (Interchange.svg, split per floor), tarkov-dev maps.json @ ef62766"
 }

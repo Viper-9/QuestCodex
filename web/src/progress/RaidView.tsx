@@ -22,8 +22,16 @@ interface RaidViewProps {
   map: string | null
 }
 
-/** 탭 이름. 번역이 없는 맵(모드 맵)은 키 그대로 — feature/quest-map 의 mapName 과 같은 규칙 */
-function mapName(key: string, t: T): string {
+/** 번역이 있는 지도 변형(09 스펙) — i18n 키는 map.name.<맵 키>-<변형 ID>, 위치정보 팝업 탭 이름(변형 폴더 키)과 같다 */
+const VARIANT_NAMES = new Set(['interchange-manimal'])
+
+/**
+ * 탭 이름. 번역이 없는 맵(모드 맵)은 키 그대로 — feature/quest-map 의 mapName 과 같은 규칙.
+ * 맵 교체 모드가 로드된 서버(catalog.mapVariants)면 변형 이름("확장된 인터체인지").
+ */
+function mapName(key: string, t: T, variants: Record<string, string> | undefined): string {
+  const variant = variants?.[key] && `${key}-${variants[key]}`
+  if (variant && VARIANT_NAMES.has(variant)) return t(`map.name.${variant}` as UiKey)
   return MAP_ORDER.includes(key) ? t(`map.name.${key}` as UiKey) : key
 }
 
@@ -50,7 +58,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
             aria-pressed={x.key === selected}
             onClick={() => { setHot(null); navigate('progress', 'raid', { map: x.key }) }}
           >
-            {mapName(x.key, t)} <span className="qc-map__n">{x.count}</span>
+            {mapName(x.key, t, catalog.mapVariants)} <span className="qc-map__n">{x.count}</span>
           </button>
         ))}
       </div>
@@ -59,7 +67,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
         {/* 이 맵 / 모든 맵을 카드로 나눈다 — 한 카드 안 소제목으로는 경계가 잘 안 보인다는 피드백 */}
         <div className="qc-raid__main">
           <section className="qc-card">
-            <h3 className="qc-card__h">{t('raid.todo', { map: mapName(selected, t) })}</h3>
+            <h3 className="qc-card__h">{t('raid.todo', { map: mapName(selected, t, catalog.mapVariants) })}</h3>
             {brief.here.length === 0 && <p className="qc-muted">{t('raid.nothing')}</p>}
             <QuestGroups entries={brief.here} all={entries} map={selected} lookup={lookup} numbers={plan.numbers} hot={hot} onHot={setHot} />
           </section>
@@ -71,7 +79,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
           )}
           {/* 오른쪽 칸이 길어 왼쪽 아래가 비므로 거기에 두고, 스크롤해도 따라오게 sticky(progress.css) */}
           <RaidMap
-            map={selected} mapLabel={mapName(selected, t)} plan={plan} lockedDoors={catalog.lockedDoors}
+            map={selected} mapLabel={mapName(selected, t, catalog.mapVariants)} plan={plan} lockedDoors={catalog.lockedDoors}
             mapVariants={catalog.mapVariants} hot={hot} onHot={setHot}
           />
         </div>
@@ -92,7 +100,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
 
           <section className="qc-card">
             <h3 className="qc-card__h">{t('raid.find')}</h3>
-            <FindGroups finds={finds} catalog={catalog} mapLabel={t('raid.findMap', { map: mapName(selected, t) })} />
+            <FindGroups finds={finds} catalog={catalog} mapLabel={t('raid.findMap', { map: mapName(selected, t, catalog.mapVariants) })} />
           </section>
 
           <section className="qc-card">
