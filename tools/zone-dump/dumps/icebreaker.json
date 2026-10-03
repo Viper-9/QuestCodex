@@ -1,6 +1,6 @@
 {
   "Location": "icebreaker",
-  "DumpedAtUtc": "2026-10-02T18:21:47.4144567Z",
+  "DumpedAtUtc": "2026-10-03T08:16:45.3729765Z",
   "Zones": [
     {
       "Id": "icebreaker_heli_zone",
@@ -397,6 +397,35 @@
         "X": -1.52499986,
         "Y": 43.331,
         "Z": 35.686
+      }
+    }
+  ],
+  "Switches": [
+    {
+      "Name": "switch_Icebreaker_Design_Stuff_00002",
+      "Active": true,
+      "Position": {
+        "X": 1.10100007,
+        "Y": 8.502456,
+        "Z": -16.133
+      }
+    },
+    {
+      "Name": "switch_Icebreaker_Design_Stuff_00003",
+      "Active": true,
+      "Position": {
+        "X": 14.0807,
+        "Y": 17.1775761,
+        "Z": 7.385
+      }
+    },
+    {
+      "Name": "switch_Icebreaker_Design_Stuff_00004",
+      "Active": true,
+      "Position": {
+        "X": -13.663022,
+        "Y": 17.1775761,
+        "Z": 6.677003
       }
     }
   ]

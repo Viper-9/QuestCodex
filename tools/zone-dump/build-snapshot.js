@@ -40,6 +40,13 @@
   const NAMED_DOORS = {
     INTERACTIVE_Icebreaker_exterior_hatchway_door_frozen: { type: 'Hatch', key: GAS_TORCH },
   }
+  // Quest switches (dump plugin 0.0.7): ManimalIcebreaker's client mod completes these VisitPlace targets by repairing a
+  // breaker panel (IcebreakerPanelRepair.Panels), not by entering a zone, so the panel position stands in for the zone.
+  const SWITCH_ZONES = {
+    switch_Icebreaker_Design_Stuff_00004: 'fix_element_one',
+    switch_Icebreaker_Design_Stuff_00003: 'fix_element_02',
+    switch_Icebreaker_Design_Stuff_00002: 'fix_element_03',
+  }
   const exitsFile = path.join(__dirname, 'exits', 'tarkovdev-exits.json')
   const exitsByMap = fs.existsSync(exitsFile) ? JSON.parse(fs.readFileSync(exitsFile, 'utf8')).maps : {}
   // map -> exit key -> tarkov.dev English name, for dumped exits
@@ -83,6 +90,13 @@
       const point = { x: round(zone.Position.X), y: round(zone.Position.Y), z: round(zone.Position.Z) }
       const boxes = boxesOf(zone)
       if (boxes.length > 0) point.boxes = boxes
+      const points = (byId[id] ??= [])
+      if (!points.some((p) => p.x === point.x && p.y === point.y && p.z === point.z)) points.push(point)
+    }
+    for (const sw of dump.Switches ?? []) {
+      const id = SWITCH_ZONES[sw.Name]
+      if (!id) continue
+      const point = { x: round(sw.Position.X), y: round(sw.Position.Y), z: round(sw.Position.Z) }
       const points = (byId[id] ??= [])
       if (!points.some((p) => p.x === point.x && p.y === point.y && p.z === point.z)) points.push(point)
     }

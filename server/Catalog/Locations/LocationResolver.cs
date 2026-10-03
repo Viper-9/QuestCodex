@@ -144,6 +144,10 @@ public sealed class LocationResolver
             case "LeaveItemAtLocation":
                 ids.Add((c.ZoneId ?? "", AreaKind.None));
                 break;
+            // 바닐라는 CounterCreator 안에만 두지만, 모드는 최상위에도 쓴다(Icebreaker "배에 선을 대다" 차단기 수리 fix_element_*).
+            case "VisitPlace":
+                ids.AddRange(Targets(c.Target).Select(t => (t, AreaKind.None)));
+                break;
             case "CounterCreator":
                 foreach (var sub in c.Counter?.Conditions ?? [])
                 {

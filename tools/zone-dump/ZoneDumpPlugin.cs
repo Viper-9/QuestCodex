@@ -19,7 +19,8 @@ namespace QuestCodex.ZoneDump;
 // 0.0.4: also exits (every ExfiltrationPoint subclass, incl. scav/shared/secret) and transit points, for maps whose
 // tarkov.dev positions are missing or wrong (10 spec §7).
 // 0.0.6: Icebreaker doors without a key (keypads, the explosive chain door) and named scene objects (11 spec §2).
-[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.6")]
+// 0.0.7: quest switches — the Icebreaker breaker panels its client mod ties to VisitPlace targets (fix_element_*).
+[BepInPlugin("com.viper.questcodex.zonedump", "QuestCodex Zone Dump", "0.0.7")]
 public class ZoneDumpPlugin : BaseUnityPlugin
 {
     private ConfigEntry<KeyboardShortcut> _dumpKey = null!;
@@ -42,6 +43,13 @@ public class ZoneDumpPlugin : BaseUnityPlugin
     private static readonly HashSet<string> NamedObjects = new()
     {
         "Icebreaker_chain_door", "Explosion_switch", "INTERACTIVE_Icebreaker_exterior_hatchway_door_frozen",
+    };
+
+    // Switches a mod completes a quest objective with instead of a zone. ManimalIcebreaker's IcebreakerPanelRepair binds
+    // these three breaker panels to "Wiring the Vessel" VisitPlace targets fix_element_one / _02 / _03.
+    private static readonly HashSet<string> QuestSwitches = new()
+    {
+        "switch_Icebreaker_Design_Stuff_00002", "switch_Icebreaker_Design_Stuff_00003", "switch_Icebreaker_Design_Stuff_00004",
     };
 
     private string DumpDir =>Path.Combine(Path.GetDirectoryName(Info.Location)!, "dumps");
@@ -130,6 +138,12 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                 .OrderBy(d => d.KeyId)
                 .ToList();
 
+            var switches = FindObjectsOfType<WorldInteractiveObject>(true)
+                .Where(w => QuestSwitches.Contains(w.Id))
+                .Select(w => new NamedRow { Name = w.Id, Active = w.gameObject.activeInHierarchy, Position = V(w.transform.position) })
+                .OrderBy(n => n.Name)
+                .ToList();
+
             var named = FindObjectsOfType<Transform>(true)
                 .Where(t => NamedObjects.Contains(t.name))
                 .Select(t => new NamedRow { Name = t.name, Active = t.gameObject.activeInHierarchy, Position = V(t.position) })
@@ -171,13 +185,14 @@ public class ZoneDumpPlugin : BaseUnityPlugin
                 Exits = exits,
                 Transits = transits,
                 Named = named,
+                Switches = switches,
             };
 
             Directory.CreateDirectory(DumpDir);
             // The game reports some ids capitalized (Sandbox, RezervBase); the server's locations folder is lowercase.
             var path = Path.Combine(DumpDir, $"{location.ToLowerInvariant()}.json");
             File.WriteAllText(path, JsonConvert.SerializeObject(dump, Formatting.Indented));
-            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors, {exits.Count} exits, {transits.Count} transits, {named.Count} named -> {path}");
+            Logger.LogInfo($"Dumped {location}: {zones.Count} zones, {doors.Count} locked doors, {exits.Count} exits, {transits.Count} transits, {named.Count} named, {switches.Count} switches -> {path}");
         }
         catch (Exception e)
         {
@@ -227,6 +242,7 @@ public class ZoneDumpPlugin : BaseUnityPlugin
         public List<ExitRow> Exits = new();
         public List<TransitRow> Transits = new();
         public List<NamedRow> Named = new();
+        public List<NamedRow> Switches = new();
     }
 
     private class NamedRow

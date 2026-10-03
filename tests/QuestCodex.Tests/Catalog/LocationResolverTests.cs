@@ -100,6 +100,25 @@ public class LocationResolverTests
     }
 
     [Fact]
+    public void Top_level_visit_place_resolves_its_target_zone()
+    {
+        // Icebreaker "Wiring the Vessel": VisitPlace as a top-level condition, not inside a CounterCreator
+        var p = new MapPoint(-13.66, 17.18, 6.68);
+        var resolver = Resolver(Table(("icebreaker", "fix_element_one", p)));
+        var visit = new QuestCondition
+        {
+            Id = Id(4), ConditionType = "VisitPlace", DynamicLocale = false, Target = new ListOrT<string>(null, "fix_element_one"),
+        };
+        var warnings = new List<CatalogWarning>();
+
+        var only = Assert.Single(resolver.Resolve(visit, "icebreaker", warnings, "q"));
+
+        Assert.Equal("icebreaker", only.Map);
+        Assert.Equal([p], only.Points);
+        Assert.Empty(warnings);
+    }
+
+    [Fact]
     public void Rule2_quest_map_miss_keeps_every_map()
     {
         var p = new MapPoint(1, 2, 3);
