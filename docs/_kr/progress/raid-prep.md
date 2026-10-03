@@ -19,7 +19,7 @@ nav_order: 2
 
 ## 맵 탭 {#map-tabs}
 
-맵 탭마다 남은 목표 수가 표시됩니다.
+맵 탭마다 남은 목표 수가 표시됩니다. 아이스브레이커처럼 아직 퀘스트가 없는 맵도 서버에 있으면 탭이 생겨서, 탈출구와 잠긴 문을 미리 볼 수 있습니다.
 
 [![맵 탭]({{ '/assets/images/progress-raid-maps.png' | relative_url }})]({{ '/assets/images/progress-raid-maps.png' | relative_url }})
 
@@ -37,6 +37,7 @@ nav_order: 2
 
 - 퀘스트 행에 마커와 같은 색의 번호가 붙습니다. 한쪽에 마우스를 올리면 다른 쪽도 강조됩니다
 - 층 버튼, 목표 영역, **잠긴 문**(Locked doors) 토글은 위키와 같습니다. 마커 근처의 자물쇠 아이콘으로 챙겨 갈 열쇠를 짐작할 수 있습니다
+- **탈출구**(Extracts)를 켜면 이 맵의 탈출구와 환승 지점이 표시됩니다. 마우스를 올려 조건과 등장 확률을 보고 나갈 길을 정할 수 있습니다
 
 [![지도 카드]({{ '/assets/images/progress-raid-map-card.png' | relative_url }})]({{ '/assets/images/progress-raid-map-card.png' | relative_url }})
 

@@ -59,7 +59,13 @@
     "sorting.li2": "**레벨순**(By level)",
     "sorting.li3": "**이름순**(By name)",
     "deep-links.heading": "딥링크",
-    "deep-links.p1": "`?quest=<questId>`로 특정 퀘스트를 바로 열 수 있어서, 즐겨찾기하거나 공유하기 좋습니다."
+    "deep-links.p1": "`?quest=<questId>`로 특정 퀘스트를 바로 열 수 있어서, 즐겨찾기하거나 공유하기 좋습니다.",
+    "mod-filter.heading": "출처 모드 필터",
+    "mod-filter.p1": "서버에 모드 퀘스트가 있고 `모드`(Mod) 칩이 켜져 있으면 필터 줄 아래에 **출처 모드**(Source mod) 줄이 나타납니다. 모드는 바닐라 상인에게 퀘스트를 붙이는 경우가 많아서, 한 모드가 추가한 퀘스트를 한 번에 모아 보기 좋습니다.",
+    "mod-filter.li1": "모드를 하나 이상 고릅니다. **전체 모드**(All mods)를 누르면 선택이 풀립니다",
+    "mod-filter.li2": "상인 필터와 같이 걸리고, 상인 줄 숫자도 고른 모드 기준으로 다시 셉니다",
+    "mod-filter.li3": "칩의 점 색은 목록의 모드 태그 색과 같습니다",
+    "mod-filter.img.wiki-mod-filter": "출처 모드 필터"
   },
   "wiki/quest-details": {
     "title": "퀘스트 상세",
@@ -85,7 +91,16 @@
     "mod-attribution.heading": "모드 출처 표시",
     "mod-attribution.p1": "모드 퀘스트에는 어느 모드에서 왔는지 모드 이름이 모드별 색으로 붙습니다.",
     "mod-attribution.img.wiki-mod-list": "모드 태그가 붙은 모드 퀘스트",
-    "mod-attribution.p2": "JSON 파일이 아니라 C# 코드로 추가된 모드 퀘스트는 파일 흔적이 없어서 출처 모드를 알 수 없습니다. 이런 퀘스트에는 모드 이름 대신 `모드` 태그가 붙습니다."
+    "mod-attribution.p2": "JSON 파일이 아니라 C# 코드로 추가된 모드 퀘스트는 파일 흔적이 없어서 출처 모드를 알 수 없습니다. 이런 퀘스트에는 모드 이름 대신 `모드` 태그가 붙습니다.",
+    "quest-locations-map.li5": "**탈출구**(Extracts)를 켜면 탈출구와 환승 지점이 방패 아이콘으로 표시됩니다. PMC·공용·스캐브 탈출구는 색으로 구분됩니다. 마우스를 올리면 이름과 진영이 나오고, 조건(예: 요금, 등반 장비)과 등장 확률이 있으면 같이 나옵니다. 다른 층의 탈출구는 흐리게 그려집니다",
+    "icebreaker.heading": "아이스브레이커",
+    "icebreaker.p1": "SPT v5를 앞두고 **아이스브레이커**(Icebreaker) 지도를 미리 준비했습니다. 그전까지는 모드 등으로 서버에 아이스브레이커 맵이 들어오면 바로 표시됩니다.",
+    "icebreaker.li1": "층 버튼은 배의 데크입니다(`데크 -3` ~ `데크 10`)",
+    "icebreaker.li2": "문 툴팁은 열쇠·키카드 문 말고도 키패드 문(코드가 고정이면 코드 포함), 폭약으로 여는 문, 가스 토치로 녹이는 얼어붙은 해치까지 알려 줍니다",
+    "icebreaker.li3": "**배에 선을 대다**(Wiring the Vessel)의 차단기 수리처럼 스위치를 가리키는 수리 목표에도 마커가 찍힙니다",
+    "icebreaker.img.wiki-quest-map-icebreaker": "배에 선을 대다의 아이스브레이커 지도",
+    "expanded-interchange.heading": "확장된 인터체인지",
+    "expanded-interchange.p1": "인터체인지를 확장하는 모드가 로드돼 있으면 지도와 퀘스트 구역·영역·잠긴 문이 확장판으로 바뀌고, 탭 이름도 **확장된 인터체인지**(Interchange (Expanded))로 나옵니다. 모드가 없으면 아무것도 바뀌지 않습니다."
   },
   "wiki/quest-guide": {
     "title": "퀘스트 가이드",
@@ -137,7 +152,7 @@
     "what-you-can-do-now.li3": "**바로 제출 가능**(Can hand over now): 가진 아이템으로 채울 수 있는 제출 목표",
     "what-you-can-do-now.img.progress-overview-visit": "상인에게 갈 것",
     "quests-by-status.heading": "상태별 퀘스트",
-    "quests-by-status.p1": "모든 퀘스트를 상태별로 묶어 보여 주며, 검색과 위키와 같은 상인 줄로 거를 수 있습니다. 모드 퀘스트에는 모드 이름 태그가 붙습니다.",
+    "quests-by-status.p1": "모든 퀘스트를 상태별로 묶어 보여 주며, 검색과 위키와 같은 상인 줄로 거를 수 있습니다. 모드 퀘스트에는 모드 이름 태그가 붙습니다. 상태 탭 아래에는 위키와 같은 [출처 모드 필터](../wiki/quest-list.html#mod-filter)가 있고, 탭 개수와 상인 줄도 고른 모드 기준으로 셉니다.",
     "quests-by-status.p2": "퀘스트를 누르면 위키와 같은 상세(설명, 가이드, 위치 지도, 분기 경고, 보상, 연계 퀘스트)가 펼쳐지고, 내 진행 상황이 함께 보입니다.",
     "quests-by-status.li1": "목표마다 진행 수치가 붙고, 끝낸 목표는 취소선으로 표시됩니다",
     "quests-by-status.li2": "잠긴 퀘스트는 아직 못 채운 시작 조건을 현재 값과 함께 표시합니다",
@@ -154,7 +169,7 @@
     "intro.p1": "들어갈 맵을 고르면 진행 중인 퀘스트가 그 맵에서 요구하는 것을 모두 보여 줍니다.",
     "intro.img.progress-raid-full": "레이드 준비 페이지",
     "map-tabs.heading": "맵 탭",
-    "map-tabs.p1": "맵 탭마다 남은 목표 수가 표시됩니다.",
+    "map-tabs.p1": "맵 탭마다 남은 목표 수가 표시됩니다. 아이스브레이커처럼 아직 퀘스트가 없는 맵도 서버에 있으면 탭이 생겨서, 탈출구와 잠긴 문을 미리 볼 수 있습니다.",
     "map-tabs.img.progress-raid-maps": "맵 탭",
     "quests-on-this-map.heading": "이 맵에서 진행되는 퀘스트",
     "quests-on-this-map.p1": "고른 맵에 목표가 있는 퀘스트와, 어느 맵에서나 할 수 있는 목표를 퀘스트별로 묶어 보여 줍니다. 퀘스트를 펼치면 다른 맵의 목표는 흐리게 표시됩니다.",
@@ -175,7 +190,8 @@
     "gear-and-special-conditions.li1": "**장비 · 무기**(Gear · Weapons): 필수·금지 장비와 허용 무기를 퀘스트별로",
     "gear-and-special-conditions.li2": "**특수 조건**(Special conditions): 한 레이드 안에 완료, 특정 탈출구 사용 같은 규칙",
     "gear-and-special-conditions.img.progress-raid-gear": "장비와 무기",
-    "gear-and-special-conditions.p1": "퀘스트 데이터에 맵 정보가 없는 목표는 목표 문장에 적힌 맵을 쓰고, **문장 기준**(from text)으로 표시합니다."
+    "gear-and-special-conditions.p1": "퀘스트 데이터에 맵 정보가 없는 목표는 목표 문장에 적힌 맵을 쓰고, **문장 기준**(from text)으로 표시합니다.",
+    "map.li3": "**탈출구**(Extracts)를 켜면 이 맵의 탈출구와 환승 지점이 표시됩니다. 마우스를 올려 조건과 등장 확률을 보고 나갈 길을 정할 수 있습니다"
   },
   "progress/needed-items": {
     "title": "필요 아이템",
@@ -234,11 +250,13 @@
     "mod-quests-added-from-c-code.p1": "JSON 파일이 아니라 C# 코드(`CustomQuestService.CreateQuest()`)로 추가된 퀘스트는 파일 흔적이 없어서 출처 모드를 알 수 없습니다. 이런 퀘스트에는 `모드` 태그가 붙습니다.",
     "quest-map-coverage.heading": "퀘스트 지도 표시 범위",
     "quest-map-coverage.li1": "위치 정보가 없는 일부 퀘스트는 목표가 지도에 표시되지 않습니다.",
-    "quest-map-coverage.li2": "모드 퀘스트는 모드가 서버에서 읽을 수 있는 데이터로 구역을 정의한 경우에만 지도에 표시됩니다.",
-    "quest-map-coverage.li3": "어떤 열쇠를 가지고 있는지는 확인하지 않습니다. 자물쇠 아이콘은 그 문에 필요한 열쇠만 알려 줍니다.",
+    "quest-map-coverage.li2": "모드 퀘스트는 모드가 서버에서 읽을 수 있는 데이터로 구역을 정의했거나, QuestCodex가 위치를 미리 담아 둔 경우(아이스브레이커 퀘스트)에만 지도에 표시됩니다.",
+    "quest-map-coverage.li3": "모드가 추가한 맵은 QuestCodex가 지도를 갖고 있을 때만 그려집니다(현재 아이스브레이커와 확장된 인터체인지).",
     "unlock-paths.heading": "해금 경로",
     "unlock-paths.p1": "경로 요약에서 필요 레벨은 내 프로필과 비교하지만, 상인 레벨과 평판은 표시만 하고 비교하지 않습니다. **남은 퀘스트**(Quests left)는 퀘스트 수만 셉니다.",
     "local-only.heading": "로컬 전용",
-    "local-only.p1": "SPT 서버는 `127.0.0.1`에만 열리므로 QuestCodex는 서버를 실행한 PC의 브라우저에서만 열립니다."
+    "local-only.p1": "SPT 서버는 `127.0.0.1`에만 열리므로 QuestCodex는 서버를 실행한 PC의 브라우저에서만 열립니다.",
+    "quest-map-coverage.li4": "탈출구·환승 위치는 내장 데이터에서 가져오므로, 모드가 추가하거나 옮긴 탈출구는 빠지거나 위치가 다를 수 있습니다.",
+    "quest-map-coverage.li5": "어떤 열쇠를 가지고 있는지는 확인하지 않습니다. 자물쇠 아이콘은 그 문에 필요한 열쇠만 알려 줍니다."
   }
 }

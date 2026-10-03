@@ -18,7 +18,8 @@ Pick the map you're about to play and see everything your active quests want the
 
 ## Map tabs
 
-Each map tab shows how many open objectives it has.
+Each map tab shows how many open objectives it has. A map your server has gets a tab even with no quests on
+it yet, such as the Icebreaker, so you can still check its extracts and locked doors.
 
 [![Map tabs](../assets/images/progress-raid-maps.png)](../assets/images/progress-raid-maps.png)
 
@@ -40,6 +41,8 @@ with all the quests on this map at once.
 - Quest rows carry the same colored number as their markers. Hover either side to highlight the other
 - Floor buttons, objective areas and the **Locked doors** toggle work like in the wiki. Lock icons near a
   marker tell you which key you may want to bring
+- **Extracts** shows the map's extracts and transits. Hover one to check its requirement and spawn chance
+  before you plan your way out
 
 [![Map card](../assets/images/progress-raid-map-card.png)](../assets/images/progress-raid-map-card.png)
 

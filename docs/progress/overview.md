@@ -33,6 +33,8 @@ Under **Go see a trader**:
 ## Quests by status
 
 All quests grouped by status, with search and the same trader row as the wiki. Mod quests carry their mod name tag.
+The same [source mod filter](../wiki/quest-list.html#mod-filter) sits under the status tabs, and the tab
+counts and trader row follow the mods you pick.
 
 Click a quest to expand the same details as the wiki (description, guide, locations map, branch warning,
 rewards, related quests), plus your progress:

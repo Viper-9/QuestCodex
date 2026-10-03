@@ -38,12 +38,32 @@ out when no objective has location data.
 - Map tabs switch maps, and floor buttons switch floors. A red dot on a floor button means that floor has objectives too
 - Wheel to zoom, drag to pan, double-click to fit
 - **Locked doors** shows lock icons for locked doors and keycard doors. Hover one to see the key it needs
+- **Extracts** shows extracts and transits as shield icons, colored for PMC, shared and scav extracts.
+  Hover one to see its name and side, plus its requirement (e.g. a fee or climbing gear) and spawn chance
+  when it has them. Extracts on other floors are drawn dimmed
 
 QuestCodex doesn't know which quests need a key, but the map gets you most of the way: if a marker sits
 next to a lock icon, hover it to see which key opens that door, and you can judge for yourself whether to
 bring it.
 
 [![Quest locations map](../assets/images/wiki-quest-map.png)](../assets/images/wiki-quest-map.png)
+
+### Icebreaker
+
+The Icebreaker map is ready ahead of SPT v5. Until then, it shows up as soon as your server has the
+Icebreaker location, for example from a mod that adds it.
+
+- Floors are the ship's decks (`Deck -3` to `Deck 10`)
+- Besides key and keycard doors, the door tooltip covers keypad doors (with the code when it's fixed),
+  doors you blow open with an explosive charge and frozen hatches you melt with a gas torch
+- Repair objectives that point at a switch, like the breaker panels in Wiring the Vessel, get markers too
+
+[![Icebreaker map for Wiring the Vessel](../assets/images/wiki-quest-map-icebreaker.png)](../assets/images/wiki-quest-map-icebreaker.png)
+
+### Expanded Interchange
+
+If a mod that expands Interchange is loaded, the map and its quest zones, areas and locked doors switch to
+the expanded version, and the tab reads **Interchange (Expanded)**. Without it, nothing changes.
 
 ## Branch warnings
 

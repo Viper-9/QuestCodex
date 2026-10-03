@@ -25,6 +25,16 @@ nav_order: 1
 
 [![검색, 필터 칩, 정렬]({{ '/assets/images/wiki-filters.png' | relative_url }})]({{ '/assets/images/wiki-filters.png' | relative_url }})
 
+## 출처 모드 필터 {#mod-filter}
+
+서버에 모드 퀘스트가 있고 `모드`(Mod) 칩이 켜져 있으면 필터 줄 아래에 **출처 모드**(Source mod) 줄이 나타납니다. 모드는 바닐라 상인에게 퀘스트를 붙이는 경우가 많아서, 한 모드가 추가한 퀘스트를 한 번에 모아 보기 좋습니다.
+
+- 모드를 하나 이상 고릅니다. **전체 모드**(All mods)를 누르면 선택이 풀립니다
+- 상인 필터와 같이 걸리고, 상인 줄 숫자도 고른 모드 기준으로 다시 셉니다
+- 칩의 점 색은 목록의 모드 태그 색과 같습니다
+
+[![출처 모드 필터]({{ '/assets/images/wiki-mod-filter.png' | relative_url }})]({{ '/assets/images/wiki-mod-filter.png' | relative_url }})
+
 ## 정렬 {#sorting}
 
 - **연계순**(By chain, 기본값): 선행 퀘스트가 항상 후속 퀘스트보다 위에 옵니다

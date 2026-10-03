@@ -25,7 +25,12 @@ no file trace, so their source mod can't be identified. Those get a generic `mod
 ## Quest map coverage
 
 - A few quests have no location data, so their objectives don't appear on the map.
-- Mod quests show on the map only when the mod defines its zones in data the server can read.
+- Mod quests show on the map only when the mod defines its zones in data the server can read, or when
+  QuestCodex already ships their positions (the Icebreaker quests do).
+- Maps a mod adds are drawn only when QuestCodex ships a map for them (currently the Icebreaker and the
+  expanded Interchange).
+- Extract and transit positions come from bundled data, so an extract a mod adds or moves may be missing
+  or misplaced.
 - QuestCodex doesn't track which keys you own. Lock icons tell you which key a door needs, nothing more.
 
 ## Unlock paths

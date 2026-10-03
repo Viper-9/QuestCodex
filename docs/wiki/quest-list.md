@@ -24,6 +24,17 @@ Search by quest name, and narrow the list with the `Vanilla` / `Mod` and `BEAR o
 
 [![Search, filter chips and sorting](../assets/images/wiki-filters.png)](../assets/images/wiki-filters.png)
 
+## Mod filter
+
+When your server has mod quests and the `Mod` chip is on, a **Source mod** row appears under the filter bar.
+Mods often add quests to vanilla traders, so this is the quickest way to see everything one mod added.
+
+- Pick one or more mods. **All mods** clears the selection
+- It combines with the trader filter, and the trader row recounts for the selected mods
+- Chip dots use the same colors as the mod tags in the list
+
+[![Source mod filter](../assets/images/wiki-mod-filter.png)](../assets/images/wiki-mod-filter.png)
+
 ## Sorting
 
 - **By chain** (default): prerequisites always sit above the quests they unlock
