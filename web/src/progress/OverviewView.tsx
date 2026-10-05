@@ -116,7 +116,7 @@ interface QuestTableProps {
 /** 연계 점프로 펼친 줄을 강조해 두는 시간 */
 const JUMP_FLASH_MS = 1500
 
-function lineId(questId: string): string {
+export function lineId(questId: string): string {
   return `qc-pline-${questId}`
 }
 
@@ -270,10 +270,14 @@ interface QuestLineProps {
   onToggle(): void
   /** 펼쳤을 때 줄 아래에 붙는 위키와 같은 상세 */
   detail: ReactNode
+  /** 이름 뒤 태그 자리에 덧붙일 것(카파 트래커의 "실패 — 다시 수락") */
+  tag?: ReactNode
+  /** 요약 뒤·카운터 앞에 덧붙일 것(카파 트래커의 "뒤로 N개 · 연쇄 N단계") */
+  aside?: ReactNode
 }
 
 /** 한 줄 요약: 진행 중이면 첫 미완료 목표와 카운터, 잠김이면 첫 잠김 사유. 펼치면 위키와 같은 전체 상세. */
-function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, detail }: QuestLineProps) {
+export function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, detail, tag, aside }: QuestLineProps) {
   const t = useT()
   const locked = qp.status === 'Locked'
   const unreachable = locked && isUnreachable(qp)
@@ -293,9 +297,11 @@ function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, detail 
             </span>
           )}
           {unreachable &&<span className="qc-tag qc-pline__tag" title={t('overview.unreachableHint')}>{t('overview.unreachable')}</span>}
+          {tag}
         </span>
         <span className="qc-pline__trader">{lookup.traderName(quest.traderId)}</span>
         <span className="qc-pline__summary">{summary}</span>
+        {aside}
         <span className="qc-pline__counter">{!locked && first && <Counter op={qp.objectives[first.conditionId]} />}</span>
       </button>
       {detail}

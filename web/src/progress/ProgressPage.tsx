@@ -4,6 +4,7 @@ import { useT } from '../i18n/I18nContext'
 import type { Route } from '../shell/router'
 import { makeLookup } from '../wiki/derive'
 import { ItemsView } from './ItemsView'
+import { KappaView } from './KappaView'
 import { OverviewView } from './OverviewView'
 import { ProfileBar } from './ProfileBar'
 import { RaidView } from './RaidView'
@@ -57,6 +58,7 @@ export function ProgressPage({ catalog, route }: ProgressPageProps) {
             <ItemsView catalog={catalog} progress={p.progress} inventory={inventory} lookup={lookup} />
           )}
           {route.sub === 'unlocks' && <UnlocksView catalog={catalog} progress={p.progress} lookup={lookup} />}
+          {route.sub === 'kappa' && <KappaView catalog={catalog} progress={p.progress} inventory={inventory} lookup={lookup} />}
         </>
       ) : (
         !p.error && p.profiles?.length !== 0 && <p className="qc-empty">{t('app.loading')}</p>
