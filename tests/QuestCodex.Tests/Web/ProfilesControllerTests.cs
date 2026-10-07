@@ -23,6 +23,7 @@ public class ProfilesControllerTests
     {
         public IReadOnlySet<string> SupportedLangs { get; } = new HashSet<string> { "en" };
         public CatalogModel Get(string lang) => new("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new(), new(), new());
+        public void Rebuild() { }
     }
 
     [Fact]
