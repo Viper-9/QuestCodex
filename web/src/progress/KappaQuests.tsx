@@ -6,14 +6,11 @@ import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
 import { branchIndex, toggleMember, type NameLookup } from '../wiki/derive'
 import { formatInt } from '../wiki/format'
-import { QuestDescriptionDialog } from '../wiki/QuestDescriptionDialog'
 import { QuestDetail } from '../wiki/QuestDetail'
-import { QuestMapDialog } from '../wiki/QuestMapDialog'
-import { QuestPrepDialog } from '../wiki/QuestPrepDialog'
 import { questProgress } from './derive'
 import { requirementLines } from './format'
 import type { ChainStat, KappaGraph, KappaLists } from './kappa'
-import { KappaChainDialog } from './KappaChainDialog'
+import { useKappaDialogs } from './KappaDialogs'
 import { lineId, QuestLine } from './OverviewView'
 import { objectiveLines } from './parts'
 
@@ -41,10 +38,7 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
   const t = useT()
   const [openSections, setOpenSections] = useState<ReadonlySet<Section>>(() => new Set(['now']))
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
-  const [dialogId, setDialogId] = useState<string | null>(null)
-  const [prepId, setPrepId] = useState<string | null>(null)
-  const [mapId, setMapId] = useState<string | null>(null)
-  const [chainId, setChainId] = useState<string | null>(null)
+  const { open: openDialog, dialogs } = useKappaDialogs(catalog, graph, progress, done, lookup)
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
   const branches = useMemo(() => branchIndex(Object.values(catalog.quests)), [catalog])
 
@@ -87,11 +81,11 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
         detail={open && (
           <QuestDetail
             quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)}
-            onOpenDescription={setDialogId} onOpenPrep={setPrepId} onOpenMap={setMapId} onJump={jumpTo}
+            onOpenDescription={openDialog.description} onOpenPrep={openDialog.prep} onOpenMap={openDialog.map} onJump={jumpTo}
             objectiveLines={objectiveLines(q, qp, t)}
             requirementLines={requirementLines(q, qp, lookup, t)}
             actions={<>
-              <button type="button" className="qc-btn" onClick={() => setChainId(q.id)}>{t('kappa.openChain')}</button>
+              <button type="button" className="qc-btn" onClick={() => openDialog.chain(q.id)}>{t('kappa.openChain')}</button>
               <button type="button" className="qc-btn" onClick={() => navigate('wiki', null, { quest: q.id })}>{t('overview.openWiki')}</button>
             </>}
           />
@@ -139,25 +133,7 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
       {section('now', t('kappa.now'), t('kappa.nowHint'), lists.now)}
       {section('locked', t('kappa.locked'), t('kappa.lockedHint'), lists.locked)}
       {section('done', t('kappa.done'), null, lists.done)}
-      <KappaChainDialog questId={chainId} catalog={catalog} graph={graph} progress={progress} done={done} lookup={lookup} onClose={() => setChainId(null)} />
-      <QuestDescriptionDialog
-        quest={dialogId ? catalog.quests[dialogId] ?? null : null}
-        traderName={dialogId ? lookup.traderName(catalog.quests[dialogId]?.traderId ?? '') : ''}
-        onClose={() => setDialogId(null)}
-      />
-      <QuestPrepDialog
-        quest={prepId ? catalog.quests[prepId] ?? null : null}
-        traderName={prepId ? lookup.traderName(catalog.quests[prepId]?.traderId ?? '') : ''}
-        onClose={() => setPrepId(null)}
-      />
-      <QuestMapDialog
-        quest={mapId ? catalog.quests[mapId] ?? null : null}
-        traderName={mapId ? lookup.traderName(catalog.quests[mapId]?.traderId ?? '') : ''}
-        lockedDoors={catalog.lockedDoors}
-        exits={catalog.exits}
-        mapVariants={catalog.mapVariants}
-        onClose={() => setMapId(null)}
-      />
+      {dialogs}
     </div>
   )
 }

@@ -179,7 +179,8 @@ export function chainStats(g: KappaGraph, done: ReadonlySet<string>): Map<string
 
 // ---- 목록 ----
 
-const NOW = new Set<QuestStatus>(['AvailableForFinish', 'Started', 'AvailableForStart', 'FailRestartable'])
+/** 지금 할 수 있는 상태 — 목록의 "지금 할 수 있는 것", 트리의 now, 연쇄 팝업의 강조가 같이 쓴다 */
+export const NOW: ReadonlySet<QuestStatus> = new Set<QuestStatus>(['AvailableForFinish', 'Started', 'AvailableForStart', 'FailRestartable'])
 
 export interface KappaLists { now: CatalogQuest[]; locked: CatalogQuest[]; done: CatalogQuest[] }
 
@@ -224,6 +225,223 @@ export function kappaUnlocks(catalog: Catalog, g: KappaGraph, progress: ProfileP
   }
   for (const list of out.values()) list.sort((a, b) => a.name.localeCompare(b.name))
   return out
+}
+
+// ---- 상인별 트리(kappa-tree.spec.md §3) ----
+
+export type TreeState = 'done' | 'now' | 'next' | 'far'
+export type TreeNodeKind = 'quest' | 'outside' | 'doneBox'
+/** 완료 접기를 켰을 때 이 상인의 완료 노드를 합친 칸의 id */
+export const TREE_DONE_BOX = '__done'
+
+export interface TreeNode {
+  /** 퀘스트 id, 접힌 칸은 TREE_DONE_BOX */
+  id: string
+  kind: TreeNodeKind
+  /** doneBox 는 'done' */
+  state: TreeState
+  col: number
+  /** 소수 가능(부모 평균 높이) */
+  row: number
+}
+
+export interface TreeEdge {
+  from: string
+  to: string
+  /** from 이 택일 분기(g.failOk) — 실패해도 열린다 */
+  soft: boolean
+  /** 건너뛰는 중간 열의 행 값(col(from)+1 … col(to)−1 순). 인접 열이면 [] */
+  via: number[]
+}
+
+export interface KappaTree {
+  nodes: TreeNode[]
+  edges: TreeEdge[]
+  cols: number
+  /** max(row, via) + 1 */
+  rows: number
+  /** 이 상인 카파 퀘스트 중 완료 수 */
+  doneCount: number
+  /** 이 상인 카파 퀘스트 수 */
+  total: number
+}
+
+/** 완료 / 지금 할 수 있음 / 다음에 열림(카파 선행이 전부 완료나 지금 할 수 있음) / 그 밖 */
+export function treeState(g: KappaGraph, progress: ProfileProgress, done: ReadonlySet<string>, id: string): TreeState {
+  if (done.has(id)) return 'done'
+  const ready = (q: string) => NOW.has(questProgress(progress, q).status)
+  if (ready(id)) return 'now'
+  return (g.ups.get(id) ?? []).every((u) => done.has(u) || ready(u)) ? 'next' : 'far'
+}
+
+/**
+ * 상인 하나의 카파 퀘스트 트리. 열 = 상인 안 최장 선행 깊이, 행 = barycenter 4회 + 부모 평균 높이.
+ * 두 열 이상 건너뛰는 간선은 중간 열마다 빈 자리(더미)를 끼워 노드 뒤로 지나가지 않게 한다(§3.5).
+ * 바깥 노드(다른 상인 선행)는 한 겹만 그린다.
+ */
+export function kappaTree(
+  catalog: Catalog, g: KappaGraph, progress: ProfileProgress, done: ReadonlySet<string>, traderId: string, collapse: boolean,
+): KappaTree {
+  const members = [...g.ids].filter((id) => catalog.quests[id]?.traderId === traderId)
+  const memberSet = new Set(members)
+  const doneCount = members.filter((id) => done.has(id)).length
+  const kinds = new Map<string, TreeNodeKind>()
+  const pairs: { from: string; to: string }[] = []
+
+  // 1. 노드·간선 고르기(§3.3)
+  const drawn = members.filter((id) => !(collapse && done.has(id)))
+  for (const id of drawn) kinds.set(id, 'quest')
+  if (collapse && doneCount > 0) kinds.set(TREE_DONE_BOX, 'doneBox')
+  for (const id of drawn) {
+    let fromBox = false
+    for (const u of g.ups.get(id) ?? []) {
+      if (memberSet.has(u)) {
+        if (kinds.has(u)) pairs.push({ from: u, to: id })
+        else fromBox = true
+      } else if (!(collapse && done.has(u))) {
+        if (!kinds.has(u)) kinds.set(u, 'outside')
+        pairs.push({ from: u, to: id })
+      }
+    }
+    if (fromBox) pairs.push({ from: TREE_DONE_BOX, to: id })
+  }
+
+  const ups = new Map<string, string[]>()
+  const downs = new Map<string, string[]>()
+  for (const id of kinds.keys()) { ups.set(id, []); downs.set(id, []) }
+  for (const e of pairs) { ups.get(e.to)!.push(e.from); downs.get(e.from)!.push(e.to) }
+
+  // 2. 열(§3.4)
+  const col = new Map<string, number>()
+  const colOf = (id: string): number => {
+    const memo = col.get(id)
+    if (memo !== undefined) return memo
+    col.set(id, 0) // 순환 방어
+    let d = 0
+    for (const u of ups.get(id)!) d = Math.max(d, kinds.get(u) === 'quest' ? colOf(u) + 1 : 1)
+    col.set(id, d)
+    return d
+  }
+  for (const id of drawn) colOf(id)
+  if (kinds.has(TREE_DONE_BOX)) col.set(TREE_DONE_BOX, 0)
+  for (const [id, kind] of kinds) if (kind === 'outside') col.set(id, Math.min(...downs.get(id)!.map((d) => col.get(d)!)) - 1)
+  const ncol = Math.max(0, ...[...col.values()].map((c) => c + 1))
+
+  // 3. 배치 그래프: 건너뛰는 간선의 중간 열마다 더미(§3.5-1)
+  const lups = new Map<string, string[]>()
+  const ldowns = new Map<string, string[]>()
+  for (const id of kinds.keys()) { lups.set(id, []); ldowns.set(id, []) }
+  const dummies = pairs.map((e, ei) => {
+    const path: string[] = []
+    let prev = e.from
+    for (let k = col.get(e.from)! + 1; k < col.get(e.to)!; k++) {
+      const d = `~${ei}_${k}`
+      col.set(d, k)
+      lups.set(d, [prev])
+      ldowns.set(d, [])
+      ldowns.get(prev)!.push(d)
+      path.push(d)
+      prev = d
+    }
+    lups.get(e.to)!.push(prev)
+    ldowns.get(prev)!.push(e.to)
+    return path
+  })
+
+  // 4. 초기 순서: 열마다 이름순, 더미는 끝(§3.5-2)
+  const name = (id: string) => catalog.quests[id]?.name ?? ''
+  const isDummy = (id: string) => id.startsWith('~')
+  const cols: string[][] = Array.from({ length: ncol }, () => [])
+  const ordered = [...col.keys()].sort((a, b) =>
+    Number(isDummy(a)) - Number(isDummy(b)) || (isDummy(a) ? 0 : name(a).localeCompare(name(b)) || a.localeCompare(b)))
+  for (const id of ordered) cols[col.get(id)!].push(id)
+
+  // 5. barycenter 4회 — 짝수 회는 왼→오(부모 평균), 홀수 회는 오→왼(자식 평균)(§3.5-3)
+  const pos = new Map<string, number>()
+  const index = (list: string[]) => list.forEach((id, i) => pos.set(id, i))
+  cols.forEach(index)
+  const bary = (list: string[], id: string) => (list.length ? list.reduce((s, x) => s + pos.get(x)!, 0) / list.length : pos.get(id)!)
+  for (let it = 0; it < 4; it++) {
+    const down = it % 2 === 0
+    for (let k = down ? 1 : ncol - 2; down ? k < ncol : k >= 0; k += down ? 1 : -1) {
+      const key = new Map(cols[k].map((id) => [id, bary((down ? lups : ldowns).get(id)!, id)]))
+      cols[k].sort((a, b) => key.get(a)! - key.get(b)!)
+      index(cols[k])
+    }
+  }
+
+  // 6. 높이: 부모 평균, 바로 위 노드보다 1 아래 이상(§3.5-4). 바깥 노드는 자식 평균으로 한 번 더(§3.5-5)
+  const avg = (list: string[]) => list.reduce((s, x) => s + row.get(x)!, 0) / list.length
+  const row = new Map<string, number>()
+  for (const list of cols) {
+    let prev = -1
+    for (const id of list) {
+      const ps = lups.get(id)!
+      row.set(id, Math.max(ps.length ? avg(ps) : 0, prev + 1))
+      prev = row.get(id)!
+    }
+  }
+  for (const list of cols) {
+    let prev = -1
+    for (const id of list) {
+      row.set(id, kinds.get(id) === 'outside' ? Math.max(avg(ldowns.get(id)!), prev + 1) : Math.max(row.get(id)!, prev + 1))
+      prev = row.get(id)!
+    }
+  }
+
+  const nodes: TreeNode[] = [...kinds].map(([id, kind]) => ({
+    id, kind, state: kind === 'doneBox' ? 'done' : treeState(g, progress, done, id), col: col.get(id)!, row: row.get(id)!,
+  }))
+  const edges: TreeEdge[] = pairs.map((e, ei) => ({
+    from: e.from, to: e.to, soft: e.from !== TREE_DONE_BOX && g.failOk.has(e.from), via: dummies[ei].map((d) => row.get(d)!),
+  }))
+  return { nodes, edges, cols: ncol, rows: row.size ? Math.max(...row.values()) + 1 : 0, doneCount, total: members.length }
+}
+
+/** id + 그 조상·자손(트리 간선 기준, 바깥 노드·접힌 칸 포함). 선택 강조용 */
+export function treeFocus(tree: KappaTree, id: string): Set<string> {
+  const out = new Set([id])
+  for (const [a, b] of [['from', 'to'], ['to', 'from']] as const) {
+    const stack = [id]
+    const seen = new Set<string>()
+    while (stack.length) {
+      const cur = stack.pop()!
+      if (seen.has(cur)) continue
+      seen.add(cur)
+      out.add(cur)
+      for (const e of tree.edges) if (e[a] === cur) stack.push(e[b])
+    }
+  }
+  return out
+}
+
+/** 노드 크기·열 간격·행 간격·여백(px) — 그리기(KappaTree.tsx)와 간선 경로가 같이 쓴다(§3.6) */
+export const TREE_W = 196
+export const TREE_H = 40
+export const TREE_CX = 252
+export const TREE_RY = 52
+export const TREE_PAD = 10
+
+export const treeX = (col: number) => TREE_PAD + col * TREE_CX
+export const treeY = (row: number) => TREE_PAD + row * TREE_RY
+
+/** 간선 SVG 경로 — 구간마다 앞 점 오른쪽 가운데 → 뒤 점 왼쪽 가운데 3차 베지어, 빈 자리는 노드 폭만큼 수평선으로 통과 */
+export function edgePath(edge: TreeEdge, tree: KappaTree): string {
+  const at = (id: string) => tree.nodes.find((n) => n.id === id)!
+  const from = at(edge.from)
+  const points = [from, ...edge.via.map((row, i) => ({ col: from.col + 1 + i, row })), at(edge.to)]
+  const mid = (row: number) => treeY(row) + TREE_H / 2
+  let d = `M${treeX(from.col) + TREE_W} ${mid(from.row)}`
+  for (let i = 0; i + 1 < points.length; i++) {
+    const x1 = treeX(points[i].col) + TREE_W
+    const y1 = mid(points[i].row)
+    const x2 = treeX(points[i + 1].col)
+    const y2 = mid(points[i + 1].row)
+    const g = (x2 - x1) / 2
+    d += ` C${x1 + g} ${y1} ${x2 - g} ${y2} ${x2} ${y2}`
+    if (i + 2 < points.length) d += ` H${x2 + TREE_W}`
+  }
+  return d
 }
 
 // ---- 상인 표 ----

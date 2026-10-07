@@ -477,3 +477,65 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-utier__q.is-now { color: var(--ok); }
 .qc-card .qc-kappa__chainh, .qc-dialog .qc-kappa__chainh { margin: 14px 0 4px; color: var(--fg-3); font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: .05em; }
 .qc-kappa__more { margin-top: 8px; }
+
+/* ---- 카파 상인별 트리(dev-docs/12-kappa-tracker/kappa-tree.spec.md) ----
+   버튼 규칙은 .qc-card/.qc-maps 를 앞에 붙인다: `.qc-shell button`(0,1,1) 리셋이 단일 클래스를 이긴다(walkthrough §6).
+   상태 수식자도 0,2,0 이라 선언 순서로 이긴다 — 기본 → 상태 → 선택(is-sel/is-hi/is-dim) 순서를 지킬 것 */
+.qc-maps__spacer { flex: 1; }
+.qc-ktree__seg { display: inline-flex; border: 1px solid var(--border-2); border-radius: var(--radius); overflow: hidden; }
+.qc-maps .qc-ktree__seg button { padding: 4px 12px; border: 0; background: var(--bg-3); color: var(--fg-2); font-size: 12px; }
+.qc-maps .qc-ktree__seg button + button { border-left: 1px solid var(--border-2); }
+.qc-maps .qc-ktree__seg button.is-on { background: var(--accent-bg); color: var(--accent-fg); font-weight: 600; box-shadow: var(--pressed-shadow); }
+
+.qc-ktree { min-width: 0; }
+.qc-ktree__head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--fg-2); font-size: 12px; }
+.qc-ktree__title { color: var(--fg); font-size: 14px; font-weight: 600; }
+.qc-ktree__sp { flex: 1; }
+.qc-ktree__toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); cursor: pointer; }
+.qc-ktree__toggle input { margin: 0; accent-color: var(--accent); }
+.qc-ktree__scroll { overflow-x: auto; overflow-y: hidden; }
+.qc-ktree__canvas { position: relative; }
+.qc-ktree__canvas svg { position: absolute; inset: 0; overflow: visible; }
+.qc-ktree__canvas path { fill: none; stroke: var(--border-2); stroke-width: 1.2; transition: opacity .12s; }
+.qc-ktree__canvas path.is-now { stroke: var(--accent); stroke-width: 1.6; }
+.qc-ktree__canvas path.is-done { stroke: var(--ok); opacity: .55; }
+.qc-ktree__canvas path.is-soft { stroke-dasharray: 5 4; }
+.qc-ktree__canvas path.is-dim { opacity: .12; }
+.qc-ktree__canvas path.is-hi { stroke-width: 2.2; opacity: 1; }
+
+.qc-card .qc-ktree__node {
+  position: absolute; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; padding: 0 10px; text-align: left;
+  border: 1.3px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); transition: opacity .12s;
+}
+.qc-card .qc-ktree__node:not(.qc-ktree__node--done, .qc-ktree__node--box, .qc-ktree__node--now):hover { background: linear-gradient(var(--bg-hover), var(--bg-hover)), var(--bg-3); }
+.qc-ktree__name { overflow: hidden; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.qc-ktree__sub { overflow: hidden; color: var(--fg-2); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+/* 반투명 상태색은 --bg-3 위에 겹쳐 불투명하게 — 뒤의 간선이 비치지 않게 */
+.qc-ktree__node.qc-ktree__node--done, .qc-ktree__node.qc-ktree__node--box { background: linear-gradient(var(--ok-bg), var(--ok-bg)), var(--bg-3); border-color: var(--ok); }
+.qc-ktree__node--done .qc-ktree__name, .qc-ktree__node--box .qc-ktree__name { color: var(--ok); }
+.qc-ktree__node.qc-ktree__node--now { background: linear-gradient(var(--accent-bg), var(--accent-bg)), var(--bg-3); border-color: var(--accent); }
+.qc-ktree__node--now .qc-ktree__name { font-weight: 700; }
+.qc-ktree__node--now .qc-ktree__sub { color: var(--accent-fg); }
+.qc-ktree__node.qc-ktree__node--next { border-style: dashed; border-color: var(--fg-2); }
+.qc-ktree__node.qc-ktree__node--far { opacity: .62; }
+.qc-ktree__node.qc-ktree__node--out { border-style: dotted; background: var(--bg-2); opacity: .7; }
+.qc-ktree__node--out .qc-ktree__name { color: var(--fg-2); font-weight: 500; }
+.qc-ktree__node.is-sel { box-shadow: 0 0 0 2px var(--bg-2), 0 0 0 4px var(--accent); opacity: 1; }
+.qc-ktree__node.is-hi { opacity: 1; }
+.qc-ktree__node.is-dim { opacity: .22; }
+
+.qc-ktree__legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 9px 14px; border-top: 1px solid var(--border); color: var(--fg-2); font-size: 12px; }
+.qc-ktree__legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.qc-ktree__sw { display: inline-block; width: 16px; height: 11px; border: 1.5px solid var(--border-2); border-radius: 3px; background: var(--bg-3); }
+.qc-ktree__sw--done { background: var(--ok-bg); border-color: var(--ok); }
+.qc-ktree__sw--now { background: var(--accent-bg); border-color: var(--accent); }
+.qc-ktree__sw--next { border-style: dashed; border-color: var(--fg-2); }
+.qc-ktree__sw--far { opacity: .6; }
+.qc-ktree__ln { display: inline-block; width: 22px; border-top: 1.6px dashed var(--fg-2); }
+
+.qc-card.qc-ktree__pick { padding: 22px 16px; }
+.qc-ktree__dhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.qc-ktree__dname { font-size: 15px; font-weight: 600; }
+.qc-ktree__dmeta { color: var(--fg-2); font-size: 12px; }
+.qc-card .qc-ktree__dclose { margin-left: auto; padding: 0 4px; border: 0; background: none; color: var(--fg-2); font-size: 14px; }
+.qc-card .qc-ktree__dclose:hover { color: var(--fg); }
