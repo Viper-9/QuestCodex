@@ -40,7 +40,7 @@
   "list.empty": "No quests match the filters",
   "list.prereqShort": " · prereq {n}",
   "tag.mod": "mod",
-  "tag.overriddenTitle": "Modified by {mod}",
+  "tag.overriddenTitle": "Overridden by {mod}",
   "detail.description": "View description",
   "detail.noDescription": "No description",
   "detail.vanilla": "Vanilla",
