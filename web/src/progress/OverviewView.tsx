@@ -4,8 +4,9 @@ import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
-import { assignModColors, branchIndex, listMods, orderTraders, toggleMember, type NameLookup } from '../wiki/derive'
+import { assignModColors, branchIndex, listMods, modColorOf, orderTraders, toggleMember, type NameLookup } from '../wiki/derive'
 import { ModStrip } from '../wiki/ModStrip'
+import { SourceTag } from '../wiki/SourceTag'
 import { QuestDescriptionDialog } from '../wiki/QuestDescriptionDialog'
 import { QuestDetail } from '../wiki/QuestDetail'
 import { QuestMapDialog } from '../wiki/QuestMapDialog'
@@ -219,7 +220,7 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
                 lookup={lookup}
                 open={open}
                 flash={highlight.has(q.id) || jumped === q.id}
-                modColor={q.modName ? modColors[q.modName] : undefined}
+                modColor={modColorOf(q, modColors)}
                 onToggle={() => toggle(q.id)}
                 detail={open && (
                   <QuestDetail
@@ -291,11 +292,7 @@ export function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, 
       <button type="button" className="qc-pline__row" aria-expanded={open} onClick={onToggle}>
         <span className="qc-pline__name">
           {quest.name}
-          {!quest.isVanilla && (
-            <span className="qc-tag qc-tag--mod" data-mod-color={modColor} title={quest.modName ?? undefined}>
-              {quest.modName ?? t('tag.mod')}
-            </span>
-          )}
+          <SourceTag quest={quest} color={modColor} />
           {unreachable &&<span className="qc-tag qc-pline__tag" title={t('overview.unreachableHint')}>{t('overview.unreachable')}</span>}
           {tag}
         </span>

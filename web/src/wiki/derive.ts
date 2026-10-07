@@ -21,17 +21,39 @@ export interface WikiFilters {
 /** 출처를 못 찾은 모드 퀘스트(C# 코드로 주입 등)의 키. 실제 모드 폴더명은 빈 문자열일 수 없다. */
 export const UNKNOWN_MOD = ''
 
-/** 퀘스트의 출처 모드 키. 바닐라면 null, 모드인데 출처 미상이면 UNKNOWN_MOD. */
+/**
+ * 모드가 덮어쓴 바닐라 퀘스트의 키 앞머리. 같은 모드가 퀘스트를 추가도 하고 덮어쓰기도 하면 칩이 두 개로 나뉜다.
+ * ':' 은 윈도우 폴더명에 쓸 수 없어 실제 모드 폴더명(추가 퀘스트의 키)과 겹치지 않는다.
+ */
+export const OVERRIDE_PREFIX = ':'
+
+/** 퀘스트의 출처 모드 키. 모드인데 출처 미상이면 UNKNOWN_MOD, 모드가 덮어쓴 바닐라면 OVERRIDE_PREFIX+모드명, 그 밖의 바닐라는 null. */
 export function modKey(q: CatalogQuest): string | null {
-  return q.isVanilla ? null : (q.modName ?? UNKNOWN_MOD)
+  if (q.isVanilla) return q.overriddenBy ? OVERRIDE_PREFIX + q.overriddenBy : null
+  return q.modName ?? UNKNOWN_MOD
+}
+
+/** 목록 태그·칩 점에 쓸 모드 이름. 모드 퀘스트는 출처 모드, 덮어쓴 바닐라는 덮어쓴 모드. */
+export function sourceModName(q: CatalogQuest): string | null {
+  return q.isVanilla ? (q.overriddenBy ?? null) : q.modName
+}
+
+/** 출처 태그 색 번호. 바닐라 그대로거나 출처 미상이면 undefined → 기본 --mod 색. */
+export function modColorOf(q: CatalogQuest, colors: Record<string, number>): number | undefined {
+  const name = sourceModName(q)
+  return name ? colors[name] : undefined
 }
 
 export interface ModEntry {
   key: string
+  /** 칩에 보일 모드 이름. 출처 미상이면 UNKNOWN_MOD */
+  name: string
+  /** true 면 이 모드가 덮어쓴 바닐라 퀘스트 묶음 */
+  overridden: boolean
   count: number
 }
 
-/** 모드 칩 줄의 항목. 모드 이름순, 출처 미상은 맨 뒤. 개수는 필터와 무관한 고정값. */
+/** 모드 칩 줄의 항목. 모드 이름순(같은 모드면 추가 → 덮어쓰기), 출처 미상은 맨 뒤. 개수는 필터와 무관한 고정값. */
 export function listMods(quests: CatalogQuest[]): ModEntry[] {
   const counts = new Map<string, number>()
   for (const q of quests) {
@@ -39,8 +61,14 @@ export function listMods(quests: CatalogQuest[]): ModEntry[] {
     if (k !== null) counts.set(k, (counts.get(k) ?? 0) + 1)
   }
   return [...counts]
-    .map(([key, count]) => ({ key, count }))
-    .sort((a, b) => Number(a.key === UNKNOWN_MOD) - Number(b.key === UNKNOWN_MOD) || a.key.localeCompare(b.key))
+    .map(([key, count]) => {
+      const overridden = key.startsWith(OVERRIDE_PREFIX)
+      return { key, name: overridden ? key.slice(OVERRIDE_PREFIX.length) : key, overridden, count }
+    })
+    .sort((a, b) =>
+      Number(a.key === UNKNOWN_MOD) - Number(b.key === UNKNOWN_MOD)
+      || a.name.localeCompare(b.name)
+      || Number(a.overridden) - Number(b.overridden))
 }
 
 /** 모드 선택이 걸린 상태면 그 모드들의 퀘스트만, 아니면 그대로. 목록 필터와 상인 개수가 같이 쓴다. */
@@ -182,7 +210,7 @@ export const MOD_COLOR_COUNT = 6
  * 같은 모드의 색이 바뀐다. 모드 수가 팔레트보다 많으면 색이 순환해 재사용된다(중복 허용).
  */
 export function assignModColors(quests: CatalogQuest[]): Record<string, number> {
-  const names = [...new Set(quests.map((q) => q.modName).filter((n): n is string => n !== null))]
+  const names = [...new Set(quests.map(sourceModName).filter((n): n is string => n !== null))]
   names.sort((a, b) => a.localeCompare(b))
   const out: Record<string, number> = {}
   names.forEach((name, i) => { out[name] = (i % MOD_COLOR_COUNT) + 1 })

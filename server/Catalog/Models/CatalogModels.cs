@@ -114,6 +114,11 @@ public sealed class CatalogQuest
     public bool IsVanilla { get; init; }
     /// <summary>IsVanilla=false 인 퀘스트에서만 채워진다. 출처 모드를 못 찾으면(예: CustomQuestService 로 주입) null.</summary>
     public string? ModName { get; init; }
+    /// <summary>
+    /// IsVanilla=true 인데 어떤 모드의 퀘스트 DB 파일에 같은 ID 가 있으면 그 모드 폴더명(예: sptQuestLive 가 바닐라
+    /// 퀘스트를 고쳐 덮어쓴 경우). 파일이 있다는 사실만 보며 내용이 바닐라와 실제로 다른지는 비교하지 않는다.
+    /// </summary>
+    public string? OverriddenBy { get; init; }
     public string? ImageUrl { get; init; }
     public int? MinLevel { get; init; }
     /// <summary>퀘스트가 묶인 맵의 표시 이름. "any" 이거나 이름을 못 찾으면 null.</summary>

@@ -270,6 +270,7 @@ public static class CatalogBuilder
             ParseRewards(quest, "Success", rewardParser, warnings, questId),
             ParseRewards(quest, "Fail", rewardParser, warnings, questId));
 
+        var isVanilla = input.VanillaQuestIds?.Contains(questId) ?? false;
         return new CatalogQuest
         {
             Id = questId,
@@ -278,8 +279,9 @@ public static class CatalogBuilder
             TraderId = traderId,
             Side = quest.Side,
             FactionOnly = factionOnly,
-            IsVanilla = input.VanillaQuestIds?.Contains(questId) ?? false,
-            ModName = input.VanillaQuestIds?.Contains(questId) == true ? null : input.ModQuestOrigins?.GetValueOrDefault(questId),
+            IsVanilla = isVanilla,
+            ModName = isVanilla ? null : input.ModQuestOrigins?.GetValueOrDefault(questId),
+            OverriddenBy = isVanilla ? input.ModQuestOrigins?.GetValueOrDefault(questId) : null,
             ImageUrl = string.IsNullOrWhiteSpace(quest.Image) ? null : quest.Image,
             MinLevel = minLevel,
             Location = ResolveLocation(quest.Location, locale),

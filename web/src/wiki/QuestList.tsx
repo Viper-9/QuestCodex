@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { CatalogQuest } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
-import type { NameLookup } from './derive'
+import { modColorOf, type NameLookup } from './derive'
 import { QuestRow } from './QuestRow'
 
 interface QuestListProps {
@@ -41,7 +41,7 @@ export function QuestList({ quests, lookup, expanded, onToggle, renderDetail, mo
               expanded={open}
               onToggle={() => onToggle(q.id)}
               detail={open ? renderDetail(q) : undefined}
-              modColor={q.modName ? modColors[q.modName] : undefined}
+              modColor={modColorOf(q, modColors)}
               branch={branchIds.has(q.id)}
             />
           )

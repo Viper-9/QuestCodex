@@ -160,6 +160,8 @@ export interface CatalogQuest {
   factionOnly: FactionOnly
   isVanilla: boolean
   modName: string | null   // isVanilla=false 일 때만 값이 있을 수 있다. 서버가 출처 모드를 못 찾으면 null
+  /** isVanilla=true 인데 모드가 같은 ID 로 덮어쓴 퀘스트면 그 모드 폴더명(예: sptQuestLive). 구버전 서버엔 없다(undefined) */
+  overriddenBy?: string | null
   imageUrl: string | null      // 위키에서는 쓰지 않는다 (스펙 §0)
   minLevel: number | null
   /** 퀘스트가 묶인 맵의 표시 이름. 아무 맵이면 null */

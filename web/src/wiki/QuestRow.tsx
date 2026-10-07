@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { CatalogQuest } from '../api/catalog'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
+import { SourceTag } from './SourceTag'
 
 /** 연계 점프·딥링크가 scrollIntoView 대상으로 쓰는 DOM id (§4.4). */
 export function rowId(questId: string): string {
@@ -30,11 +31,7 @@ export function QuestRow({ quest, traderName, expanded, onToggle, detail, modCol
       <button type="button" className="qc-row" aria-expanded={expanded} onClick={onToggle}>
         <span className="qc-row__name">
           {quest.name}
-          {!quest.isVanilla && (
-            <span className="qc-tag qc-tag--mod" data-mod-color={modColor} title={quest.modName ?? undefined}>
-              {quest.modName ?? t('tag.mod')}
-            </span>
-          )}
+          <SourceTag quest={quest} color={modColor} />
           {branch && <span className="qc-tag qc-tag--branch" title={t('tag.branchTitle')}>{t('tag.branch')}</span>}
         </span>
         <span className="qc-row__trader">{traderName}</span>

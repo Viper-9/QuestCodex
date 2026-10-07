@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogQuest, CatalogTrader } from '../api/catalog'
-import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, inMods, listMods, makeLookup, MOD_COLOR_COUNT, modKey, orderTraders, sortQuests, toggleMember, UNKNOWN_MOD } from './derive'
+import { assignModColors, modColorOf, OVERRIDE_PREFIX, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, inMods, listMods, makeLookup, MOD_COLOR_COUNT, modKey, orderTraders, sortQuests, toggleMember, UNKNOWN_MOD } from './derive'
 
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
@@ -77,7 +77,9 @@ describe('출처 모드', () => {
   })
   it('listMods: 이름순, 출처 미상은 맨 뒤, 바닐라 제외', () => {
     expect(listMods(qs)).toEqual([
-      { key: 'ManimalIcebreaker', count: 2 }, { key: 'WTT-Artem', count: 1 }, { key: UNKNOWN_MOD, count: 1 },
+      { key: 'ManimalIcebreaker', name: 'ManimalIcebreaker', overridden: false, count: 2 },
+      { key: 'WTT-Artem', name: 'WTT-Artem', overridden: false, count: 1 },
+      { key: UNKNOWN_MOD, name: UNKNOWN_MOD, overridden: false, count: 1 },
     ])
     expect(listMods([qs[0]])).toEqual([])
   })
@@ -96,6 +98,42 @@ describe('출처 모드', () => {
   it('inMods + countByTrader: 상인 개수가 고른 모드 기준', () => {
     expect(countByTrader(inMods(qs, new Set(['ManimalIcebreaker'])))).toEqual({ prapor: 1, mechanic: 1 })
     expect(inMods(qs, new Set())).toBe(qs)
+  })
+})
+
+describe('모드가 덮어쓴 바닐라 퀘스트', () => {
+  const qs = [
+    quest({ id: 'v', isVanilla: true }),
+    quest({ id: 'v-live', isVanilla: true, overriddenBy: 'sptQuestLive' }),
+    quest({ id: 'v-ice', isVanilla: true, overriddenBy: 'ManimalIcebreaker' }),
+    quest({ id: 'ice', isVanilla: false, modName: 'ManimalIcebreaker' }),
+  ]
+  const base = { traders: new Set<string>(), chips: DEFAULT_CHIPS, query: '', mods: new Set<string>() }
+  const ids = (out: CatalogQuest[]) => out.map((q) => q.id)
+  const live = OVERRIDE_PREFIX + 'sptQuestLive'
+
+  it('modKey: 덮어쓴 바닐라는 접두어 붙은 모드명, 손대지 않은 바닐라는 null', () => {
+    expect(qs.map(modKey)).toEqual([null, live, OVERRIDE_PREFIX + 'ManimalIcebreaker', 'ManimalIcebreaker'])
+  })
+  it('listMods: 같은 모드면 추가 칩 뒤에 덮어쓰기 칩', () => {
+    expect(listMods(qs)).toEqual([
+      { key: 'ManimalIcebreaker', name: 'ManimalIcebreaker', overridden: false, count: 1 },
+      { key: OVERRIDE_PREFIX + 'ManimalIcebreaker', name: 'ManimalIcebreaker', overridden: true, count: 1 },
+      { key: live, name: 'sptQuestLive', overridden: true, count: 1 },
+    ])
+  })
+  it('덮어쓰기 칩을 고르면 그 모드가 고친 바닐라만', () => {
+    expect(ids(filterQuests(qs, { ...base, mods: new Set([live]) }))).toEqual(['v-live'])
+  })
+  it('덮어쓴 바닐라는 Vanilla 칩을 따른다', () => {
+    const chips = { ...DEFAULT_CHIPS, vanilla: false }
+    expect(ids(filterQuests(qs, { ...base, chips }))).toEqual(['ice'])
+  })
+  it('색: 덮어쓴 모드도 팔레트에 들어가고 같은 모드면 같은 색', () => {
+    const colors = assignModColors(qs)
+    expect(modColorOf(qs[0], colors)).toBeUndefined()
+    expect(modColorOf(qs[2], colors)).toBe(modColorOf(qs[3], colors))
+    expect(modColorOf(qs[1], colors)).toBeDefined()
   })
 })
 
