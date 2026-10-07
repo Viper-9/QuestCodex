@@ -40,6 +40,7 @@
   "list.empty": "조건에 맞는 퀘스트가 없습니다",
   "list.prereqShort": " · 선행 {n}",
   "tag.mod": "모드",
+  "tag.overriddenTitle": "{mod}에 의해 수정됨",
   "detail.description": "퀘스트 설명 보기",
   "detail.noDescription": "설명 없음",
   "detail.vanilla": "바닐라",

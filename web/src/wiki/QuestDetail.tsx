@@ -33,7 +33,9 @@ export function QuestDetail({
   const t = useT()
   const meta = [
     lookup.traderName(quest.traderId),
-    quest.isVanilla ? t('detail.vanilla') : (quest.modName ?? t('detail.mod')),
+    quest.isVanilla
+      ? (quest.overriddenBy ? t('tag.overriddenTitle', { mod: quest.overriddenBy }) : t('detail.vanilla'))
+      : (quest.modName ?? t('detail.mod')),
     quest.minLevel !== null ? t('detail.minLevel', { n: quest.minLevel }) : null,
     quest.factionOnly === 'bear' ? t('detail.bearOnly') : quest.factionOnly === 'usec' ? t('detail.usecOnly') : null,
   ].filter(Boolean).join(' · ')

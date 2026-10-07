@@ -175,6 +175,19 @@ public class CatalogBuilderTests
     }
 
     [Fact]
+    public void OverriddenBy_is_filled_for_vanilla_quests_claimed_by_a_mod()
+    {
+        var origins = new Dictionary<string, string> { [Id(1).ToString()] = "SomeMod", [Id(2).ToString()] = "sptQuestLive" };
+
+        var cat = CatalogBuilder.Build(Input([Quest(Id(1)), Quest(Id(2)), Quest(Id(3))],
+            vanilla: new HashSet<string> { Id(2), Id(3) }, modOrigins: origins), Now);
+
+        Assert.Null(cat.Quests[Id(1)].OverriddenBy);              // 모드 퀘스트는 ModName 쪽
+        Assert.Equal("sptQuestLive", cat.Quests[Id(2)].OverriddenBy);
+        Assert.Null(cat.Quests[Id(3)].OverriddenBy);              // 어떤 모드 파일에도 없는 바닐라
+    }
+
+    [Fact]
     public void Mod_scan_warnings_are_merged_into_catalog_warnings()
     {
         var scanWarning = new CatalogWarning(null, WarningCodes.ModQuestScanFailed, "BrokenMod: bad json");

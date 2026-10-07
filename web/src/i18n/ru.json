@@ -40,6 +40,7 @@
   "list.empty": "Нет заданий, соответствующих фильтрам",
   "list.prereqShort": " · предш. {n}",
   "tag.mod": "мод",
+  "tag.overriddenTitle": "Изменено модом {mod}",
   "detail.description": "Показать описание",
   "detail.noDescription": "Нет описания",
   "detail.vanilla": "Ванильное",
