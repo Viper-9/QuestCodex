@@ -7,7 +7,7 @@ import type { NameLookup } from '../wiki/derive'
 import { formatInt } from '../wiki/format'
 import { itemDone, type KappaConds, type KappaItem, type TraderCond, type TraderRow } from './kappa'
 
-// 카파 트래커 상단 — 왼쪽 "남은 것" + 종류별 막대, 오른쪽 상인 표. 합산 % 는 일부러 없다(스펙 §0: 가중치를 설명할 수 없어서).
+// 카파 트래커 상단 — 왼쪽 종류별 막대(Collector 상태 한 줄), 오른쪽 상인 표. 합산 % 는 일부러 없다(스펙 §0: 가중치를 설명할 수 없어서).
 
 interface SummaryProps {
   goalStatus: QuestStatus
@@ -19,22 +19,18 @@ export function KappaSummary({ goalStatus, conds, items }: SummaryProps) {
   const t = useT()
   const itemsDone = items.filter(itemDone).length
   const tradersMet = conds.traders.filter((c) => c.met).length
-  const parts = [
-    conds.level && !conds.level.met ? t('kappa.left.level', { n: conds.level.need - conds.level.current }) : null,
-    tradersMet < conds.traders.length ? t('kappa.left.traders', { n: new Set(conds.traders.filter((c) => !c.met).map((c) => c.traderId)).size }) : null,
-    conds.quests.done < conds.quests.total ? t('kappa.left.quests', { n: formatInt(conds.quests.total - conds.quests.done) }) : null,
-    itemsDone < items.length ? t('kappa.left.items', { n: items.length - itemsDone }) : null,
-  ].filter((x): x is string => x !== null)
+  const allMet = (!conds.level || conds.level.met) && tradersMet === conds.traders.length
+    && conds.quests.done >= conds.quests.total && itemsDone === items.length
 
-  let head: string
+  // 남은 수는 막대가 보여 주므로 따로 적지 않는다 — Collector 상태가 바뀌었을 때만 한 줄
+  let head: string | null = null
   if (goalStatus === 'Success') head = t('kappa.goal.done')
   else if (goalStatus === 'Started' || goalStatus === 'AvailableForFinish') head = t('kappa.goal.started')
-  else if (goalStatus === 'AvailableForStart' || parts.length === 0) head = t('kappa.goal.ready')
-  else head = t('kappa.left', { parts: parts.join(' · ') })
+  else if (goalStatus === 'AvailableForStart' || allMet) head = t('kappa.goal.ready')
 
   return (
     <section className="qc-card qc-kappa__sum">
-      <p className="qc-kappa__head">{head}</p>
+      {head && <p className="qc-kappa__head">{head}</p>}
       <ul className="qc-kappa__bars">
         {conds.level && <Bar label={t('kappa.bar.level')} done={conds.level.met ? conds.level.need : Math.min(conds.level.current, conds.level.need)} total={conds.level.need} />}
         {conds.traders.length > 0 && <Bar label={t('kappa.bar.traders')} done={tradersMet} total={conds.traders.length} />}
@@ -88,7 +84,7 @@ export function KappaTraders({ rows, lookup }: TradersProps) {
       <div className="qc-kappa__trow qc-kappa__trow--head" aria-hidden="true">
         <span>{t('kappa.table.trader')}</span>
         <span>{t('kappa.table.progress')}</span>
-        <span className="qc-kappa__tnum">{t('kappa.table.done')}</span>
+        <span className="qc-kappa__tnum"><span className="qc-bar__num"><span className="qc-kappa__tnumh">{t('kappa.table.done')}</span></span></span>
         {hasConds && <span className="qc-kappa__tcond">{t('kappa.table.need')}</span>}
       </div>
       {rows.map((r) => {
@@ -101,9 +97,12 @@ export function KappaTraders({ rows, lookup }: TradersProps) {
               ? <span className="qc-bar__track"><span className="qc-bar__fill" style={{ width: `${(r.done / r.total) * 100}%` }} /></span>
               : <span className="qc-muted">—</span>}
             <span className="qc-kappa__tnum">
-              {r.total > 0
-                ? <span className="qc-bar__num"><span className="qc-bar__done">{formatInt(r.done)}</span><span className="qc-bar__total">/ {formatInt(r.total)}</span></span>
-                : '—'}
+              {/* 카파 퀘스트가 없는 상인의 — 도 같은 칸 틀에 넣어 열 제목·숫자의 "/" 와 줄을 맞춘다 */}
+              <span className="qc-bar__num">
+                {r.total > 0
+                  ? <><span className="qc-bar__done">{formatInt(r.done)}</span><span className="qc-bar__total">/ {formatInt(r.total)}</span></>
+                  : <span className="qc-kappa__tnone">—</span>}
+              </span>
             </span>
             {hasConds && (
               <span className="qc-kappa__tcond">
