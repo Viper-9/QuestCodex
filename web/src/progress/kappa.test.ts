@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Catalog, CatalogQuest, Objective, Requirement } from '../api/catalog'
 import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
-import { chainStats, chainTiers, COLLECTOR_ID, kappaConds, kappaDone, kappaGraph, kappaItems, kappaLists, traderRows } from './kappa'
+import { chainStats, chainTiers, COLLECTOR_ID, formatChance, itemSource, kappaConds, kappaDone, kappaGraph, kappaItems, kappaLists, kappaUnlocks, nothingOpen, traderRows } from './kappa'
 
 function quest(id: string, p: Partial<CatalogQuest> = {}): CatalogQuest {
   return {
@@ -182,5 +182,54 @@ describe('chainTiers', () => {
     const g = kappaGraph(cat)!
     expect(chainTiers(cat, g, 'M')).toEqual({ ups: [['B'], ['A']], downs: [['N']] })
     expect(chainTiers(cat, g, 'A')).toEqual({ ups: [], downs: [['B'], ['M'], ['N']] })
+  })
+})
+
+describe('끝내면 열림 · 새 프로필', () => {
+  const lockOn = (questId: string, currentStatus = 'Locked', ...needStatuses: string[]) =>
+    ({ kind: 'quest' as const, questId, needStatuses: needStatuses.length ? needStatuses : ['Success'], currentStatus })
+  // A 진행 중 → B(A 완료 필요) → C(B 완료 필요). D 는 레벨만, S 는 수락만 요구(이미 진행 중이면 사유 없음)
+  const prog = progress({
+    A: qp('Started'),
+    B: qp('Locked', [lockOn('A', 'Started'), lockOn('S', 'AvailableForStart', 'Started')]),
+    C: qp('Locked', [lockOn('B')]),
+    D: qp('Locked', [{ kind: 'level', need: 30, compare: '>=', current: 10 }]),
+  })
+
+  it('kappaUnlocks: 못 채운 퀘스트 선행마다 그 선행에 막힌 카파 퀘스트를 모은다', () => {
+    const g = kappaGraph(vanilla)!
+    const u = kappaUnlocks(vanilla, g, prog, kappaDone(g, prog))
+    expect(u.get('A')?.map((q) => q.id)).toEqual(['B'])
+    expect(u.get('S')?.map((q) => q.id)).toEqual(['B'])
+    expect(u.get('B')?.map((q) => q.id)).toEqual(['C'])
+  })
+
+  it('nothingOpen: 전부 Locked 일 때만', () => {
+    expect(nothingOpen(progress({ A: qp('Locked'), B: qp('Locked') }))).toBe(true)
+    expect(nothingOpen(prog)).toBe(false)
+  })
+})
+
+describe('제출 아이템 출처', () => {
+  const item = (...tpls: string[]) => ({ conditionId: 'c', items: tpls.map((tpl) => ({ tpl, name: tpl })), state: 'none' as const })
+  const sources = {
+    a: { containers: [{ tpl: 'safe', name: 'Safe', chance: 0.03 }, { tpl: 'bag', name: 'Bag', chance: 0.002 }], bots: ['pmc' as const] },
+    b: { containers: [{ tpl: 'bag', name: 'Bag', chance: 0.01 }], bots: ['scav' as const] },
+  }
+
+  it('itemSource: 대체 tpl 은 컨테이너마다 큰 확률로 합치고 봇은 표시 순서로', () => {
+    expect(itemSource(item('a'), sources)).toBe(sources.a)
+    expect(itemSource(item('a', 'b'), sources)).toEqual({
+      containers: [{ tpl: 'safe', name: 'Safe', chance: 0.03 }, { tpl: 'bag', name: 'Bag', chance: 0.01 }],
+      bots: ['scav', 'pmc'],
+    })
+    expect(itemSource(item('x'), sources)).toBeNull()
+    expect(itemSource(item('a'), undefined)).toBeNull()
+  })
+
+  it('formatChance', () => {
+    expect(formatChance(0.0308)).toBe('3.1%')
+    expect(formatChance(0.0023)).toBe('0.2%')
+    expect(formatChance(0.0004)).toBe('<0.1%')
   })
 })

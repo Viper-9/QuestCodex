@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { QuestStatus } from '../api/progress'
 import { cls } from '../cls'
 import type { T } from '../i18n/index'
@@ -47,10 +48,12 @@ export function KappaSummary({ goalStatus, conds, items }: SummaryProps) {
 function Bar({ label, done, total }: { label: string; done: number; total: number }) {
   const full = total > 0 && done >= total
   return (
-    <li className={cls('qc-kappa__bar', full && 'is-full')}>
+    <li className={cls('qc-kappa__bar', full && 'is-full', done === 0 && 'is-zero')}>
       <span className="qc-kappa__barhead">
         <span>{label}</span>
-        <span className="qc-kappa__barnum">{full ? '✓ ' : ''}{formatInt(done)} / {formatInt(total)}</span>
+        <span className="qc-kappa__barnum">
+          <span className="qc-bar__done">{full ? '✓ ' : ''}{formatInt(done)}</span> <span className="qc-bar__total">/ {formatInt(total)}</span>
+        </span>
       </span>
       <span className="qc-bar__track"><span className="qc-bar__fill" style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }} /></span>
     </li>
@@ -60,25 +63,28 @@ function Bar({ label, done, total }: { label: string; done: number; total: numbe
 /** 평판은 소수 둘째 자리까지, 끝의 0 은 뗀다 */
 const num = (n: number) => String(Number(n.toFixed(2)))
 
-function condText(c: TraderCond, t: T): string {
+/** 못 채운 조건은 "평판 2.34 / 3" — 현재 값 강조·"/ 필요"는 흐리게, 완료 칸 카운트(.qc-bar__num)와 같은 간격 */
+function condText(c: TraderCond, t: T): ReactNode {
   if (c.met) return c.kind === 'loyalty' ? `${t('kappa.cond.ll', { need: c.need })} ✓` : `${t('kappa.cond.standing', { need: num(c.need) })} ✓`
   const current = c.current === null ? '?' : num(c.current)
-  return c.kind === 'loyalty' ? t('kappa.cond.llShort', { current, need: c.need }) : t('kappa.cond.standingShort', { current, need: num(c.need) })
+  const need = c.kind === 'loyalty' ? String(c.need) : num(c.need)
+  return <>
+    <span className="qc-bar__done">{c.kind === 'loyalty' ? t('kappa.cond.llShort', { current }) : t('kappa.cond.standingShort', { current })}</span>
+    {' '}<span className="qc-bar__total">/ {need}</span>
+  </>
 }
 
 interface TradersProps {
   rows: TraderRow[]
   lookup: NameLookup
-  selected: string | null
-  onSelect(traderId: string): void
 }
 
-/** 상인 표 — 행을 누르면 아래 목록이 그 상인으로 걸러진다. 필요 등급 칸은 Collector 에 상인 조건이 있을 때만(sptQuestLive 형) */
-export function KappaTraders({ rows, lookup, selected, onSelect }: TradersProps) {
+/** 상인 표 — 읽기 전용(거르기는 아래 상인 탭). 필요 등급 칸은 Collector 에 상인 조건이 있을 때만(sptQuestLive 형) */
+export function KappaTraders({ rows, lookup }: TradersProps) {
   const t = useT()
   const hasConds = rows.some((r) => r.conds.length > 0)
   return (
-    <section className={cls('qc-card qc-kappa__traders', hasConds && 'has-conds')} title={t('kappa.table.hint')}>
+    <section className={cls('qc-card qc-kappa__traders', hasConds && 'has-conds')}>
       <div className="qc-kappa__trow qc-kappa__trow--head" aria-hidden="true">
         <span>{t('kappa.table.trader')}</span>
         <span>{t('kappa.table.progress')}</span>
@@ -87,16 +93,18 @@ export function KappaTraders({ rows, lookup, selected, onSelect }: TradersProps)
       </div>
       {rows.map((r) => {
         const full = r.total > 0 && r.done === r.total
+        const zero = r.total > 0 && r.done === 0
         return (
-          <button
-            key={r.traderId} type="button" aria-pressed={selected === r.traderId} onClick={() => onSelect(r.traderId)}
-            className={cls('qc-kappa__trow', selected === r.traderId && 'is-on', full && 'is-full')}
-          >
+          <div key={r.traderId} className={cls('qc-kappa__trow', full && 'is-full', zero && 'is-zero')}>
             <span className="qc-kappa__tname">{lookup.traderName(r.traderId)}</span>
             {r.total > 0
               ? <span className="qc-bar__track"><span className="qc-bar__fill" style={{ width: `${(r.done / r.total) * 100}%` }} /></span>
               : <span className="qc-muted">—</span>}
-            <span className="qc-kappa__tnum">{r.total > 0 ? `${formatInt(r.done)} / ${formatInt(r.total)}` : '—'}</span>
+            <span className="qc-kappa__tnum">
+              {r.total > 0
+                ? <span className="qc-bar__num"><span className="qc-bar__done">{formatInt(r.done)}</span><span className="qc-bar__total">/ {formatInt(r.total)}</span></span>
+                : '—'}
+            </span>
             {hasConds && (
               <span className="qc-kappa__tcond">
                 {r.conds.map((c) => (
@@ -104,9 +112,39 @@ export function KappaTraders({ rows, lookup, selected, onSelect }: TradersProps)
                 ))}
               </span>
             )}
-          </button>
+          </div>
         )
       })}
     </section>
+  )
+}
+
+interface TraderTabsProps {
+  rows: TraderRow[]
+  lookup: NameLookup
+  selected: string | null
+  onSelect(traderId: string | null): void
+}
+
+/**
+ * 상인 탭 — 목록 바로 위에서 "상인별로 거를 수 있다"가 보이게 한다.
+ * 모양은 레이드 준비 맵 탭(.qc-map)과 같고, 숫자는 남은 카파 퀘스트 수
+ */
+export function KappaTraderTabs({ rows, lookup, selected, onSelect }: TraderTabsProps) {
+  const t = useT()
+  const left = (r: TraderRow) => r.total - r.done
+  const tab = (id: string | null, name: string, n: number) => (
+    <button
+      key={id ?? ''} type="button" aria-pressed={selected === id} onClick={() => onSelect(id)}
+      className={cls('qc-map', selected === id && 'is-on', n === 0 && 'is-empty')}
+    >
+      {name} <span className="qc-map__n">{formatInt(n)}</span>
+    </button>
+  )
+  return (
+    <div className="qc-maps" role="group" aria-label={t('kappa.table.trader')}>
+      {tab(null, t('trader.all'), rows.reduce((sum, r) => sum + left(r), 0))}
+      {rows.filter((r) => r.total > 0).map((r) => tab(r.traderId, lookup.traderName(r.traderId), left(r)))}
+    </div>
   )
 }

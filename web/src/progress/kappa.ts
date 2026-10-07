@@ -1,4 +1,4 @@
-import type { Catalog, CatalogQuest, ItemRef } from '../api/catalog'
+import type { BotGroup, Catalog, CatalogQuest, ItemRef, LootSource } from '../api/catalog'
 import type { Holding, ProfileProgress, QuestStatus } from '../api/progress'
 import { orderTraders } from '../wiki/derive'
 import { holdingOf, itemKey, questProgress, remaining, sortForTab } from './derive'
@@ -118,6 +118,33 @@ export function kappaItems(g: KappaGraph, progress: ProfileProgress, inventory: 
 
 export const itemDone = (i: KappaItem) => i.state === 'given' || i.state === 'ready'
 
+const BOT_ORDER: readonly BotGroup[] = ['scav', 'pmc', 'boss', 'raider', 'cultist', 'other']
+
+/** 제출 조건의 출처. 대체 tpl 이 여럿이면 합쳐서 컨테이너마다 큰 확률. 출처 정보가 없는 아이템·구버전 서버면 null */
+export function itemSource(item: KappaItem, sources: Record<string, LootSource> | undefined): LootSource | null {
+  const found = item.items.map((i) => sources?.[i.tpl]).filter((x): x is LootSource => !!x)
+  if (found.length === 0) return null
+  if (found.length === 1) return found[0]
+  const best = new Map<string, LootSource['containers'][number]>()
+  for (const c of found.flatMap((f) => f.containers)) if ((best.get(c.tpl)?.chance ?? -1) < c.chance) best.set(c.tpl, c)
+  const bots = new Set(found.flatMap((f) => f.bots))
+  return { containers: [...best.values()].sort((a, b) => b.chance - a.chance), bots: BOT_ORDER.filter((b) => bots.has(b)) }
+}
+
+/**
+ * 게임 이름이 무엇인지 알기 어려운 컨테이너 → UI 문자열 키. "일반 자금보관소(Common fund stash)"는 삼림에 하나뿐인
+ * 슈투르만 열쇠로 여는 은닉처(boss_container)라 그렇게 부른다.
+ */
+export const CONTAINER_LABELS: Readonly<Record<string, 'kappa.container.shturman'>> = {
+  '5d07b91b86f7745a077a9432': 'kappa.container.shturman',
+}
+
+/** 확률 표기: 0.1% 미만은 "<0.1%", 그 밖은 소수 첫째 자리 */
+export function formatChance(chance: number): string {
+  const pct = chance * 100
+  return pct < 0.1 ? '<0.1%' : `${pct.toFixed(1)}%`
+}
+
 // ---- 행 숫자: 뒤로 N개 · 연쇄 N단계 ----
 
 export interface ChainStat { after: number; chain: number }
@@ -174,6 +201,29 @@ export function kappaLists(
   const s = (id: string) => stats.get(id) ?? { after: 0, chain: 0 }
   now.sort((a, b) => s(b.id).chain - s(a.id).chain || s(b.id).after - s(a.id).after || a.name.localeCompare(b.name))
   return { now, locked: sortForTab(locked, progress, 'locked'), done: sortForTab(finished, progress, 'done') }
+}
+
+/** 아직 아무 퀘스트도 열리지 않은 프로필 — 게임에 한 번도 접속하지 않으면 서버가 전부 Locked 로 준다 */
+export function nothingOpen(progress: ProfileProgress): boolean {
+  return Object.values(progress.quests).every((q) => q.status === 'Locked')
+}
+
+// ---- 끝내면 열림 ----
+
+/** 아직 못 채운 퀘스트 선행 조건(서버가 보낸 잠김 사유 중) */
+const openQuestReasons = (progress: ProfileProgress, id: string) =>
+  questProgress(progress, id).lockReasons.flatMap((r) =>
+    r.kind === 'quest' && !r.needStatuses.includes(r.currentStatus) ? [r] : [])
+
+/** 퀘스트 → 그 퀘스트에 막혀 있는 잠긴 카파 퀘스트(이름순). "지금 할 수 있는 것" 줄 오른쪽의 "→ ○○ 외 N개" */
+export function kappaUnlocks(catalog: Catalog, g: KappaGraph, progress: ProfileProgress, done: ReadonlySet<string>): Map<string, CatalogQuest[]> {
+  const out = new Map<string, CatalogQuest[]>()
+  for (const id of g.ids) {
+    if (done.has(id) || questProgress(progress, id).status !== 'Locked') continue
+    for (const r of openQuestReasons(progress, id)) out.set(r.questId, [...(out.get(r.questId) ?? []), catalog.quests[id]])
+  }
+  for (const list of out.values()) list.sort((a, b) => a.name.localeCompare(b.name))
+  return out
 }
 
 // ---- 상인 표 ----

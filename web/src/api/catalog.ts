@@ -206,7 +206,24 @@ export interface Catalog {
   mapVariants?: Record<string, string>
   /** 서버 맵 키 → 탈출구·환승. 구버전 서버면 undefined. */
   exits?: Record<string, MapExit[]>
+  /** 아이템 tpl → 주로 나오는 곳(Collector 제출 아이템만). 구버전 서버면 undefined. */
+  lootSources?: Record<string, LootSource>
 }
+
+/** containers = 하나 열었을 때 들어 있을 확률 높은 순, bots = 봇 묶음 키 */
+export interface LootSource {
+  containers: LootContainer[]
+  bots: BotGroup[]
+}
+
+export interface LootContainer {
+  tpl: string
+  name: string
+  /** 그 컨테이너 하나를 열었을 때 아이템이 하나 이상 들어 있을 확률 0~1 */
+  chance: number
+}
+
+export type BotGroup = 'scav' | 'pmc' | 'boss' | 'raider' | 'cultist' | 'other'
 
 export interface CatalogItemCategory {
   id: string

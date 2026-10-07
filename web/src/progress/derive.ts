@@ -613,19 +613,48 @@ export function questCompletion(q: CatalogQuest, qp: QuestProgress): number {
   return sum / q.objectives.length
 }
 
-const ACTIVE = new Set<QuestStatus>(['Started', 'AvailableForFinish'])
-
 /**
- * 잠김 탭의 단계: 0 = 지금 진행 중인 선행 하나만 남음(끝내면 바로 열림), 1 = 그 밖의 사유,
- * 2 = 사유를 모름(프로필에 없는 퀘스트), 3 = 도달 불가(다른 진영·닫힌 택일 분기)
+ * 잠김 탭의 단계: 0 = 사유를 앎, 2 = 사유를 모름(프로필에 없는 퀘스트), 3 = 도달 불가(다른 진영·닫힌 택일 분기)
  */
 function lockTier(qp: QuestProgress): number {
   if (isUnreachable(qp)) return 3
-  const rs = qp.lockReasons
-  if (rs.length === 0) return 2
-  if (rs.length === 1 && rs[0].kind === 'quest' && ACTIVE.has(rs[0].currentStatus)) return 0
-  return 1
+  if (qp.lockReasons.length === 0) return 2
+  return 0
 }
+
+interface LockDistance { steps: number; level: number }
+
+/**
+ * 열리기까지의 거리. 선행 사유를 거꾸로 따라가 이미 열린 퀘스트에 닿을 때까지 센다.
+ * steps = 끝내야 하는 퀘스트 수(선행 여럿은 모두 필요하므로 가장 긴 것, "진행 중" 만 요구하는 선행은 끝낼 필요가 없어 0 단계),
+ * level = 그 사슬에서 가장 높은 레벨 조건. 직속 사유 수만 세면 새 프로필(전부 Locked)에서 모두 1 로 같아져 이름순이 됐다.
+ */
+function lockDistance(progress: ProfileProgress): (questId: string) => LockDistance {
+  const memo = new Map<string, LockDistance>()
+  const dist = (id: string): LockDistance => {
+    const known = memo.get(id)
+    if (known) return known
+    memo.set(id, { steps: 0, level: 0 })   // 순환 방지
+    const qp = questProgress(progress, id)
+    const d = { steps: 0, level: 0 }
+    if (qp.status === 'Locked') {
+      for (const r of qp.lockReasons) {
+        if (r.kind === 'level') d.level = Math.max(d.level, r.need)
+        if (r.kind !== 'quest' || r.needStatuses.includes(r.currentStatus)) continue
+        const pre = dist(r.questId)
+        const finish = !r.needStatuses.some((x) => x === 'Started' || x === 'AvailableForFinish')
+        d.steps = Math.max(d.steps, pre.steps + (finish ? 1 : 0))
+        d.level = Math.max(d.level, pre.level)
+      }
+    }
+    memo.set(id, d)
+    return d
+  }
+  return dist
+}
+
+/** 퀘스트·레벨 말고 남은 사유(상인 등급·평판 등) 수 */
+const otherReasons = (qp: QuestProgress) => qp.lockReasons.filter((r) => r.kind !== 'quest' && r.kind !== 'level').length
 
 /** 완료·실패 시각(ms). 없으면 -Infinity 라 최신순에서 맨 뒤 */
 function finishedAt(qp: QuestProgress): number {
@@ -635,16 +664,20 @@ function finishedAt(qp: QuestProgress): number {
 
 /**
  * 탭별 기본 정렬 — 현황은 "다음에 할 것" 화면이라 탭마다 보고 싶은 게 다르다. 마지막은 늘 최소 레벨 → 이름.
- * 진행 중: 완료 보고 대기 → 진행률 높은 순 / 잠김: lockTier → 남은 사유 수 적은 순 /
+ * 진행 중: 완료 보고 대기 → 진행률 높은 순 / 잠김: lockTier → 모자란 레벨(선행 사슬 포함) 적은 순 → 남은 선행 단계 적은 순 → 그 밖의 사유 적은 순 /
  * 완료·실패: 끝난 시각 최신순 / 수락 가능: 최소 레벨
  */
 export function sortForTab(quests: CatalogQuest[], progress: ProfileProgress, tab: QuestTab): CatalogQuest[] {
   const byLevel = (a: CatalogQuest, b: CatalogQuest) => (a.minLevel ?? 0) - (b.minLevel ?? 0) || a.name.localeCompare(b.name)
+  const dist = tab === 'locked' ? lockDistance(progress) : null
   const key = new Map(quests.map((q): [string, number[]] => {
     const qp = questProgress(progress, q.id)
     switch (tab) {
       case 'active': return [q.id, [qp.status === 'AvailableForFinish' ? 0 : 1, -questCompletion(q, qp)]]
-      case 'locked': return [q.id, [lockTier(qp), qp.lockReasons.length]]
+      case 'locked': {
+        const d = dist!(q.id)
+        return [q.id, [lockTier(qp), Math.max(0, d.level - progress.level), d.steps, otherReasons(qp)]]
+      }
       case 'done':
       case 'failed': return [q.id, [-finishedAt(qp)]]
       case 'available': return [q.id, []]

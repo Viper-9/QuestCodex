@@ -27,12 +27,17 @@ interface KappaQuestsProps {
   lists: KappaLists
   done: ReadonlySet<string>
   stats: ReadonlyMap<string, ChainStat>
-  /** 상인 표에서 고른 상인. 칩으로 보여 주고 누르면 푼다 */
-  filter: { name: string; clear(): void } | null
+  /** 퀘스트 → 그것에 막힌 잠긴 카파 퀘스트(줄 오른쪽 "→ ○○ 외 N개") */
+  unlocks: ReadonlyMap<string, CatalogQuest[]>
+  /** 아직 아무 퀘스트도 열리지 않은 프로필(게임 미접속) */
+  fresh: boolean
 }
 
-/** 카파 퀘스트 목록 — 지금 할 수 있는 것(펼침) / 잠김·완료(접힘). 줄과 펼친 상세는 현황 탭 것을 그대로 쓴다. */
-export function KappaQuests({ catalog, graph, progress, lookup, lists, done, stats, filter }: KappaQuestsProps) {
+/** 새 프로필 안내에 보여 줄 "가장 먼저 열릴 것" 수 */
+const FIRST_N = 4
+
+/** 카파 퀘스트 목록 — 지금 할 수 있는 것(펼침) / 잠김·완료(접힘), 구역마다 카드 하나. 줄과 펼친 상세는 현황 탭 것을 그대로 쓴다. */
+export function KappaQuests({ catalog, graph, progress, lookup, lists, done, stats, unlocks, fresh }: KappaQuestsProps) {
   const t = useT()
   const [openSections, setOpenSections] = useState<ReadonlySet<Section>>(() => new Set(['now']))
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
@@ -62,17 +67,23 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
     const qp = questProgress(progress, q.id)
     const open = expanded.has(q.id)
     const s = stats.get(q.id)
+    const opens = qp.status === 'Locked' ? [] : unlocks.get(q.id) ?? []
+    const numbers = [
+      s && s.after > 0 ? t('kappa.after', { n: formatInt(s.after) }) : null,
+      s && s.chain > 0 ? t('kappa.chain', { n: s.chain }) : null,
+    ].filter(Boolean).join(' · ')
+    // 열 수 있는 퀘스트 줄은 "끝내면 열림"을 이름으로 보여 주고 숫자는 툴팁으로, 잠긴 줄은 숫자 그대로
+    const asideText = opens.length === 0 ? numbers
+      : opens.length === 1 ? t('kappa.opens', { name: opens[0].name })
+      : t('kappa.opensMore', { name: opens[0].name, n: opens.length - 1 })
+    const tip = opens.length === 0 ? undefined
+      : `${t('kappa.unlocks')}: ${opens.map((u) => u.name).join(', ')}${numbers ? `\n${numbers}` : ''}`
     return (
       <QuestLine
         key={q.id} quest={q} qp={qp} lookup={lookup} open={open} flash={false}
         onToggle={() => setExpanded((prev) => toggleMember(prev, q.id))}
         tag={qp.status === 'FailRestartable' && <span className="qc-tag qc-warn">{t('kappa.failedRestart')}</span>}
-        aside={
-          <span className="qc-kappa__aside">
-            {s && s.after > 0 && t('kappa.after', { n: formatInt(s.after) })}
-            {s && s.chain > 0 && <> · {t('kappa.chain', { n: s.chain })}</>}
-          </span>
-        }
+        aside={<span className="qc-kappa__aside" title={tip}>{asideText}</span>}
         detail={open && (
           <QuestDetail
             quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)}
@@ -89,29 +100,42 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
     )
   }
 
+  /** 지금 할 수 있는 것이 비었는데 프로필이 아직 아무것도 안 열렸을 때 — "없음" 대신 이유와 가장 먼저 열릴 것 */
+  const freshNote = (
+    <div className="qc-kappa__fresh">
+      <p className="qc-kappa__freshh">{t('kappa.fresh.title')}</p>
+      <p className="qc-muted">{t('kappa.fresh.body')}</p>
+      {lists.locked.length > 0 && (
+        <div className="qc-kappa__unlocks">
+          <span className="qc-kappa__unlockh">{t('kappa.fresh.next')}</span>
+          {lists.locked.slice(0, FIRST_N).map((q) => (
+            <button key={q.id} type="button" className="qc-kappa__unlock" onClick={() => jumpTo(q.id)}>{q.name}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
   const section = (key: Section, title: string, hint: string | null, quests: CatalogQuest[]): ReactNode => {
     const open = openSections.has(key)
+    let body: ReactNode
+    if (quests.length === 0) body = key === 'now' && fresh ? freshNote : <p className="qc-empty">{t('kappa.empty')}</p>
+    else body = <ul>{quests.map(line)}</ul>
     return (
-      <div className={cls('qc-kappa__sec', open && 'is-open')}>
+      <section className={cls('qc-card qc-card--flush qc-kappa__sec', `qc-kappa__sec--${key}`, open && 'is-open')}>
         <button type="button" className="qc-kappa__sechead" aria-expanded={open} onClick={() => setOpenSections((prev) => toggleMember(prev, key))}>
           <span className="qc-row__caret">{open ? '▾' : '▸'}</span>
           <span className="qc-kappa__sectitle">{title}</span>
           <span className="qc-group__n">{formatInt(quests.length)}</span>
           {hint && <span className="qc-kappa__sechint">· {hint}</span>}
         </button>
-        {open && (quests.length === 0 ? <p className="qc-empty">{t('kappa.empty')}</p> : <ul>{quests.map(line)}</ul>)}
-      </div>
+        {open && body}
+      </section>
     )
   }
 
   return (
-    <section className="qc-card qc-card--flush qc-kappa__quests">
-      {filter && (
-        <div className="qc-kappa__filter">
-          <button type="button" className="qc-chip is-on" onClick={filter.clear}>{filter.name} ✕</button>
-          <span className="qc-muted">{t('kappa.filterHint')}</span>
-        </div>
-      )}
+    <div className="qc-kappa__quests">
       {section('now', t('kappa.now'), t('kappa.nowHint'), lists.now)}
       {section('locked', t('kappa.locked'), t('kappa.lockedHint'), lists.locked)}
       {section('done', t('kappa.done'), null, lists.done)}
@@ -134,6 +158,6 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
         mapVariants={catalog.mapVariants}
         onClose={() => setMapId(null)}
       />
-    </section>
+    </div>
   )
 }

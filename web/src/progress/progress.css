@@ -385,10 +385,12 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-kappa__bars { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .qc-kappa__barhead { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; color: var(--fg-2); font-size: 12px; }
 .qc-kappa__barnum { color: var(--fg); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qc-kappa__barnum .qc-bar__done { font-weight: 600; }   /* 숫자 강조는 현황 상인별 진행률(.qc-bar__num)과 같게 */
+.qc-kappa__bar.is-zero .qc-bar__done { color: var(--fg-3); font-weight: 400; }
 .qc-kappa__bar .qc-bar__track { display: block; }
 .qc-kappa__bar.is-full .qc-bar__fill { background: var(--ok); }
-.qc-kappa__bar.is-full .qc-kappa__barnum { color: var(--ok); }
-/* 상인 표 — 행 = 버튼(누르면 아래 목록 필터). 필요 등급 칸은 has-conds 일 때만 */
+.qc-kappa__bar.is-full .qc-bar__done { color: var(--ok); }
+/* 상인 표 — 읽기 전용. 필요 등급 칸은 has-conds 일 때만 */
 .qc-kappa__traders { padding: 6px; }
 .qc-card .qc-kappa__trow {
   width: 100%;
@@ -404,39 +406,68 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
   font: inherit;
   font-size: 12px;
   text-align: left;
-  cursor: pointer;
 }
 .qc-card.has-conds .qc-kappa__trow { grid-template-columns: 110px minmax(0, 1fr) 72px 130px; }
-.qc-kappa__trow:hover { background: var(--bg-hover); }
-.qc-kappa__trow.is-on { background: var(--accent-bg); }
-.qc-card .qc-kappa__trow--head { color: var(--fg-3); font-size: 11px; font-weight: 400; cursor: default; }
-.qc-kappa__trow--head:hover { background: none; }
+.qc-card .qc-kappa__trow--head { color: var(--fg-3); font-size: 11px; font-weight: 400; }
 .qc-kappa__trow .qc-bar__track { display: block; }
 .qc-kappa__trow.is-full .qc-bar__fill { background: var(--ok); }
 .qc-kappa__tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qc-kappa__tnum { color: var(--fg-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qc-kappa__tnum { display: flex; justify-content: flex-end; color: var(--fg-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qc-kappa__tnum .qc-bar__done { color: var(--fg); }
+.qc-kappa__trow.is-full .qc-bar__done { color: var(--ok); }
+.qc-kappa__trow.is-zero, .qc-kappa__trow.is-zero .qc-bar__done, .qc-kappa__trow.is-zero .qc-bar__total { color: var(--fg-3); }
 .qc-kappa__tcond { display: flex; flex-direction: column; align-items: flex-end; font-weight: 600; white-space: nowrap; }
 .qc-kappa__trow--head .qc-kappa__tcond { font-weight: 400; }
+.qc-kappa__tcond .qc-bar__total { font-weight: 400; }
 .qc-kappa__ok { color: var(--ok); }
 /* 퀘스트 목록 — 구역 머리(누르면 접기/펼치기) + 현황 줄(오른쪽에 "뒤로 N · 연쇄 N" 칸 하나 더) */
-.qc-kappa__filter { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
-.qc-kappa__sec + .qc-kappa__sec { border-top: 1px solid var(--border); }
-.qc-card .qc-kappa__sechead { width: 100%; display: flex; justify-content: flex-start; align-items: center; gap: 8px; padding: 9px 14px; border: 0; background: none; color: var(--fg-2); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
-.qc-kappa__sechead:hover { background: var(--bg-hover); }
-.qc-kappa__sectitle { color: var(--fg); font-size: 13px; font-weight: 600; }
+/* 구역 = 카드 하나. 머리는 프로필 바 아래에 붙어(sticky) 긴 목록을 내려도 어느 구역인지 보이고, 왼쪽 색 막대로 구역을 구분한다.
+   배경은 겹침 그라디언트로 카드보다 한 단계 진하게 하면서 불투명하게(아래 줄이 비치지 않게) 둔다 */
+.qc-card .qc-kappa__sechead {
+  position: sticky; top: 41px; z-index: 1;
+  width: 100%; display: flex; justify-content: flex-start; align-items: center; gap: 8px;
+  padding: 11px 14px; border: 0; border-radius: var(--radius);
+  background: linear-gradient(var(--bg-hover), var(--bg-hover)), var(--bg-2);
+  box-shadow: inset 3px 0 0 var(--sec-color);
+  color: var(--fg-2); font: inherit; font-size: 12px; text-align: left; cursor: pointer;
+}
+.qc-kappa__sechead:hover { background: linear-gradient(var(--bg-hover), var(--bg-hover)), linear-gradient(var(--bg-hover), var(--bg-hover)), var(--bg-2); }
+.qc-kappa__sec { --sec-color: var(--border-2); }
+.qc-kappa__sec--now { --sec-color: var(--accent); }
+.qc-kappa__sec--done { --sec-color: var(--ok); }
+.qc-kappa__sectitle { color: var(--fg); font-size: 14px; font-weight: 600; }
 .qc-kappa__sechint { color: var(--fg-3); }
-.qc-kappa__sec.is-open > .qc-kappa__sechead { border-bottom: 1px solid var(--border); }
+.qc-kappa__sec.is-open > .qc-kappa__sechead { border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
+.qc-kappa__quests .qc-pline { scroll-margin-top: 90px; }   /* 연계 링크 점프 시 프로필 바 + 구역 머리에 가리지 않게 */
 .qc-kappa__quests .qc-pline__row { grid-template-columns: minmax(0, 2fr) 110px minmax(0, 2fr) minmax(0, 1.3fr) 110px; }
 .qc-kappa__aside { color: var(--fg-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-kappa__quests .qc-pline:last-child { border-bottom: 0; }
+/* 새 프로필 안내의 "가장 먼저 열릴 것" — 이름을 누르면 그 퀘스트로 이동(jumpTo) */
+.qc-kappa__unlocks { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 12px; }
+.qc-kappa__unlockh { color: var(--fg-3); }
+.qc-kappa__unlockh::after { content: " →"; color: var(--accent); }
+.qc-card .qc-kappa__unlock { padding: 0 7px; border: 1px solid var(--border-2); border-radius: 4px; background: none; color: var(--fg-2); font: inherit; font-size: 12px; cursor: pointer; }
+.qc-kappa__unlock:hover { border-color: var(--accent); color: var(--fg); }
+/* 새 프로필(게임 미접속) 안내 */
+.qc-kappa__fresh { display: grid; gap: 6px; padding: 14px; }
+.qc-card .qc-kappa__freshh { margin: 0; font-size: 14px; font-weight: 600; }
+.qc-card .qc-kappa__fresh p { margin: 0; }
+.qc-kappa__fresh .qc-kappa__unlocks { margin-top: 4px; }
 /* 제출 아이템 — 상태 색 칩 */
-.qc-card .qc-kappa__chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 12px 14px; list-style: none; }
 .qc-kappa__item { padding: 2px 10px; border: 1px solid var(--border-2); border-radius: 999px; color: var(--fg-2); font-size: 12px; }
 .qc-kappa__item.is-ready { border-color: var(--ok); color: var(--ok); }
 .qc-kappa__item.is-given { border-color: var(--border); color: var(--fg-3); }
 .qc-kappa__item.is-nonFir { border-color: var(--warn); color: var(--warn); }
-.qc-kappa__itemnote { font-size: 11px; opacity: .8; }
 .qc-kappa__items.qc-card { padding: 0; }
+/* 제출 아이템 표 — 아이템 · 상태 · 주로 나오는 곳 · 봇. 출처가 없는 구버전 서버는 앞의 두 열만 */
+.qc-kappa__irow { display: grid; grid-template-columns: minmax(0, 1.3fr) 110px; gap: 12px; align-items: center; padding: 7px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.qc-kappa__items.has-sources .qc-kappa__irow { grid-template-columns: minmax(0, 1.3fr) 110px minmax(0, 2.6fr) minmax(0, 1.2fr); }
+.qc-kappa__irow:last-child { border-bottom: 0; }
+.qc-kappa__irow--head { padding-block: 6px; color: var(--fg-3); font-size: 11px; }
+.qc-kappa__irow.is-done { opacity: .55; }
+.qc-kappa__iname { overflow: hidden; color: var(--fg); font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.qc-kappa__iwhere, .qc-kappa__ibots { overflow: hidden; color: var(--fg-2); text-overflow: ellipsis; white-space: nowrap; }
+.qc-kappa__iwhere b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
 /* 연쇄 팝업 — 접힌 "지나온 카파 퀘스트" 줄, 칩 상태색 */
 .qc-dialog .qc-kappa__past { display: block; width: 100%; margin: 0 0 6px; padding: 7px 10px; border: 1px dashed var(--border-2); border-radius: var(--radius); background: none; color: var(--fg-2); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
 .qc-kappa__past:hover { background: var(--bg-hover); }
