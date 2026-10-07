@@ -1,5 +1,6 @@
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
+import { DevDataSwitch } from './DevDataSwitch'
 import { PROGRESS_SUBS, type Page, type ProgressSub, type Route } from './router'
 
 interface SideMenuProps {
@@ -56,6 +57,8 @@ export function SideMenu({ route, onNavigate }: SideMenuProps) {
           </div>
         )
       })}
+      {/* 개발 서버에서만 — 배포 빌드에서는 import.meta.env.DEV 가 false 로 바뀌어 컴포넌트째 빠진다 */}
+      {import.meta.env.DEV && <DevDataSwitch />}
     </nav>
   )
 }
