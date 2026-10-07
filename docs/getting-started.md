@@ -43,7 +43,13 @@ You can also reach it from the mod card on the SPT server web page (`https://127
   (game text comes from the server's locale tables).
 - **Theme**: `System` / `Light` / `Dark`, remembered in the browser.
 
-[![Theme and language switches](assets/images/topbar-switches.png)](assets/images/topbar-switches.png)
+[![Refresh data, theme and language switches](assets/images/topbar-switches.png)](assets/images/topbar-switches.png)
+
+## Refresh data
+
+Map and loot data are built once per server run and kept on disk, so later starts are fast. If you change mod
+settings that affect loot (such as a loot preset) without changing the mod list, press **Refresh data** at the right
+of the top bar to rebuild it. It takes about 10 seconds.
 
 ## Side menu
 

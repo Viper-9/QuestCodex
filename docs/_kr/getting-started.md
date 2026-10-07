@@ -39,7 +39,11 @@ nav_order: 2
 - **언어**: `English` / `한국어` / `Русский`. UI 문구와 퀘스트·아이템 이름이 함께 바뀝니다 (게임 텍스트는 서버의 로케일 테이블을 씁니다).
 - **테마**: 시스템 / 밝게 / 어둡게. 브라우저에 기억됩니다.
 
-[![테마와 언어 선택]({{ '/assets/images/topbar-switches.png' | relative_url }})]({{ '/assets/images/topbar-switches.png' | relative_url }})
+[![데이터 갱신, 테마와 언어 선택]({{ '/assets/images/topbar-switches.png' | relative_url }})]({{ '/assets/images/topbar-switches.png' | relative_url }})
+
+## 데이터 갱신 {#refresh-data}
+
+지도·루트 데이터는 서버를 켤 때 한 번 만들어 디스크에 저장해 두므로, 다음 실행부터는 빨리 열립니다. 모드 목록은 그대로인데 루트에 영향을 주는 모드 설정(루트 프리셋 등)을 바꿨다면, 상단 바 오른쪽의 **데이터 갱신**(Refresh data)을 눌러 다시 만드세요. 10초 정도 걸립니다.
 
 ## 사이드 메뉴 {#side-menu}
 

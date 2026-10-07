@@ -35,6 +35,14 @@ Mods often add quests to vanilla traders, so this is the quickest way to see eve
 
 [![Source mod filter](../assets/images/wiki-mod-filter.png)](../assets/images/wiki-mod-filter.png)
 
+## Vanilla quests a mod overrides
+
+Some quest mods replace the files of vanilla quests instead of adding new ones. Those quests stay vanilla, but they
+carry the mod's name in a tag with a dashed outline, in the wiki and on the progress pages.
+
+- The mod gets its own chip in the **Source mod** row, with a hollow dot, so you can list every quest it overrides
+- The expanded quest's meta line reads **Overridden by** and the mod name
+
 ## Sorting
 
 - **By chain** (default): prerequisites always sit above the quests they unlock

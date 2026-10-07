@@ -35,6 +35,13 @@ nav_order: 1
 
 [![출처 모드 필터]({{ '/assets/images/wiki-mod-filter.png' | relative_url }})]({{ '/assets/images/wiki-mod-filter.png' | relative_url }})
 
+## 모드가 덮어쓴 바닐라 퀘스트 {#vanilla-quests-a-mod-overrides}
+
+퀘스트 모드 중에는 새 퀘스트를 추가하지 않고 바닐라 퀘스트 파일을 바꿔치기하는 것도 있습니다. 이런 퀘스트는 바닐라로 남지만, 위키와 진행현황 페이지에서 점선 테두리 태그로 모드 이름이 붙습니다.
+
+- **출처 모드**(Source mod) 줄에 그 모드 칩이 속이 빈 점으로 따로 생겨서, 그 모드가 덮어쓴 퀘스트를 모아 볼 수 있습니다
+- 퀘스트를 펼치면 메타 줄에 **○○에 의해 수정됨**(Overridden by)이 모드 이름과 함께 표시됩니다
+
 ## 정렬 {#sorting}
 
 - **연계순**(By chain, 기본값): 선행 퀘스트가 항상 후속 퀘스트보다 위에 옵니다

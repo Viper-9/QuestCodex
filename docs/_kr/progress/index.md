@@ -7,7 +7,7 @@ has_children: true
 
 # 진행현황
 
-진행현황 메뉴는 프로필이 어디까지 왔고 무엇이 남았는지 보여 줍니다. 네 페이지로 되어 있습니다.
+진행현황 메뉴는 프로필이 어디까지 왔고 무엇이 남았는지 보여 줍니다. 다섯 페이지로 되어 있습니다.
 
 | 페이지 | 하는 일 |
 |:-----|:-------------|
@@ -15,10 +15,11 @@ has_children: true
 | [레이드 준비]({{ '/kr/progress/raid-prep.html' | relative_url }}) | 들어갈 맵에서 할 일 전부 |
 | [필요 아이템]({{ '/kr/progress/needed-items.html' | relative_url }}) | 남은 퀘스트에 필요한 아이템과 보유량 비교 |
 | [해금 경로]({{ '/kr/progress/unlock-paths.html' | relative_url }}) | 아이템이 상인 판매나 제작으로 열리기까지 남은 퀘스트 |
+| [카파 트래커]({{ '/kr/progress/kappa-tracker.html' | relative_url }}) | 카파 컨테이너까지 남은 것, 목록이나 상인별 트리로 |
 
 ## 프로필 고르기 {#choosing-a-profile}
 
-맨 위 프로필 바는 네 페이지가 함께 씁니다. 처음에는 지금 접속 중인 프로필로 시작하고, 고른 프로필은 브라우저에 기억됩니다.
+맨 위 프로필 바는 다섯 페이지가 함께 씁니다. 처음에는 지금 접속 중인 프로필로 시작하고, 고른 프로필은 브라우저에 기억됩니다.
 
 [![프로필 바]({{ '/assets/images/progress-profile.png' | relative_url }})]({{ '/assets/images/progress-profile.png' | relative_url }})
 

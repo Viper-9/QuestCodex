@@ -16,7 +16,7 @@
     "whats-inside.table1.r4c1": "[퀘스트 가이드](wiki/quest-guide.html)",
     "whats-inside.table1.r4c2": "레이드 전에 챙길 것: 맵, 무기, 장비, 제출·설치할 아이템",
     "whats-inside.table1.r5c1": "[진행현황](progress/)",
-    "whats-inside.table1.r5c2": "프로필의 퀘스트 진행도, 맵별 레이드 준비, 아직 필요한 아이템, 아이템을 해금하는 퀘스트",
+    "whats-inside.table1.r5c2": "프로필의 퀘스트 진행도, 맵별 레이드 준비, 아직 필요한 아이템, 아이템을 해금하는 퀘스트, 카파까지 남은 것",
     "translation-note": "스크린샷은 영문 UI 기준입니다. 본문에는 한국어 UI 이름과 영문 이름을 함께 적었습니다."
   },
   "getting-started": {
@@ -37,9 +37,11 @@
     "language-and-theme.heading": "언어와 테마",
     "language-and-theme.li1": "**언어**: `English` / `한국어` / `Русский`. UI 문구와 퀘스트·아이템 이름이 함께 바뀝니다 (게임 텍스트는 서버의 로케일 테이블을 씁니다).",
     "language-and-theme.li2": "**테마**: 시스템 / 밝게 / 어둡게. 브라우저에 기억됩니다.",
-    "language-and-theme.img.topbar-switches": "테마와 언어 선택",
+    "language-and-theme.img.topbar-switches": "데이터 갱신, 테마와 언어 선택",
     "side-menu.heading": "사이드 메뉴",
-    "side-menu.p1": "상단 바 왼쪽의 메뉴 버튼으로 사이드 메뉴를 접거나 펼칠 수 있고, 선택한 상태가 기억됩니다."
+    "side-menu.p1": "상단 바 왼쪽의 메뉴 버튼으로 사이드 메뉴를 접거나 펼칠 수 있고, 선택한 상태가 기억됩니다.",
+    "refresh-data.heading": "데이터 갱신",
+    "refresh-data.p1": "지도·루트 데이터는 서버를 켤 때 한 번 만들어 디스크에 저장해 두므로, 다음 실행부터는 빨리 열립니다. 모드 목록은 그대로인데 루트에 영향을 주는 모드 설정(루트 프리셋 등)을 바꿨다면, 상단 바 오른쪽의 **데이터 갱신**(Refresh data)을 눌러 다시 만드세요. 10초 정도 걸립니다."
   },
   "wiki/index": {
     "title": "위키",
@@ -65,7 +67,11 @@
     "mod-filter.li1": "모드를 하나 이상 고릅니다. **전체 모드**(All mods)를 누르면 선택이 풀립니다",
     "mod-filter.li2": "상인 필터와 같이 걸리고, 상인 줄 숫자도 고른 모드 기준으로 다시 셉니다",
     "mod-filter.li3": "칩의 점 색은 목록의 모드 태그 색과 같습니다",
-    "mod-filter.img.wiki-mod-filter": "출처 모드 필터"
+    "mod-filter.img.wiki-mod-filter": "출처 모드 필터",
+    "vanilla-quests-a-mod-overrides.heading": "모드가 덮어쓴 바닐라 퀘스트",
+    "vanilla-quests-a-mod-overrides.p1": "퀘스트 모드 중에는 새 퀘스트를 추가하지 않고 바닐라 퀘스트 파일을 바꿔치기하는 것도 있습니다. 이런 퀘스트는 바닐라로 남지만, 위키와 진행현황 페이지에서 점선 테두리 태그로 모드 이름이 붙습니다.",
+    "vanilla-quests-a-mod-overrides.li1": "**출처 모드**(Source mod) 줄에 그 모드 칩이 속이 빈 점으로 따로 생겨서, 그 모드가 덮어쓴 퀘스트를 모아 볼 수 있습니다",
+    "vanilla-quests-a-mod-overrides.li2": "퀘스트를 펼치면 메타 줄에 **○○에 의해 수정됨**(Overridden by)이 모드 이름과 함께 표시됩니다"
   },
   "wiki/quest-details": {
     "title": "퀘스트 상세",
@@ -122,7 +128,7 @@
   },
   "progress/index": {
     "title": "진행현황",
-    "intro.p1": "진행현황 메뉴는 프로필이 어디까지 왔고 무엇이 남았는지 보여 줍니다. 네 페이지로 되어 있습니다.",
+    "intro.p1": "진행현황 메뉴는 프로필이 어디까지 왔고 무엇이 남았는지 보여 줍니다. 다섯 페이지로 되어 있습니다.",
     "intro.table1.r1c1": "페이지",
     "intro.table1.r1c2": "하는 일",
     "intro.table1.r3c1": "[현황](overview.html)",
@@ -134,10 +140,12 @@
     "intro.table1.r6c1": "[해금 경로](unlock-paths.html)",
     "intro.table1.r6c2": "아이템이 상인 판매나 제작으로 열리기까지 남은 퀘스트",
     "choosing-a-profile.heading": "프로필 고르기",
-    "choosing-a-profile.p1": "맨 위 프로필 바는 네 페이지가 함께 씁니다. 처음에는 지금 접속 중인 프로필로 시작하고, 고른 프로필은 브라우저에 기억됩니다.",
+    "choosing-a-profile.p1": "맨 위 프로필 바는 다섯 페이지가 함께 씁니다. 처음에는 지금 접속 중인 프로필로 시작하고, 고른 프로필은 브라우저에 기억됩니다.",
     "choosing-a-profile.img.progress-profile": "프로필 바",
     "live-updates.heading": "실시간 갱신",
-    "live-updates.p1": "게임이 프로필을 저장할 때(레이드 종료, 퀘스트 제출 등)와 탭으로 돌아올 때 알아서 새로고침됩니다. 바뀐 퀘스트는 잠깐 강조 표시됩니다."
+    "live-updates.p1": "게임이 프로필을 저장할 때(레이드 종료, 퀘스트 제출 등)와 탭으로 돌아올 때 알아서 새로고침됩니다. 바뀐 퀘스트는 잠깐 강조 표시됩니다.",
+    "intro.table1.r7c1": "[카파 트래커](kappa-tracker.html)",
+    "intro.table1.r7c2": "카파 컨테이너까지 남은 것, 목록이나 상인별 트리로"
   },
   "progress/overview": {
     "title": "현황",
@@ -257,6 +265,51 @@
     "local-only.heading": "로컬 전용",
     "local-only.p1": "SPT 서버는 `127.0.0.1`에만 열리므로 QuestCodex는 서버를 실행한 PC의 브라우저에서만 열립니다.",
     "quest-map-coverage.li4": "탈출구·환승 위치는 내장 데이터에서 가져오므로, 모드가 추가하거나 옮긴 탈출구는 빠지거나 위치가 다를 수 있습니다.",
-    "quest-map-coverage.li5": "어떤 열쇠를 가지고 있는지는 확인하지 않습니다. 자물쇠 아이콘은 그 문에 필요한 열쇠만 알려 줍니다."
+    "quest-map-coverage.li5": "어떤 열쇠를 가지고 있는지는 확인하지 않습니다. 자물쇠 아이콘은 그 문에 필요한 열쇠만 알려 줍니다.",
+    "overridden-vanilla-quests.heading": "모드가 덮어쓴 바닐라 퀘스트",
+    "overridden-vanilla-quests.p1": "모드가 바닐라 퀘스트를 대신하는 파일을 갖고 있으면 그 퀘스트를 덮어쓴 것으로 표시합니다. 모드가 실제로 내용을 바꿨는지는 확인하지 않습니다.",
+    "kappa-tracker.heading": "카파 트래커",
+    "kappa-tracker.li1": "Collector 아이템의 컨테이너 확률은 서버 루트 테이블로 계산해 맵 전체에 걸쳐 평균 낸 값이라, 레이드마다 그대로 나오는 드롭률이 아니라 추정치입니다.",
+    "kappa-tracker.li2": "루트 출처는 Collector 제출 아이템에만 나옵니다."
+  },
+  "progress/kappa-tracker": {
+    "title": "카파 트래커",
+    "intro.p1": "Collector 퀘스트와 카파 컨테이너까지 무엇이 남았는지, 다음에 어떤 카파 퀘스트를 하면 되는지 보여 줍니다.",
+    "intro.img.progress-kappa-full": "카파 트래커 페이지",
+    "what-counts-toward-kappa.heading": "무엇을 카파 조건으로 세나",
+    "what-counts-toward-kappa.p1": "정해진 목록을 쓰지 않습니다. 서버에 있는 Collector 퀘스트를 읽어서, 그 퀘스트가 요구하는 퀘스트와 그 앞의 선행 퀘스트를 모두 셉니다. 바닐라 서버는 퀘스트 목록이 그대로 나오고, Collector 조건을 바꾸는 퀘스트 모드(예: 상인 레벨이나 플레이어 레벨 조건 추가)도 그대로 따라갑니다.",
+    "what-counts-toward-kappa.p2": "실패한 퀘스트도 뒤따르는 퀘스트가 모두 실패를 인정하면(택일 분기처럼) 완료로 셉니다.",
+    "summary.heading": "요약",
+    "summary.li1": "왼쪽 카드는 조건 종류마다 막대 하나입니다. **카파 퀘스트**(Kappa quests), **제출 아이템 (FIR)**(Collector items (FIR)), 그리고 Collector 퀘스트가 요구하면 **레벨**(Level)이나 **상인 등급**(Trader levels)",
+    "summary.li2": "오른쪽 카드는 상인별 카파 퀘스트 완료 수입니다. Collector 퀘스트가 상인 등급을 요구하면 **필요 등급**(Required) 칸도 나옵니다",
+    "quest-list.heading": "퀘스트 목록",
+    "quest-list.p1": "목록 위 상인 탭에는 상인마다 남은 카파 퀘스트 수가 나옵니다. 상인을 고르면 그 상인 퀘스트만 남습니다.",
+    "quest-list.li1": "**진행 가능**(Available): 수락할 수 있거나 진행 중인 퀘스트. 뒤로 이어지는 흐름이 긴 것부터 나옵니다. 오른쪽에는 이 퀘스트를 끝내면 열리는 카파 퀘스트가 나오고, 여러 개면 `외 N개`가 붙습니다",
+    "quest-list.li2": "**잠김**(Locked): 아직 받을 수 없는 퀘스트. 곧 열리는 것부터 나오고, 처음엔 접혀 있습니다",
+    "quest-list.li3": "**완료**(Done): 끝낸 카파 퀘스트. 최근 것부터 나오고, 처음엔 접혀 있습니다",
+    "quest-list.p2": "행을 누르면 목표·조건·보상이 현황 페이지와 같은 모양으로 펼쳐집니다.",
+    "quest-list.img.progress-kappa-quests": "펼친 카파 퀘스트",
+    "quest-list.p3": "게임에 한 번도 접속하지 않은 프로필은 모든 퀘스트가 잠겨 있습니다. 이때는 목록에 그 이유와 가장 먼저 열릴 퀘스트가 나옵니다.",
+    "quest-flow.heading": "퀘스트 흐름",
+    "quest-flow.p1": "**퀘스트 흐름 보기**(Show full chain)를 누르면 퀘스트 하나를 기준으로 앞뒤 카파 퀘스트가 열립니다. 고른 퀘스트가 별표와 함께 가운데에 오고, 그 위로 이미 끝낸 카파 퀘스트는 한 줄로 접히며, 아래로 남은 퀘스트가 단계별로 이어집니다. 흐름이 길면 앞쪽 단계만 보이고 **N단계 더 보기**(Show N more steps)로 나머지를 펼칩니다.",
+    "quest-flow.p2": "예를 들어 **Gunsmith - Part 11**에서 열면, 앞의 카파 퀘스트 11개는 완료로 접혀 있고 아래로 Part 22까지 남은 11개가 이어집니다.",
+    "quest-flow.img.progress-kappa-chain": "Gunsmith - Part 11의 퀘스트 흐름",
+    "quest-flow.p3": "한 단계에 퀘스트가 여러 개면, 지금 하고 있는 퀘스트를 눌러 그 퀘스트와 이어진 것만 남길 수 있습니다. [해금 경로](unlock-paths.html)와 같은 방식입니다.",
+    "tree-view.heading": "트리 보기",
+    "tree-view.p1": "상인 탭을 고르고 **목록**(List)을 **트리**(Tree)로 바꾸면 그 상인의 카파 퀘스트가 트리로 나옵니다. 한 열이 선행 한 단계이고, 선은 퀘스트와 그 퀘스트가 여는 퀘스트를 잇습니다. 고른 보기는 기억됩니다.",
+    "tree-view.li1": "색으로 **완료**(Completed), **지금 할 수 있음 · 진행 중**(Available · In progress), **다음에 열림**(Opens next, 선행이 모두 완료나 진행 중), **잠김**(Locked)을 구분합니다. 점선은 앞의 택일 분기 퀘스트가 실패해도 열리는 퀘스트입니다",
+    "tree-view.li2": "다른 상인의 선행 퀘스트는 한 단계 앞에 흐린 점선 상자로 그려집니다",
+    "tree-view.li3": "**완료 접기**(Collapse completed)를 켜면 끝낸 퀘스트가 상자 하나로 합쳐집니다",
+    "tree-view.li4": "트리가 크면 마우스로 끌어서 움직일 수 있습니다",
+    "tree-view.img.progress-kappa-tree": "Mechanic 카파 퀘스트 트리",
+    "tree-view.p2": "퀘스트를 누르면 그 퀘스트에 필요한 퀘스트와 그 퀘스트가 필요한 퀘스트가 강조됩니다. 트리 아래에 상세가 열리고, **퀘스트 흐름 보기**(Show full chain)와 **위키에서 보기**(Open in wiki) 버튼이 있습니다.",
+    "tree-view.img.progress-kappa-tree-select": "트리에서 고른 퀘스트",
+    "collector-items.heading": "Collector 제출 아이템",
+    "collector-items.p1": "Collector 퀘스트에 제출해야 하는 아이템과 구할 수 있는 곳입니다.",
+    "collector-items.li1": "**상태**(Status): **제출함**(Handed over), **FIR 보유**(Have (FIR)), **FIR 아님**(not FIR, 갖고 있지만 레이드에서 찾은 게 아님), **없음**(Missing)",
+    "collector-items.li2": "**상자 파밍**(Container loot): 그 아이템이 잘 나오는 컨테이너와, 하나 열었을 때 들어 있을 확률. 마우스를 올리면 전체 목록이 나옵니다",
+    "collector-items.li3": "**시체 파밍**(Body loot): 그 아이템을 가지고 다닐 수 있는 봇 종류",
+    "collector-items.li4": "**미제출**(Not handed in) / **전체**(All) 칩과 검색창으로 표를 좁힐 수 있습니다",
+    "collector-items.img.progress-kappa-items": "Collector 제출 아이템"
   }
 }

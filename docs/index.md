@@ -29,4 +29,4 @@ It only **reads** server data. It never modifies quests, profiles or traders.
 |:-----|:-------------|
 | [Wiki](wiki/) | Every quest on your server, with filters, chains, rewards and mod attribution |
 | [Quest guide](wiki/quest-guide.html) | What to bring before a raid: maps, weapons, gear, items to hand over or plant |
-| [Progress](progress/) | Your profile's quest progress, raid prep per map, the items you still need and the quests that unlock items |
+| [Progress](progress/) | Your profile's quest progress, raid prep per map, the items you still need, the quests that unlock items and your way to Kappa |
