@@ -27,4 +27,12 @@ public class CatalogController(ICatalogSource catalogs) : ControllerBase
             return StatusCode(500, new ErrorBody("catalogBuildFailed"));
         }
     }
+
+    /// <summary>"데이터 다시 만들기" 버튼. 캐시만 버리고 바로 돌아온다 — 웹이 이어서 GET catalog 로 새로 받는다.</summary>
+    [HttpPost("catalog/rebuild")]
+    public IActionResult Rebuild()
+    {
+        catalogs.Rebuild();
+        return NoContent();
+    }
 }

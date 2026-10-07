@@ -248,9 +248,19 @@ export async function fetchCatalog(lang: string, signal?: AbortSignal): Promise<
 
 /** QuestCodex REST 공통 GET. 실패는 CatalogError(code) — 이름은 카탈로그지만 진행 상태 API 도 같은 에러 규약이다. */
 export async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await send(url, { signal })
+  return (await res.json()) as T
+}
+
+/** 서버의 메모리·디스크 캐시를 버린다(13 catalog-cache 스펙 §4). 이어서 fetchCatalog 를 다시 부르면 새로 만든다. */
+export async function rebuildCatalog(): Promise<void> {
+  await send('/questcodex/api/catalog/rebuild', { method: 'POST' })
+}
+
+async function send(url: string, init: RequestInit): Promise<Response> {
   let res: Response
   try {
-    res = await fetch(url, { signal })
+    res = await fetch(url, init)
   } catch (e) {
     if (isAbort(e)) throw e
     throw new CatalogError('network', null)
@@ -265,5 +275,5 @@ export async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> 
     }
     throw new CatalogError(code, res.status)
   }
-  return (await res.json()) as T
+  return res
 }

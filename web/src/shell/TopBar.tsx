@@ -13,9 +13,13 @@ interface TopBarProps {
   onLangChange(lang: Lang): void
   /** 카탈로그가 이미 있는데 재요청 중일 때 작은 표시 (§3.1) */
   busy: boolean
+  /** 데이터 갱신 — 누르는 즉시 App 이 전체 화면 덮개를 띄우고 서버 캐시를 다시 만든다 (13 catalog-cache 스펙 §4) */
+  onRebuild(): void
+  /** 카탈로그를 받는 중이면 누를 수 없다 */
+  rebuildDisabled: boolean
 }
 
-export function TopBar({ sideOpen, onToggleSide, onHome, theme, onThemeChange, lang, onLangChange, busy }: TopBarProps) {
+export function TopBar({ sideOpen, onToggleSide, onHome, theme, onThemeChange, lang, onLangChange, busy, onRebuild, rebuildDisabled }: TopBarProps) {
   const t = useT()
   const menuLabel = t(sideOpen ? 'topbar.menuHide' : 'topbar.menuShow')
   return (
@@ -28,6 +32,13 @@ export function TopBar({ sideOpen, onToggleSide, onHome, theme, onThemeChange, l
       {!sideOpen && <button type="button" className="qc-topbar__logo" onClick={onHome}>QuestCodex</button>}
       <div className="qc-topbar__spacer" />
       {busy && <span className="qc-topbar__busy" aria-live="polite">{t('topbar.busy')}</span>}
+      <button type="button" className="qc-topbar__rebuild" title={t('rebuild.hint')} disabled={rebuildDisabled} onClick={onRebuild}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36L21 8" />
+          <path d="M21 3v5h-5" />
+        </svg>
+        {t('rebuild.button')}
+      </button>
       <select className="qc-select" aria-label={t('topbar.theme')} value={theme} onChange={(e) => onThemeChange(e.target.value as ThemePref)}>
         {/* `theme.${p}` 는 템플릿 리터럴 타입이라 UiKey 로 좁혀진다 — 사전에 키가 없으면 컴파일 오류 */}
         {THEME_PREFS.map((p) => <option key={p} value={p}>{t(`theme.${p}`)}</option>)}

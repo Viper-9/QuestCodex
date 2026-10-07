@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { CatalogError, fetchCatalog } from './catalog'
+import { CatalogError, fetchCatalog, rebuildCatalog } from './catalog'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -37,5 +37,19 @@ describe('fetchCatalog', () => {
     ctrl.abort()
     const err = await fetchCatalog('en', ctrl.signal).catch((e: unknown) => e)
     expect(err).not.toBeInstanceOf(CatalogError)
+  })
+})
+
+describe('rebuildCatalog', () => {
+  it('rebuild 엔드포인트에 POST 한다', async () => {
+    const fetchMock = vi.fn(async () => new Response(null, { status: 204 }))
+    vi.stubGlobal('fetch', fetchMock)
+    await rebuildCatalog()
+    expect(fetchMock).toHaveBeenCalledWith('/questcodex/api/catalog/rebuild', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('실패는 CatalogError', async () => {
+    vi.stubGlobal('fetch', async () => new Response('', { status: 500 }))
+    await expect(rebuildCatalog()).rejects.toMatchObject({ code: 'http500', status: 500 })
   })
 })

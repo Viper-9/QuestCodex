@@ -6,6 +6,7 @@ import { navigate, useHashRoute } from './shell/router'
 import { SideMenu } from './shell/SideMenu'
 import { TopBar } from './shell/TopBar'
 import { ErrorBanner } from './shell/ErrorBanner'
+import { PreparingNotice, RebuildOverlay } from './shell/PreparingNotice'
 import { I18nProvider } from './i18n/I18nContext'
 import { ProgressPage } from './progress/ProgressPage'
 import { WikiPage } from './wiki/WikiPage'
@@ -42,14 +43,17 @@ export function App({ initialTheme }: AppProps) {
             sideOpen={sideOpen} onToggleSide={toggleSide} onHome={() => navigate('wiki')}
             theme={theme.pref} onThemeChange={theme.setPref}
             lang={c.lang} onLangChange={c.setLang}
-            busy={c.loading && c.catalog !== null}
+            busy={c.loading && c.catalog !== null && !c.rebuilding}
+            onRebuild={c.rebuild} rebuildDisabled={c.loading}
           />
           <div className="qc-page">
+            {c.preparing && <PreparingNotice />}
             {c.error && <ErrorBanner code={c.error} onRetry={c.retry} />}
             {route.page === 'progress' && <ProgressPage catalog={c.catalog} route={route} />}
             {route.page === 'wiki' && (c.catalog || !c.error) && <WikiPage catalog={c.catalog} route={route} />}
           </div>
         </div>
+        {c.rebuilding && <RebuildOverlay />}
       </div>
     </I18nProvider>
   )

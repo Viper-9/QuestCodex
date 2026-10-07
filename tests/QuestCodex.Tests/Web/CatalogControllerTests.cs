@@ -14,6 +14,8 @@ public class CatalogControllerTests
         public Func<string, CatalogModel> Factory { get; set; } = lang => new CatalogModel("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new(), new(), new());
         public IReadOnlySet<string> SupportedLangs { get; } = langs.ToHashSet();
         public CatalogModel Get(string lang) { Requested.Add(lang); return Factory(lang); }
+        public int Rebuilds { get; private set; }
+        public void Rebuild() => Rebuilds++;
     }
 
     [Fact]
@@ -46,6 +48,16 @@ public class CatalogControllerTests
         Assert.Equal("unknownLang", body.Error);
         Assert.Equal(["en", "kr"], body.Supported!.Order());
         Assert.Empty(src.Requested);
+    }
+
+    [Fact]
+    public void Rebuild_resets_the_source_and_is_204()
+    {
+        var src = new FakeSource("en");
+        var result = new CatalogController(src).Rebuild();
+
+        Assert.IsType<NoContentResult>(result);
+        Assert.Equal(1, src.Rebuilds);
     }
 
     [Fact]
