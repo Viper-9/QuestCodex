@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react'
 import type { Catalog } from '../api/catalog'
 import type { ProfileProgress } from '../api/progress'
 import { cls } from '../cls'
@@ -28,6 +28,50 @@ interface KappaTreeProps {
 /** 간선을 그리는 순서 — 지금 할 것에서 나가는 간선이 맨 위 */
 const EDGE_RANK = { done: 0, far: 1, next: 1, now: 2 } as const
 
+/** 이만큼(px) 넘게 움직여야 끌기로 본다 — 그보다 작으면 노드 클릭 */
+const DRAG_SLOP = 4
+
+/**
+ * 마우스로 잡고 끌어 이동. 가로·세로 모두 트리 스크롤만 움직이고 페이지는 그대로 둔다.
+ * 터치는 브라우저 기본 스크롤에 맡긴다. 끌었으면 손을 뗄 때의 클릭(노드 선택)을 삼킨다.
+ */
+function useDragPan(scrollRef: RefObject<HTMLDivElement | null>) {
+  const dragged = useRef(false)
+  const [dragging, setDragging] = useState(false)
+
+  const onPointerDown = (e: ReactPointerEvent) => {
+    const el = scrollRef.current
+    if (!el || e.pointerType !== 'mouse' || e.button !== 0) return
+    const start = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop }
+    dragged.current = false
+    const move = (ev: PointerEvent) => {
+      const dx = ev.clientX - start.x
+      const dy = ev.clientY - start.y
+      if (!dragged.current) {
+        if (Math.abs(dx) < DRAG_SLOP && Math.abs(dy) < DRAG_SLOP) return
+        dragged.current = true
+        setDragging(true)
+      }
+      el.scrollLeft = start.left - dx
+      el.scrollTop = start.top - dy
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setDragging(false)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+  const onClickCapture = (e: ReactMouseEvent) => {
+    if (!dragged.current) return
+    dragged.current = false
+    e.stopPropagation()
+    e.preventDefault()
+  }
+  return { dragging, onPointerDown, onClickCapture }
+}
+
 /**
  * 상인 하나의 카파 퀘스트 트리(kappa-tree.spec.md §2). 노드 = 절대 위치 버튼, 뒤에 SVG 곡선 간선.
  * 노드를 고르면 조상·자손만 진하게 하고 카드 아래에 상세 카드를 연다.
@@ -40,8 +84,21 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
   const selected = picked && picked.trader === traderId && tree.nodes.some((n) => n.id === picked.id) ? picked.id : null
   const focus = useMemo(() => (selected ? treeFocus(tree, selected) : null), [tree, selected])
   const scrollRef = useRef<HTMLDivElement>(null)
+  const pan = useDragPan(scrollRef)
+  /** 가로 스크롤바 높이 — 보이는 영역을 트리 높이만큼 확보하려고 잰다 */
+  const [bar, setBar] = useState(0)
   const [jumpTarget, setJumpTarget] = useState<string | null>(null)
   const { open: openDialog, dialogs } = useKappaDialogs(catalog, graph, progress, done, lookup)
+
+  const width = TREE_PAD * 2 + Math.max(0, tree.cols - 1) * TREE_CX + TREE_W
+  const height = TREE_PAD * 2 + Math.max(0, tree.rows - 1) * TREE_RY + TREE_H
+  // 보이는 영역은 트리 높이 그대로, 위아래에 그 절반씩 빈 공간을 숨겨 둔다 — 끌어서 맨 위·아래 노드도 가운데까지 올 수 있게
+  const slack = Math.round(height / 2)
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (el) setBar(el.offsetHeight - el.clientHeight)
+  }, [width, height])
 
   // 상인 변경·트리 모드 진입·접기 토글 때만: 가장 왼쪽 "지금 할 수 있음"(없으면 "다음에 열림") 노드가 보이게(§2.4)
   useLayoutEffect(() => {
@@ -51,6 +108,7 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
       .map((s) => tree.nodes.filter((n) => n.kind === 'quest' && n.state === s).map((n) => treeX(n.col)))
       .find((list) => list.length > 0) ?? [0]
     el.scrollLeft = Math.max(0, Math.min(...xs) - 0.6 * TREE_CX)
+    el.scrollTop = slack
   }, [traderId, collapse]) // tree 는 일부러 뺀다 — 선택·진행 갱신 때는 스크롤을 그대로 둔다
 
   useEffect(() => {
@@ -114,8 +172,6 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
   }
 
   const state = new Map(tree.nodes.map((n) => [n.id, n.state]))
-  const width = TREE_PAD * 2 + Math.max(0, tree.cols - 1) * TREE_CX + TREE_W
-  const height = TREE_PAD * 2 + Math.max(0, tree.rows - 1) * TREE_RY + TREE_H
   const traderName = lookup.traderName(traderId)
   const selectedNode = selected ? catalog.quests[selected] : undefined
 
@@ -129,8 +185,12 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
           <input type="checkbox" checked={collapse} onChange={(e) => toggleCollapse(e.target.checked)} /> {t('kappa.tree.collapse')}
         </label>
       </div>
-      <div className="qc-ktree__scroll" ref={scrollRef}>
-        <div className="qc-ktree__canvas" style={{ width, height }}>
+      <div
+        className={cls('qc-ktree__scroll', pan.dragging && 'is-dragging')} ref={scrollRef}
+        style={{ height: height + bar }}
+        onPointerDown={pan.onPointerDown} onClickCapture={pan.onClickCapture} onDragStart={(e) => e.preventDefault()}
+      >
+        <div className="qc-ktree__canvas" style={{ width, height, margin: `${slack}px 0` }}>
           <svg width={width} height={height} aria-hidden="true">
             {[...tree.edges].sort((a, b) => EDGE_RANK[state.get(a.from)!] - EDGE_RANK[state.get(b.from)!]).map((e) => (
               <path

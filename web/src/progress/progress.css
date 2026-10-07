@@ -493,7 +493,8 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-ktree__sp { flex: 1; }
 .qc-ktree__toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); cursor: pointer; }
 .qc-ktree__toggle input { margin: 0; accent-color: var(--accent); }
-.qc-ktree__scroll { overflow-x: auto; overflow-y: hidden; }
+.qc-ktree__scroll { overflow-x: auto; overflow-y: hidden; cursor: grab; }
+.qc-ktree__scroll.is-dragging, .qc-ktree__scroll.is-dragging .qc-ktree__node { cursor: grabbing; user-select: none; }
 .qc-ktree__canvas { position: relative; }
 .qc-ktree__canvas svg { position: absolute; inset: 0; overflow: visible; }
 .qc-ktree__canvas path { fill: none; stroke: var(--border-2); stroke-width: 1.2; transition: opacity .12s; }
