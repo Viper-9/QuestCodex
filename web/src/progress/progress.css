@@ -414,6 +414,10 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-kappa__tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qc-kappa__tnum { display: flex; justify-content: flex-end; color: var(--fg-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .qc-kappa__tnum .qc-bar__done { color: var(--fg); }
+/* 상인별 카파 퀘스트는 두 자리라 전체 칸을 "/ 49" 폭으로 좁힌다 — 묶음 가운데가 "/" 에 오고, 열 제목·— 도 그 가운데에 */
+.qc-kappa__tnum .qc-bar__num { grid-template-columns: 3ch 4ch; }
+.qc-kappa__tnumh, .qc-kappa__tnone { grid-column: 1 / -1; text-align: center; }
+.qc-kappa__tnone { color: var(--fg-3); }
 .qc-kappa__trow.is-full .qc-bar__done { color: var(--ok); }
 .qc-kappa__trow.is-zero, .qc-kappa__trow.is-zero .qc-bar__done, .qc-kappa__trow.is-zero .qc-bar__total { color: var(--fg-3); }
 .qc-kappa__tcond { display: flex; flex-direction: column; align-items: flex-end; font-weight: 600; white-space: nowrap; }

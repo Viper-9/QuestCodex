@@ -28,6 +28,9 @@ interface KappaTreeProps {
 /** 간선을 그리는 순서 — 지금 할 것에서 나가는 간선이 맨 위 */
 const EDGE_RANK = { done: 0, far: 1, next: 1, now: 2 } as const
 
+/** 트리 영역 최소 높이(px) — 한두 줄짜리 트리도 답답하지 않게. 트리가 더 낮으면 처음엔 세로 가운데에 둔다 */
+const MIN_VIEW_H = 260
+
 /** 이만큼(px) 넘게 움직여야 끌기로 본다 — 그보다 작으면 노드 클릭 */
 const DRAG_SLOP = 4
 
@@ -92,8 +95,9 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
 
   const width = TREE_PAD * 2 + Math.max(0, tree.cols - 1) * TREE_CX + TREE_W
   const height = TREE_PAD * 2 + Math.max(0, tree.rows - 1) * TREE_RY + TREE_H
-  // 보이는 영역은 트리 높이 그대로, 위아래에 그 절반씩 빈 공간을 숨겨 둔다 — 끌어서 맨 위·아래 노드도 가운데까지 올 수 있게
-  const slack = Math.round(height / 2)
+  // 보이는 영역은 트리 높이(최소 MIN_VIEW_H), 위아래에 그 절반씩 빈 공간을 숨겨 둔다 — 끌어서 맨 위·아래 노드도 가운데까지 올 수 있게
+  const viewH = Math.max(height, MIN_VIEW_H)
+  const slack = Math.round(viewH / 2)
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -108,7 +112,7 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
       .map((s) => tree.nodes.filter((n) => n.kind === 'quest' && n.state === s).map((n) => treeX(n.col)))
       .find((list) => list.length > 0) ?? [0]
     el.scrollLeft = Math.max(0, Math.min(...xs) - 0.6 * TREE_CX)
-    el.scrollTop = slack
+    el.scrollTop = slack - Math.round((viewH - height) / 2)
   }, [traderId, collapse]) // tree 는 일부러 뺀다 — 선택·진행 갱신 때는 스크롤을 그대로 둔다
 
   useEffect(() => {
@@ -187,7 +191,7 @@ export function KappaTree({ catalog, graph, progress, lookup, done, stats, trade
       </div>
       <div
         className={cls('qc-ktree__scroll', pan.dragging && 'is-dragging')} ref={scrollRef}
-        style={{ height: height + bar }}
+        style={{ height: viewH + bar }}
         onPointerDown={pan.onPointerDown} onClickCapture={pan.onClickCapture} onDragStart={(e) => e.preventDefault()}
       >
         <div className="qc-ktree__canvas" style={{ width, height, margin: `${slack}px 0` }}>
