@@ -3,6 +3,7 @@ import type { LootSource } from '../api/catalog'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { distinctNames } from '../wiki/prep'
+import { searchKey } from './derive'
 import { CONTAINER_LABELS, formatChance, itemDone, itemSource, type KappaItem } from './kappa'
 
 /** 주로 나오는 곳 칸에 보여 주는 컨테이너 수. 나머지는 툴팁 */
@@ -16,13 +17,15 @@ interface KappaItemsProps {
 
 /**
  * Collector 제출 아이템 표(12 kappa-loot-sources 스펙 §3) — 아이템 · 상태 · 주로 나오는 곳(컨테이너 하나 열었을 때 확률) · 봇.
- * 기본은 남은 것만. 상인 필터와 무관.
+ * 기본은 남은 것만. 검색어는 아이템 이름(여러 이름 중 하나라도)에 맞춘다. 상인 필터와 무관.
  */
 export function KappaItems({ items, sources }: KappaItemsProps) {
   const t = useT()
   const [leftOnly, setLeftOnly] = useState(true)
+  const [query, setQuery] = useState('')
   if (items.length === 0) return null
-  const shown = leftOnly ? items.filter((i) => !itemDone(i)) : items
+  const q = searchKey(query)
+  const shown = items.filter((i) => (!leftOnly || !itemDone(i)) && (q === '' || i.items.some((x) => searchKey(x.name).includes(q))))
   const withSources = sources !== undefined
   const containerName = (c: { tpl: string; name: string }) => (CONTAINER_LABELS[c.tpl] ? t(CONTAINER_LABELS[c.tpl]) : c.name)
 
@@ -35,8 +38,9 @@ export function KappaItems({ items, sources }: KappaItemsProps) {
           <button type="button" className={cls('qc-chip', leftOnly && 'is-on')} aria-pressed={leftOnly} onClick={() => setLeftOnly(true)}>{t('kappa.items.left')}</button>
           <button type="button" className={cls('qc-chip', !leftOnly && 'is-on')} aria-pressed={!leftOnly} onClick={() => setLeftOnly(false)}>{t('kappa.items.all')}</button>
         </div>
+        <input className="qc-search" type="search" placeholder={t('items.search')} aria-label={t('items.search')} value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
-      {shown.length === 0 ? <p className="qc-empty">{t('kappa.items.empty')}</p> : (
+      {shown.length === 0 ? <p className="qc-empty">{t(q === '' ? 'kappa.items.empty' : 'items.empty')}</p> : (
         <div className="qc-kappa__itable" role="table">
           <div className="qc-kappa__irow qc-kappa__irow--head" role="row">
             <span role="columnheader">{t('kappa.items.col.item')}</span>

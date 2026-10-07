@@ -40,10 +40,9 @@ export function lockReasonText(r: LockReason, lookup: NameLookup, t: T): string 
       return t('lock.quest', {
         quest: lookup.questName(r.questId) ?? r.questId,
         need: r.needStatuses.map((s) => statusLabel(s, t)).join('/'),
-        now: statusLabel(r.currentStatus, t),
       })
     case 'level':
-      return t('lock.level', { need: r.need, now: r.current })
+      return t('lock.level', { need: r.need })
     case 'traderLoyalty':
       return t('lock.loyalty', { trader: lookup.traderName(r.traderId), need: r.need, now: r.current })
     case 'traderStanding':
@@ -67,10 +66,10 @@ function sameCondition(req: Requirement, r: LockReason): boolean {
   }
 }
 
-/** 잠김 사유의 현재 값. 미충족 줄 오른쪽에 "지금 47" 로 붙는다. */
-function reasonNow(r: LockReason, t: T): string | null {
+/** 잠김 사유의 현재 값. 미충족 줄 오른쪽에 "지금 47" 로 붙는다. 선행 퀘스트는 붙이지 않는다. */
+function reasonNow(r: LockReason): string | null {
   switch (r.kind) {
-    case 'quest': return statusLabel(r.currentStatus, t)
+    case 'quest': return null // 선행 퀘스트 상태는 줄 내용과 헷갈려 숨김
     case 'level':
     case 'traderLoyalty': return formatInt(r.current)
     case 'traderStanding': return num(r.current)
@@ -94,7 +93,7 @@ export function requirementLines(quest: CatalogQuest, qp: QuestProgress, lookup:
       continue
     }
     taken.add(i)
-    const now = reasonNow(reason, t)
+    const now = reasonNow(reason)
     lines[i] = { ...lines[i], state: 'unmet', aside: now === null ? null : t('overview.now', { now }) }
   }
   return lines
