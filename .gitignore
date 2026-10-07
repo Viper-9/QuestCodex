@@ -11,6 +11,8 @@ tools/package.ps1
 *.tsbuildinfo
 web/node_modules/
 web/dist/
+# 녹화 데이터(개발 서버 전용, 프로필 데이터 포함·용량 큼)
+web/fixtures/
 server/wwwroot/
 
 # IDE / OS
