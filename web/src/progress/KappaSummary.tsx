@@ -124,13 +124,15 @@ interface TraderTabsProps {
   lookup: NameLookup
   selected: string | null
   onSelect(traderId: string | null): void
+  /** 탭 줄 오른쪽 끝에 붙일 것(목록 | 트리 세그먼트) */
+  extra?: ReactNode
 }
 
 /**
  * 상인 탭 — 목록 바로 위에서 "상인별로 거를 수 있다"가 보이게 한다.
  * 모양은 레이드 준비 맵 탭(.qc-map)과 같고, 숫자는 남은 카파 퀘스트 수
  */
-export function KappaTraderTabs({ rows, lookup, selected, onSelect }: TraderTabsProps) {
+export function KappaTraderTabs({ rows, lookup, selected, onSelect, extra }: TraderTabsProps) {
   const t = useT()
   const left = (r: TraderRow) => r.total - r.done
   const tab = (id: string | null, name: string, n: number) => (
@@ -145,6 +147,7 @@ export function KappaTraderTabs({ rows, lookup, selected, onSelect }: TraderTabs
     <div className="qc-maps" role="group" aria-label={t('kappa.table.trader')}>
       {tab(null, t('trader.all'), rows.reduce((sum, r) => sum + left(r), 0))}
       {rows.filter((r) => r.total > 0).map((r) => tab(r.traderId, lookup.traderName(r.traderId), left(r)))}
+      {extra && <><span className="qc-maps__spacer" />{extra}</>}
     </div>
   )
 }

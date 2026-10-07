@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
-import type { ProfileProgress, QuestStatus } from '../api/progress'
+import type { ProfileProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
 import type { NameLookup } from '../wiki/derive'
 import { useDialogFrame } from '../wiki/useDialogFrame'
 import { questProgress } from './derive'
-import { chainTiers, type KappaGraph } from './kappa'
+import { chainTiers, NOW, type KappaGraph } from './kappa'
 import type { PathStep } from './unlock'
 import { pathFocus } from './unlockLines'
 
 /** 아래쪽(남은 후속)을 처음에 보여 주는 단계 수. 넘으면 "N단계 더 보기" */
 const DOWN_TIERS = 6
-const NOW = new Set<QuestStatus>(['AvailableForFinish', 'Started', 'AvailableForStart', 'FailRestartable'])
 
 interface KappaChainDialogProps {
   /** null 이면 닫힘. 항상 마운트해 두고 showModal()/close() 로 토글한다(해금 경로 팝업과 같은 틀) */

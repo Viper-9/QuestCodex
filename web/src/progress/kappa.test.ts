@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Catalog, CatalogQuest, Objective, Requirement } from '../api/catalog'
 import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
-import { chainStats, chainTiers, COLLECTOR_ID, formatChance, itemSource, kappaConds, kappaDone, kappaGraph, kappaItems, kappaLists, kappaUnlocks, nothingOpen, traderRows } from './kappa'
+import {
+  chainStats, chainTiers, COLLECTOR_ID, edgePath, formatChance, itemSource, kappaConds, kappaDone, kappaGraph, kappaItems, kappaLists, kappaTree,
+  kappaUnlocks, nothingOpen, traderRows, TREE_DONE_BOX, treeFocus, treeState, type KappaTree,
+} from './kappa'
 
 function quest(id: string, p: Partial<CatalogQuest> = {}): CatalogQuest {
   return {
@@ -231,5 +234,153 @@ describe('제출 아이템 출처', () => {
     expect(formatChance(0.0308)).toBe('3.1%')
     expect(formatChance(0.0023)).toBe('0.2%')
     expect(formatChance(0.0004)).toBe('<0.1%')
+  })
+})
+
+describe('상인별 트리', () => {
+  /** 트리 하나 만들기 — 카파 그래프는 Collector 가 ends 를 요구하는 것으로 만든다 */
+  const build = (quests: CatalogQuest[], ends: string[], status: Record<string, string> = {}, collapse = false) => {
+    const cat = catalog([...quests, collector({ requirements: ends.map((id) => after(id, 'Success')) })])
+    const g = kappaGraph(cat)!
+    const p = progress(Object.fromEntries(Object.entries(status).map(([id, s]) => [id, qp(s)])))
+    const done = kappaDone(g, p)
+    return { g, p, done, tree: kappaTree(cat, g, p, done, 't1', collapse) }
+  }
+  const node = (tree: KappaTree, id: string) => tree.nodes.find((n) => n.id === id)!
+  const cols = (tree: KappaTree) => Object.fromEntries(tree.nodes.map((n) => [n.id, n.col]))
+  const edges = (tree: KappaTree) => tree.edges.map((e) => `${e.from}>${e.to}`).sort()
+  const edge = (tree: KappaTree, from: string, to: string) => tree.edges.find((e) => e.from === from && e.to === to)!
+
+  it('treeState: 선행 없는 Locked → next, 선행이 now → next, 선행이 Locked → far, 택일 실패 → done', () => {
+    const { g, p, done } = build([
+      quest('P'),
+      quest('Q', { requirements: [after('P', 'Success')] }),
+      quest('R', { requirements: [after('Q', 'Success')] }),
+      quest('F'),
+      quest('G', { requirements: [after('F', 'Success', 'Fail')] }),
+    ], ['R', 'G'], { P: 'Started', F: 'Fail' })
+    expect(treeState(g, p, done, 'P')).toBe('now')
+    expect(treeState(g, p, done, 'Q')).toBe('next')
+    expect(treeState(g, p, done, 'R')).toBe('far')
+    expect(treeState(g, p, done, 'F')).toBe('done')
+    expect(treeState(g, p, done, 'G')).toBe('next')
+    const fresh = build([quest('P'), quest('Q', { requirements: [after('P', 'Success')] })], ['Q'])
+    expect(treeState(fresh.g, fresh.p, fresh.done, 'P')).toBe('next')
+    expect(treeState(fresh.g, fresh.p, fresh.done, 'Q')).toBe('far')
+  })
+
+  // A → B → C 사슬, A → E·B → E(A→E 는 한 열 건너뜀), 다른 상인 O → F·O → C, O2 → C 만
+  const wide = [
+    quest('A'),
+    quest('B', { requirements: [after('A', 'Success')] }),
+    quest('C', { requirements: [after('B', 'Success'), after('O', 'Success'), after('O2', 'Success')] }),
+    quest('E', { requirements: [after('A', 'Success'), after('B', 'Success')] }),
+    quest('F', { requirements: [after('O', 'Success')] }),
+    quest('O', { traderId: 't2' }),
+    quest('O2', { traderId: 't2' }),
+  ]
+
+  it('열: 상인 안 최장 깊이, 바깥 선행만 있는 루트는 1열, 바깥 노드 = 가장 앞 자식 − 1', () => {
+    const { tree } = build(wide, ['C', 'E', 'F'])
+    expect(cols(tree)).toEqual({ A: 0, B: 1, C: 2, E: 2, F: 1, O: 0, O2: 1 })
+    expect(node(tree, 'O').kind).toBe('outside')
+    expect(node(tree, 'A').kind).toBe('quest')
+    expect(tree).toMatchObject({ cols: 3, total: 5, doneCount: 0 })
+  })
+
+  it('두 열 건너뛰는 간선은 via 하나, 인접 간선은 []', () => {
+    const { tree } = build(wide, ['C', 'E', 'F'])
+    expect(edge(tree, 'A', 'E').via).toHaveLength(1)
+    expect(edge(tree, 'O', 'C').via).toHaveLength(1)
+    expect(edge(tree, 'A', 'B').via).toEqual([])
+  })
+
+  it('같은 열 안 노드는 row 가 1 이상 벌어진다', () => {
+    const { tree } = build(wide, ['C', 'E', 'F'])
+    for (let c = 0; c < tree.cols; c++) {
+      const rows = tree.nodes.filter((n) => n.col === c).map((n) => n.row).sort((a, b) => a - b)
+      for (let i = 1; i < rows.length; i++) expect(rows[i] - rows[i - 1]).toBeGreaterThanOrEqual(1)
+    }
+    expect(tree.rows).toBeGreaterThan(Math.max(...tree.nodes.map((n) => n.row)))
+  })
+
+  it('행: 이름순이면 교차하는 배치가 barycenter 후 교차 없음, 한 줄 사슬은 같은 row', () => {
+    const { tree } = build([
+      quest('A'), quest('B'),
+      quest('X', { requirements: [after('B', 'Success')] }),
+      quest('Y', { requirements: [after('A', 'Success')] }),
+    ], ['X', 'Y'])
+    expect(node(tree, 'Y').row).toBe(node(tree, 'A').row)
+    expect(node(tree, 'X').row).toBe(node(tree, 'B').row)
+    const chain = build([
+      quest('A'),
+      quest('B', { requirements: [after('A', 'Success')] }),
+      quest('C', { requirements: [after('B', 'Success')] }),
+    ], ['C'])
+    expect(chain.tree.nodes.map((n) => n.row)).toEqual([0, 0, 0])
+  })
+
+  describe('완료 접기', () => {
+    // A(완료) → B(진행 중) → C, 완료 바깥 O → B, 미완료 바깥 O2 → C
+    const quests = [
+      quest('A'),
+      quest('B', { requirements: [after('A', 'Success'), after('O', 'Success')] }),
+      quest('C', { requirements: [after('B', 'Success'), after('O2', 'Success')] }),
+      quest('O', { traderId: 't2' }),
+      quest('O2', { traderId: 't2' }),
+    ]
+    const status = { A: 'Success', O: 'Success', B: 'Started' }
+
+    it('켜면 완료 상인 노드 대신 접힌 칸 하나 + 그 간선, 완료 바깥 노드는 빠지고 미완료 바깥 노드는 남는다', () => {
+      const { tree } = build(quests, ['C'], status, true)
+      expect(tree.nodes.map((n) => n.id).sort()).toEqual([TREE_DONE_BOX, 'B', 'C', 'O2'].sort())
+      expect(edges(tree)).toEqual([`${TREE_DONE_BOX}>B`, 'B>C', 'O2>C'].sort())
+      expect(node(tree, TREE_DONE_BOX)).toMatchObject({ kind: 'doneBox', state: 'done', col: 0 })
+      expect(node(tree, 'B').col).toBe(1)
+      expect(tree.doneCount).toBe(1)
+    })
+
+    it('끄면 접힌 칸 없이 전부', () => {
+      const { tree } = build(quests, ['C'], status)
+      expect(tree.nodes.map((n) => n.id).sort()).toEqual(['A', 'B', 'C', 'O', 'O2'])
+      expect(node(tree, 'A').state).toBe('done')
+    })
+
+    it('모두 완료 + 접기 → 접힌 칸 하나뿐, 간선 0', () => {
+      const { tree } = build(quests, ['C'], { A: 'Success', B: 'Success', C: 'Success', O: 'Success', O2: 'Success' }, true)
+      expect(tree.nodes.map((n) => n.id)).toEqual([TREE_DONE_BOX])
+      expect(tree.edges).toEqual([])
+      expect(tree).toMatchObject({ doneCount: 3, total: 3, cols: 1, rows: 1 })
+    })
+  })
+
+  it('soft: failOk 노드에서 나간 간선만', () => {
+    const { tree } = build([
+      quest('P'),
+      quest('Q', { requirements: [after('P', 'Success', 'Fail')] }),
+      quest('R', { requirements: [after('Q', 'Success')] }),
+    ], ['R'])
+    expect(edge(tree, 'P', 'Q').soft).toBe(true)
+    expect(edge(tree, 'Q', 'R').soft).toBe(false)
+  })
+
+  it('treeFocus: 조상·자손 포함, 형제 제외', () => {
+    const { tree } = build([
+      quest('A'),
+      quest('B', { requirements: [after('A', 'Success')] }),
+      quest('C', { requirements: [after('A', 'Success')] }),
+      quest('D', { requirements: [after('B', 'Success')] }),
+    ], ['C', 'D'])
+    expect([...treeFocus(tree, 'B')].sort()).toEqual(['A', 'B', 'D'])
+  })
+
+  it('edgePath: 인접 간선은 C 하나, via 하나면 C 둘 + H 하나', () => {
+    const { tree } = build(wide, ['C', 'E', 'F'])
+    const ops = (from: string, to: string) => edgePath(edge(tree, from, to), tree).replace(/[^MCH]/g, '')
+    expect(ops('A', 'B')).toBe('MC')
+    expect(ops('A', 'E')).toBe('MCHC')
+    // 한 줄 사슬: A 오른쪽 가운데(10+196, 10+20) → B 왼쪽 가운데(10+252, 같은 높이)
+    const chain = build([quest('A'), quest('B', { requirements: [after('A', 'Success')] })], ['B']).tree
+    expect(edgePath(edge(chain, 'A', 'B'), chain)).toBe('M206 30 C234 30 234 30 262 30')
   })
 })
