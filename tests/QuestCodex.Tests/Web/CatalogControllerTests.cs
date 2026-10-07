@@ -11,7 +11,7 @@ public class CatalogControllerTests
     private sealed class FakeSource(params string[] langs) : ICatalogSource
     {
         public List<string> Requested { get; } = [];
-        public Func<string, CatalogModel> Factory { get; set; } = lang => new CatalogModel("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new(), new());
+        public Func<string, CatalogModel> Factory { get; set; } = lang => new CatalogModel("4.1.5", "0.2.0", DateTimeOffset.UnixEpoch, lang, new(), new(), new(), [], [], new(), new(), new(), new(), new());
         public IReadOnlySet<string> SupportedLangs { get; } = langs.ToHashSet();
         public CatalogModel Get(string lang) { Requested.Add(lang); return Factory(lang); }
     }

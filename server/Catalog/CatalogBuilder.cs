@@ -83,8 +83,38 @@ public static class CatalogBuilder
         var lockedDoors = BuildLockedDoors(input.LockedDoors, rewardParser.NameOf);
         var exits = ExitBuilder.Build(input.ExitPositions, input.LocationExits, locale, rewardParser.NameOf, warnings);
 
+        var lootSources = BuildLootSources(quests, input.LootSources, rewardParser.NameOf);
+
         return new Models.Catalog(input.SptVersion, input.ModVersion, now, input.Lang, traders, quests, rewardIndex, warnings, itemCategories, itemCategoryOf, lockedDoors,
-            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal), exits);
+            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal), exits, lootSources);
+    }
+
+    /// <summary>카파 트래커의 Collector — 제출 아이템 출처를 이 퀘스트의 것만 싣는다</summary>
+    public const string CollectorId = "5c51aac186f77432ea65c552";
+
+    /// <summary>Collector 제출 아이템(대체 tpl 포함)의 출처에 컨테이너 이름을 붙인다. 이름은 보상 아이템과 같은 규칙.</summary>
+    private static SortedDictionary<string, LootSource> BuildLootSources(
+        IReadOnlyDictionary<string, CatalogQuest> quests, IReadOnlyDictionary<string, Loot.RawLootSource>? raw, Func<string, string> nameOf)
+    {
+        var result = new SortedDictionary<string, LootSource>(StringComparer.Ordinal);
+        if (raw is null || !quests.TryGetValue(CollectorId, out var collector)) return result;
+        var tpls = collector.Objectives
+            .Where(o => o.Prep?.Item is { Action: "handover" })
+            .SelectMany(o => o.Prep!.Item!.Items.Select(i => i.Tpl));
+        foreach (var tpl in tpls)
+        {
+            if (result.ContainsKey(tpl) || !raw.TryGetValue(tpl, out var source)) continue;
+            // 게임에서 이름이 같은 컨테이너 종류(재킷·땅에 묻힌 통 등 tpl 여러 개)는 한 줄로 — 확률이 큰 쪽을 남긴다
+            var containers = source.Containers
+                .Select(c => new LootContainer(c.ContainerTpl, nameOf(c.ContainerTpl), Math.Round(c.Chance, 5)))
+                .GroupBy(c => c.Name, StringComparer.Ordinal)
+                .Select(g => g.MaxBy(c => c.Chance)!)
+                .OrderByDescending(c => c.Chance).ThenBy(c => c.Name, StringComparer.Ordinal)
+                .ToList();
+            result[tpl] = new LootSource(containers, source.Bots);
+        }
+
+        return result;
     }
 
     /// <summary>스냅샷 문에 열쇠 이름을 붙인다. 이름은 보상 아이템과 같은 규칙(로케일 → 템플릿 이름 → tpl).</summary>

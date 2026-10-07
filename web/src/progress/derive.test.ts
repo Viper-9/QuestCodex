@@ -400,7 +400,7 @@ describe('questTab / countTabs / filterProgressQuests', () => {
     expect(questCompletion(q, qp('Started', { a: { current: 5, target: 10, done: false }, b: { current: 0, target: null, done: true } }))).toBe(0.75)
     expect(questCompletion(quest('e', []), qp('Started'))).toBe(0)
   })
-  it('잠김: 진행 중인 선행 하나만 남음 → 사유 적은 순 → 사유 모름 → 도달 불가', () => {
+  it('잠김: 모자란 레벨 적은 순 → 남은 선행 단계 적은 순 → 사유 모름 → 도달 불가', () => {
     const cat = catalog([
       quest('far', [], { minLevel: 1 }),
       quest('near', [], { minLevel: 50 }),
@@ -415,6 +415,20 @@ describe('questTab / countTabs / filterProgressQuests', () => {
       never: qp('Locked', {}, [{ kind: 'faction', need: 'bear' }]),
     })
     expect(sortForTab(Object.values(cat.quests), prog, 'locked').map((q) => q.id)).toEqual(['near', 'one', 'far', 'unknown', 'never'])
+  })
+  it('잠김: 전부 Locked 인 새 프로필에서도 선행 사슬을 따라 단계 수로 줄 세운다', () => {
+    // a(열림 직전) ← b ← c, d 는 c 를 "진행 중" 만 요구, e 는 a·c 둘 다 필요(긴 쪽). lv 는 레벨 2 만 남았지만 선행 사슬의 a 보다 뒤
+    const cat = catalog(['lv', 'e', 'd', 'c', 'b', 'a'].map((id) => quest(id, [], { name: id })))
+    const lockOn = (id: string, need = ['Success']) => ({ kind: 'quest' as const, questId: id, needStatuses: need, currentStatus: 'Locked' })
+    const prog = progress({
+      a: qp('Locked', {}, [lockOn('z', ['Success'])]),
+      lv: qp('Locked', {}, [{ kind: 'level', need: 2, compare: '>=', current: 1 }]),
+      b: qp('Locked', {}, [lockOn('a')]),
+      c: qp('Locked', {}, [lockOn('b')]),
+      d: qp('Locked', {}, [lockOn('c', ['Started', 'Success'])]),
+      e: qp('Locked', {}, [lockOn('a'), lockOn('c')]),
+    })
+    expect(sortForTab(Object.values(cat.quests), prog, 'locked').map((q) => q.id)).toEqual(['a', 'b', 'c', 'd', 'e', 'lv'])
   })
   it('완료: 끝난 시각 최신순, 시각 없으면 맨 뒤', () => {
     const cat = catalog([quest('old', []), quest('none', []), quest('new', [])])

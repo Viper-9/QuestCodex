@@ -142,7 +142,7 @@ function RelatedColumn({ labelKey, ids, quest, catalog, lookup, onJump }: Relate
         return (
           <button key={id} type="button" className="qc-link" onClick={() => onJump(id)}>
             {target.name}
-            {target.traderId !== quest.traderId && <span className="qc-related__who"> {lookup.traderName(target.traderId)}</span>}
+            {target.traderId !== quest.traderId && <span className="qc-related__who">{lookup.traderName(target.traderId)}</span>}
           </button>
         )
       })}

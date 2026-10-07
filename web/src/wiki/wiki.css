@@ -290,7 +290,7 @@
 .qc-related { display: flex; gap: 22px; }
 .qc-related__col { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
 .qc-related__k { font-size: 11px; color: var(--fg-3); margin-bottom: 3px; }
-.qc-related__who { color: var(--fg-3); font-size: 11px; }
+.qc-related__who { margin-left: 6px; color: var(--fg-3); font-size: 11px; }  /* 퀘스트 이름에 붙어 보이지 않게 여백으로 띄운다 */
 
 /* ---- (e) 설명 팝업. padding 0 은 백드롭 클릭 판정을 위해 (QuestDescriptionDialog 참조) ---- */
 .qc-dialog {

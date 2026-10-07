@@ -156,4 +156,12 @@ public sealed record Catalog(
     /// <summary>map 키 → 활성 지도 변형 ID(맵 교체 모드가 로드됐을 때만, 예: interchange → manimal). 웹이 maps/index.json 의 변형 폴더를 고른다.</summary>
     SortedDictionary<string, string> MapVariants,
     /// <summary>map 키 → 탈출구·환승. 잠긴 문처럼 맵마다 한 번만 싣는다(지도의 탈출구 토글).</summary>
-    SortedDictionary<string, List<MapExit>> Exits);
+    SortedDictionary<string, List<MapExit>> Exits,
+    /// <summary>아이템 tpl → 주로 나오는 곳(컨테이너·봇). Collector 제출 아이템만(12 kappa-loot-sources 스펙).</summary>
+    SortedDictionary<string, LootSource> LootSources);
+
+/// <summary>Containers = 하나 열었을 때 들어 있을 확률 높은 순, Bots = 봇 묶음 키(scav·pmc·boss·raider·cultist·other).</summary>
+public sealed record LootSource(IReadOnlyList<LootContainer> Containers, IReadOnlyList<string> Bots);
+
+/// <summary>Chance = 그 컨테이너 하나를 열었을 때 아이템이 하나 이상 들어 있을 확률(0~1, 맵 개수 가중 평균).</summary>
+public sealed record LootContainer(string Tpl, string Name, double Chance);
