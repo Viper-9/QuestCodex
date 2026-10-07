@@ -131,7 +131,7 @@ export function KappaQuests({ catalog, graph, progress, lookup, lists, done, sta
   return (
     <div className="qc-kappa__quests">
       {section('now', t('kappa.now'), t('kappa.nowHint'), lists.now)}
-      {section('locked', t('kappa.locked'), t('kappa.lockedHint'), lists.locked)}
+      {section('locked', t('kappa.locked'), null, lists.locked)}
       {section('done', t('kappa.done'), null, lists.done)}
       {dialogs}
     </div>
