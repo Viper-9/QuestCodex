@@ -497,6 +497,31 @@ public class CatalogBuilderTests
     }
 
     [Fact]
+    public void Loot_sources_cover_collector_handover_items_and_merge_same_named_containers()
+    {
+        MongoId rooster = Id(700), other = Id(701), jacketA = Id(800), jacketB = Id(801), safe = Id(802);
+        var collector = Quest(new MongoId(CatalogBuilder.CollectorId), finish: [FinishCond(Id(201), "HandoverItem", value: 1, target: rooster)]);
+        var q = Quest(Id(1), finish: [FinishCond(Id(202), "HandoverItem", value: 1, target: other)]);
+        var raw = new Dictionary<string, QuestCodex.Catalog.Loot.RawLootSource>
+        {
+            [rooster.ToString()] = new([(safe.ToString(), 0.03), (jacketA.ToString(), 0.01), (jacketB.ToString(), 0.02)], ["scav", "pmc"]),
+            [other.ToString()] = new([(safe.ToString(), 0.5)], []),
+        };
+        var locale = new Dictionary<string, string> { [$"{jacketA} Name"] = "재킷", [$"{jacketB} Name"] = "재킷", [$"{safe} Name"] = "금고" };
+
+        var cat = CatalogBuilder.Build(Input([collector, q], locale: locale) with { LootSources = raw }, Now);
+
+        var source = Assert.Single(cat.LootSources).Value;
+        Assert.Equal(rooster.ToString(), cat.LootSources.Keys.Single());
+        Assert.Equal([new LootContainer(safe.ToString(), "금고", 0.03), new LootContainer(jacketB.ToString(), "재킷", 0.02)], source.Containers);
+        Assert.Equal(["scav", "pmc"], source.Bots);
+    }
+
+    [Fact]
+    public void Loot_sources_are_empty_without_input()
+        => Assert.Empty(CatalogBuilder.Build(Input([]), Now).LootSources);
+
+    [Fact]
     public void Locked_doors_are_empty_without_input()
         => Assert.Empty(CatalogBuilder.Build(Input([]), Now).LockedDoors);
 

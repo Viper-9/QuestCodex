@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using QuestCodex.Catalog;
 using QuestCodex.Catalog.Locations;
+using QuestCodex.Catalog.Loot;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -19,7 +20,9 @@ public class CatalogService(
     TemplateTable templateTable,
     TradersTable tradersTable,
     LocationTable locationTable,
+    BotTable botTable,
     QuestConfig questConfig,
+    LocationConfig locationConfig,
     LocaleService localeService,
     LocaleTable localeTable,
     VanillaSnapshot vanilla,
@@ -58,6 +61,14 @@ public class CatalogService(
         bool SnapshotMissing,
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapArea>>> Areas,
         IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationExits> Exits);
+
+    /// <summary>
+    /// 아이템 출처(컨테이너 루트 테이블 + 봇 인벤토리). 언어와 무관해 한 번만. staticLoot·staticContainers 도 LazyLoad 라
+    /// 맵당 .Value 를 한 번만 읽는다.
+    /// </summary>
+    private readonly Lazy<IReadOnlyDictionary<string, RawLootSource>> _lootSources = new(
+        () => LoadLootSources(locationTable, botTable, locationConfig, logger),
+        LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>핸드북 카테고리·아이템 부모. 언어와 무관해 한 번만. 모드가 추가한 아이템도 첫 요청 시점이면 들어와 있다.</summary>
     private readonly Lazy<(IReadOnlyDictionary<string, HandbookCategoryInput> Categories, IReadOnlyDictionary<string, string> ItemParents)> _handbook = new(() =>
@@ -129,7 +140,8 @@ public class CatalogService(
             QuestZoneAreas: locations.Areas,
             MapVariants: mapVariants.Active,
             ExitPositions: questZoneSnapshot.Exits,
-            LocationExits: locations.Exits);
+            LocationExits: locations.Exits,
+            LootSources: _lootSources.Value);
 
         var catalog = CatalogBuilder.Build(input, started);
 
@@ -142,6 +154,68 @@ public class CatalogService(
         }
 
         return catalog;
+    }
+
+    /// <summary>각 맵 staticLoot(컨테이너 종류 → 루트 테이블)·staticContainers(놓인 컨테이너) + 봇 인벤토리 → LootSourceIndex.</summary>
+    private static IReadOnlyDictionary<string, RawLootSource> LoadLootSources(
+        LocationTable locationTable, BotTable botTable, LocationConfig locationConfig, ISptLogger<CatalogService> logger)
+    {
+        var maps = new List<LootMapInput>();
+        foreach (var location in locationTable.GetDictionary().Values)
+        {
+            if (location?.Base is null || string.IsNullOrWhiteSpace(location.Base.Id)) continue;
+            var map = location.Base.Id.ToLowerInvariant();
+            try
+            {
+                var loot = location.StaticLoot?.Value;
+                var placedList = location.StaticContainers?.Value?.StaticContainers;
+                if (loot is null || placedList is null) continue;
+                var placed = new Dictionary<string, int>(StringComparer.Ordinal);
+                foreach (var c in placedList)
+                {
+                    var tpl = c?.Template?.Items?.FirstOrDefault()?.Template.ToString();
+                    if (!string.IsNullOrEmpty(tpl)) placed[tpl] = placed.GetValueOrDefault(tpl) + 1;
+                }
+
+                var tables = new Dictionary<string, StaticLootTable>(StringComparer.Ordinal);
+                foreach (var (container, details) in loot)
+                {
+                    if (details is null) continue;
+                    tables[container.ToString()] = new StaticLootTable(
+                        (details.ItemCountDistribution ?? []).Where(d => d is not null).Select(d => (d.Count ?? 0, (double)(d.RelativeProbability ?? 0))).ToList(),
+                        (details.ItemDistribution ?? []).Where(d => d is not null).Select(d => (d.Tpl.ToString(), (double)(d.RelativeProbability ?? 0))).ToList());
+                }
+
+                var multiplier = locationConfig.StaticLootMultiplier?.GetValueOrDefault(map, 1.0) ?? 1.0;
+                maps.Add(new LootMapInput(map, tables, placed, multiplier));
+            }
+            catch (Exception ex)
+            {
+                logger.Warning($"[QuestCodex] static loot of '{map}' unreadable, loot sources skipped: {ex.Message}");
+            }
+        }
+
+        // 봇이 떨어뜨리는 것: 가방·주머니·조끼·특수 루트 + 장비 전 슬롯(근접무기 등). 보안 컨테이너는 떨어지지 않아 뺀다.
+        var bots = new Dictionary<string, IReadOnlySet<string>>(StringComparer.Ordinal);
+        foreach (var (type, bot) in botTable.Types ?? [])
+        {
+            var inv = bot?.BotInventory;
+            if (inv is null) continue;
+            var tpls = new HashSet<string>(StringComparer.Ordinal);
+            void AddPool(Dictionary<SPTarkov.Server.Core.Models.Common.MongoId, double>? pool)
+            {
+                foreach (var (tpl, weight) in pool ?? []) if (weight > 0) tpls.Add(tpl.ToString());
+            }
+
+            AddPool(inv.Items?.Backpack);
+            AddPool(inv.Items?.Pockets);
+            AddPool(inv.Items?.TacticalVest);
+            AddPool(inv.Items?.SpecialLoot);
+            if (inv.Equipment is not null) foreach (var slot in inv.Equipment.Values) AddPool(slot);
+            bots[type] = tpls;
+        }
+
+        return LootSourceIndex.Build(maps, bots);
     }
 
     /// <summary>
