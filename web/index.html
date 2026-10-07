@@ -20,5 +20,24 @@
       import { mount } from '/src/main.tsx'
       mount('questcodex-root')
     </script>
+    <!-- 데이터 전환(개발 서버 전용 — 이 파일은 배포본에 쓰이지 않는다). 실서버 = SPT 서버로 프록시,
+         그 밖 = web/fixtures/<세트>/ 녹화 데이터(vite.config.ts fixtures 플러그인, dev-docs/ops/dev-fixtures.runbook.md). -->
+    <label id="qc-dev-data" style="position:fixed;left:8px;bottom:8px;z-index:9999;display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid #e5a53a;border-radius:6px;background:rgba(15,16,18,.92);color:#e5a53a;font:12px system-ui,sans-serif">
+      DEV 데이터
+      <select id="qc-dev-data-set" style="padding:2px 4px;border:1px solid #555;border-radius:4px;background:#1c1d21;color:#e3e4e6;font:inherit"></select>
+    </label>
+    <script type="module">
+      const current = /(?:^|;\s*)qc-fixture=([\w-]+)/.exec(document.cookie)?.[1] ?? ''
+      const select = document.getElementById('qc-dev-data-set')
+      const sets = await fetch('/__qc-fixtures').then((r) => r.json()).catch(() => [])
+      if (current && !sets.includes(current)) sets.push(current)   // 지운 세트를 고른 채라도 실서버로 돌아올 수 있게 보여 준다
+      for (const [value, label] of [['', '실서버 (SPT 프록시)'], ...sets.map((s) => [s, `녹화: ${s}`])]) {
+        select.add(new Option(label, value, false, value === current))
+      }
+      select.addEventListener('change', () => {
+        document.cookie = select.value ? `qc-fixture=${select.value}; path=/; SameSite=Lax` : 'qc-fixture=; path=/; max-age=0'
+        location.reload()
+      })
+    </script>
   </body>
 </html>
