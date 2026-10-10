@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogQuest, CatalogTrader } from '../api/catalog'
-import { assignModColors, modColorOf, OVERRIDE_PREFIX, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, inMods, listMods, makeLookup, MOD_COLOR_COUNT, modKey, orderTraders, sortQuests, toggleMember, UNKNOWN_MOD } from './derive'
+import { assignModColors, followupCounts, sortByFollowups, modColorOf, OVERRIDE_PREFIX, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, initials, inMods, listMods, makeLookup, MOD_COLOR_COUNT, modKey, orderTraders, sortQuests, toggleMember, UNKNOWN_MOD } from './derive'
 
 function quest(p: Partial<CatalogQuest> & { id: string }): CatalogQuest {
   return {
@@ -370,5 +370,45 @@ describe('branchIndex', () => {
   it('Success 가 아닌 상태로 실패하는 조건은 "완료하면 실패" 로 치지 않는다', () => {
     const only = branchIndex([quest({ id: 'p', failsWhen: [{ questId: 'q', statuses: ['Started'] }] }), quest({ id: 'q' })])
     expect(only.size).toBe(0)
+  })
+})
+
+describe('followupCounts', () => {
+  // a → b, c / b → d / c → d, e / d → a(순환) / z → 없는 퀘스트
+  const qs = [
+    quest({ id: 'a', unlocks: ['b', 'c'] }),
+    quest({ id: 'b', unlocks: ['d'] }),
+    quest({ id: 'c', unlocks: ['d', 'e'] }),
+    quest({ id: 'd', unlocks: ['a'] }),
+    quest({ id: 'e' }),
+    quest({ id: 'z', unlocks: ['missing', 'z'] }),
+  ]
+
+  it('unlocks 를 끝까지 따라가 겹치는 갈래는 한 번만, 자신·순환·카탈로그에 없는 퀘스트는 뺀다', () => {
+    const out = followupCounts(qs)
+    expect(out.get('a')).toBe(4)   // b c d e (d → a 는 자신이라 제외)
+    expect(out.get('c')).toBe(4)   // d e a b
+    expect(out.get('e')).toBe(0)
+    expect(out.get('z')).toBe(0)
+  })
+
+  it('keep 이 거짓인 후속은 세지 않지만 그 너머는 계속 따라간다', () => {
+    const out = followupCounts(qs, (id) => id !== 'b' && id !== 'd')
+    expect(out.get('a')).toBe(2)   // c e — b·d 는 이미 끝났어도 그 뒤(a 자신)는 따라간다
+    expect(out.get('b')).toBe(3)   // a c e
+  })
+})
+
+describe('sortByFollowups', () => {
+  it('후속 많은순, 같으면 원래 순서 유지, 모르면 0', () => {
+    const rows = ['x', 'y', 'w', 'v'].map((id) => quest({ id }))
+    const counts = new Map([['x', 1], ['y', 5], ['w', 1]])
+    expect(sortByFollowups(rows, counts).map((q) => q.id)).toEqual(['y', 'x', 'w', 'v'])
+  })
+
+  it('적은순도 같으면 원래 순서 유지', () => {
+    const rows = ['x', 'y', 'w', 'v'].map((id) => quest({ id }))
+    const counts = new Map([['x', 1], ['y', 5], ['w', 1]])
+    expect(sortByFollowups(rows, counts, 'least').map((q) => q.id)).toEqual(['v', 'x', 'w', 'y'])
   })
 })

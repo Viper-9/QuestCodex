@@ -249,7 +249,7 @@
   border-radius: var(--radius);
 }
 .qc-detail__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.qc-detail__meta { color: var(--fg-2); font-size: 12px; }
+.qc-detail__meta { margin-left: auto; color: var(--fg-2); font-size: 12px; text-align: right; }  /* 버튼들 뒤 오른쪽 끝 */
 /* 택일 분기 경고 박스 (BranchWarning). 목표·보상 2열 위 */
 .qc-branch {
   margin: 0 0 14px;
@@ -295,6 +295,8 @@
 .qc-related__col { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
 .qc-related__k { font-size: 11px; color: var(--fg-3); margin-bottom: 3px; }
 .qc-related__who { margin-left: 6px; color: var(--fg-3); font-size: 11px; }  /* 퀘스트 이름에 붙어 보이지 않게 여백으로 띄운다 */
+/* 후속 링크 뒤 그 퀘스트의 하위 퀘스트 수 (followupCounts) */
+.qc-related__n { margin-left: 8px; color: var(--fg-2); font-size: 11px; font-variant-numeric: tabular-nums; }
 
 /* ---- (e) 설명 팝업. padding 0 은 백드롭 클릭 판정을 위해 (QuestDescriptionDialog 참조) ---- */
 .qc-dialog {

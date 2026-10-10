@@ -317,3 +317,36 @@ export function toggleMember<T>(set: ReadonlySet<T>, id: T): Set<T> {
   else next.add(id)
   return next
 }
+
+/**
+ * 퀘스트마다 `unlocks` 를 끝까지 따라가 중복 없이 센 후속 수(자신 제외). Forge 댓글 요청 — 뒤를 많이 막고 있는
+ * 퀘스트(관문)와 막다른 퀘스트를 숫자로 구분한다. 위키는 전부 세고(전체 수), 진행현황은 `keep` 에 아직 남은
+ * 퀘스트만 참으로 넘긴다(남은 수). `keep` 이 거짓인 퀘스트도 그 너머는 계속 따라간다 — 이미 깬 퀘스트 뒤에도
+ * 남은 퀘스트가 있을 수 있다. 카탈로그에 없는 id 는 버리고, 순환은 방문 집합이 막는다.
+ */
+export function followupCounts(quests: CatalogQuest[], keep: (id: string) => boolean = () => true): Map<string, number> {
+  const byId = new Map(quests.map((q) => [q.id, q]))
+  const out = new Map<string, number>()
+  for (const q of quests) {
+    const seen = new Set<string>([q.id])
+    const stack = [...q.unlocks]
+    let n = 0
+    while (stack.length) {
+      const id = stack.pop()!
+      if (seen.has(id)) continue
+      seen.add(id)
+      const next = byId.get(id)
+      if (!next) continue
+      if (keep(id)) n++
+      stack.push(...next.unlocks)
+    }
+    out.set(q.id, n)
+  }
+  return out
+}
+
+/** 후속 많은순(most) / 적은순(least). 같으면 들어온 순서(탭별 기본 정렬)를 지킨다 */
+export function sortByFollowups(rows: CatalogQuest[], counts: ReadonlyMap<string, number>, dir: 'most' | 'least' = 'most'): CatalogQuest[] {
+  const sign = dir === 'most' ? -1 : 1
+  return [...rows].sort((a, b) => sign * ((counts.get(a.id) ?? 0) - (counts.get(b.id) ?? 0)))
+}

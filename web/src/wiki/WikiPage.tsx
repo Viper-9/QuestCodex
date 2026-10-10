@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog } from '../api/catalog'
 import { hashFor, replaceHash, type Route } from '../shell/router'
-import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, inMods, listMods, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips, type SortKey } from './derive'
+import { assignModColors, branchIndex, chainRank, countByTrader, DEFAULT_CHIPS, DEFAULT_SORT, filterQuests, followupCounts, inMods, listMods, makeLookup, orderTraders, sortQuests, toggleMember, type ChipKey, type Chips, type SortKey } from './derive'
 import { TraderStrip } from './TraderStrip'
 import { FilterBar } from './FilterBar'
 import { ModStrip } from './ModStrip'
-import { QuestDetail } from './QuestDetail'
+import { QuestDetail, type Followups } from './QuestDetail'
 import { QuestDescriptionDialog } from './QuestDescriptionDialog'
 import { QuestPrepDialog } from './QuestPrepDialog'
 import { QuestMapDialog } from './QuestMapDialog'
@@ -53,6 +53,8 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   /** 택일 분기. 역인덱스·연쇄 계산이라 카탈로그 전체로 한 번만 */
   const branches = useMemo(() => branchIndex(quests), [quests])
   const branchIds = useMemo(() => new Set(branches.keys()), [branches])
+  /** 연계 영역의 후속 수. 위키는 프로필과 무관한 전체 수 */
+  const followups = useMemo<Followups>(() => ({ counts: followupCounts(quests), kind: 'total' }), [quests])
   const visible = useMemo(
     () => sortQuests(filterQuests(quests, { traders, chips, query, mods }), sort, chainOrder),
     [quests, traders, chips, query, mods, sort, chainOrder],
@@ -115,7 +117,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         modColors={modColors}
         branchIds={branchIds}
         renderDetail={(q) => (
-          <QuestDetail quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)} onOpenDescription={setDialogId} onOpenPrep={setPrepId} onOpenMap={setMapId} onJump={jumpTo} />
+          <QuestDetail quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)} onOpenDescription={setDialogId} onOpenPrep={setPrepId} onOpenMap={setMapId} onJump={jumpTo} followups={followups} />
         )}
       />
       <QuestDescriptionDialog
