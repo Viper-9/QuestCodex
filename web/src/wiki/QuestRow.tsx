@@ -20,9 +20,11 @@ interface QuestRowProps {
   modColor?: number
   /** 택일 분기가 걸린 퀘스트면 true — 이름 옆에 분기 태그 */
   branch?: boolean
+  /** 태그 간소화 — 출처 태그를 색 점으로 */
+  compactTag?: boolean
 }
 
-export function QuestRow({ quest, traderName, expanded, onToggle, detail, modColor, branch }: QuestRowProps) {
+export function QuestRow({ quest, traderName, expanded, onToggle, detail, modColor, branch, compactTag }: QuestRowProps) {
   const t = useT()
   const prereq = quest.prerequisites.length
   return (
@@ -31,7 +33,7 @@ export function QuestRow({ quest, traderName, expanded, onToggle, detail, modCol
       <button type="button" className="qc-row" aria-expanded={expanded} onClick={onToggle}>
         <span className="qc-row__name">
           {quest.name}
-          <SourceTag quest={quest} color={modColor} />
+          <SourceTag quest={quest} color={modColor} compact={compactTag} />
           {branch && <span className="qc-tag qc-tag--branch" title={t('tag.branchTitle')}>{t('tag.branch')}</span>}
         </span>
         <span className="qc-row__trader">{traderName}</span>

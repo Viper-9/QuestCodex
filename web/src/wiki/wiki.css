@@ -155,6 +155,11 @@
 .qc-modstrip__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mod); }
 /* 덮어쓴 바닐라 묶음: 속이 빈 점 */
 .qc-modstrip__dot--override { background: transparent; box-shadow: inset 0 0 0 1.5px var(--mod); }
+/* 태그 간소화: 이름 옆 출처 태그 대신 모드 칩 줄과 같은 점(조금 크게) */
+.qc-srcdot { flex: none; display: inline-block; width: 9px; height: 9px; vertical-align: middle; }
+/* 태그 간소화 토글. 정렬 드롭다운 바로 왼쪽 — 오른쪽 끝 정렬(margin-left:auto)은 토글이 가져간다 */
+.qc-compact { margin-left: auto; }
+.qc-compact + .qc-sort { margin-left: 0; }
 .qc-modstrip__count { color: var(--fg-3); font-variant-numeric: tabular-nums; }
 .qc-chip.is-on .qc-modstrip__count { color: inherit; opacity: .75; }
 
@@ -228,6 +233,10 @@
 .qc-tag--mod[data-mod-color="4"], .qc-modstrip__dot[data-mod-color="4"] { --mod: var(--mod-4); }
 .qc-tag--mod[data-mod-color="5"], .qc-modstrip__dot[data-mod-color="5"] { --mod: var(--mod-5); }
 .qc-tag--mod[data-mod-color="6"], .qc-modstrip__dot[data-mod-color="6"] { --mod: var(--mod-6); }
+.qc-tag--mod[data-mod-color="7"], .qc-modstrip__dot[data-mod-color="7"] { --mod: var(--mod-7); }
+.qc-tag--mod[data-mod-color="8"], .qc-modstrip__dot[data-mod-color="8"] { --mod: var(--mod-8); }
+.qc-tag--mod[data-mod-color="9"], .qc-modstrip__dot[data-mod-color="9"] { --mod: var(--mod-9); }
+.qc-tag--mod[data-mod-color="10"], .qc-modstrip__dot[data-mod-color="10"] { --mod: var(--mod-10); }
 /* 모드가 덮어쓴 바닐라 퀘스트: 같은 모드 색에 점선 테두리 — 모드가 추가한 퀘스트와 구분 */
 .qc-tag--override { border-style: dashed; max-width: 24ch; }
 /* 택일 분기 태그. 모드 태그와 같은 틀에 색만 --warn */

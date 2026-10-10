@@ -30,6 +30,11 @@
   --mod-4: #ffa657;
   --mod-5: #ff85a1;
   --mod-6: #e3c64d;
+  /* 7~10: 기존 6색 사이 빈 색상각(파랑·자홍·청록·산호)을 같은 밝기로. 번호가 이웃한 색끼리는 색상이 멀게 배치 */
+  --mod-7: #7aa2ff;
+  --mod-8: #e879f9;
+  --mod-9: #5fd4a8;
+  --mod-10: #ff7a6b;
   --pressed-shadow: inset 0 1.5px 3px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .04);
   --dialog-shadow: 0 12px 40px rgba(0, 0, 0, .35);
   --dialog-backdrop: rgba(0, 0, 0, .4);
@@ -88,6 +93,10 @@
   --mod-4: #c2410c;
   --mod-5: #be185d;
   --mod-6: #a16207;
+  --mod-7: #1d4ed8;
+  --mod-8: #a21caf;
+  --mod-9: #0f766e;
+  --mod-10: #b42318;
   --pressed-shadow: inset 0 1.5px 3px rgba(25, 31, 40, .14), inset 0 0 0 1px rgba(25, 31, 40, .04);
   --scroll-thumb: rgba(25, 31, 40, .16);
   --scroll-thumb-hover: rgba(25, 31, 40, .3);

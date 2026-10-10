@@ -14,10 +14,12 @@ interface QuestListProps {
   modColors: Record<string, number>
   /** 택일 분기가 걸린 questId 들 (derive.branchIndex 의 키) */
   branchIds: ReadonlySet<string>
+  /** 태그 간소화 — 출처 태그를 색 점으로 */
+  compactTags: boolean
 }
 
 /** (c) 컬럼 헤더 + 행 목록. 612개를 그냥 렌더한다 — 가상 스크롤 없음 (§1.2). */
-export function QuestList({ quests, lookup, expanded, onToggle, renderDetail, modColors, branchIds }: QuestListProps) {
+export function QuestList({ quests, lookup, expanded, onToggle, renderDetail, modColors, branchIds, compactTags }: QuestListProps) {
   const t = useT()
   if (quests.length === 0) return <p className="qc-empty">{t('list.empty')}</p>
   return (
@@ -43,6 +45,7 @@ export function QuestList({ quests, lookup, expanded, onToggle, renderDetail, mo
               detail={open ? renderDetail(q) : undefined}
               modColor={modColorOf(q, modColors)}
               branch={branchIds.has(q.id)}
+              compactTag={compactTags}
             />
           )
         })}

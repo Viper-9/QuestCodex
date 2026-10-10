@@ -31,6 +31,7 @@
   "modFilter.label": "Source mod",
   "modFilter.all": "All mods",
   "sort.label": "Sort",
+  "tags.compact": "Compact tags",
   "sort.level": "By level",
   "sort.chain": "By chain",
   "sort.name": "By name",

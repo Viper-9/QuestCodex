@@ -31,6 +31,7 @@
   "modFilter.label": "Мод-источник",
   "modFilter.all": "Все моды",
   "sort.label": "Сортировка",
+  "tags.compact": "Компактные метки",
   "sort.level": "По уровню",
   "sort.chain": "По цепочке",
   "sort.name": "По имени",
