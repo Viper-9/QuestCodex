@@ -42,6 +42,7 @@ rewards, related quests), plus your progress:
 - Objectives show their counters, and finished ones are struck through
 - Locked quests mark the start conditions you haven't met yet, with your current value
 - **Open in wiki** jumps to the quest in the wiki; related quest links jump within this list
+- Each quest under **Unlocks** shows how many follow-ups it still has left
 
 Each tab sorts for what you'd look for first:
 
@@ -53,3 +54,14 @@ Quests you can never finish on this profile (other faction only, or a branch you
 marked **Unreachable**.
 
 [![Quests by status](../assets/images/progress-overview-quests.png)](../assets/images/progress-overview-quests.png)
+
+### Follow-ups and sorting
+
+Each row shows **N follow-ups**: how many quests that quest eventually leads to and you haven't finished yet.
+It follows unlocks all the way down and counts a shared branch only once. Quests at the end of a chain show nothing.
+
+The sort menu next to the search box picks the order:
+
+- **Recommended** (default): the per-tab order above
+- **Most follow-ups left**: quests that open up the most first
+- **Fewest follow-ups left**

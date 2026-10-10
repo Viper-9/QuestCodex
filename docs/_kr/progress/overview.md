@@ -40,6 +40,7 @@ nav_order: 1
 - 목표마다 진행 수치가 붙고, 끝낸 목표는 취소선으로 표시됩니다
 - 잠긴 퀘스트는 아직 못 채운 시작 조건을 현재 값과 함께 표시합니다
 - **위키에서 보기**(Open in wiki)로 위키의 해당 퀘스트로 이동하고, 연계 퀘스트 링크는 이 목록 안에서 이동합니다
+- **후속**(Unlocks)에 있는 퀘스트마다 남은 하위 퀘스트 수가 붙습니다
 
 탭마다 먼저 볼 만한 퀘스트가 위로 오게 정렬됩니다.
 
@@ -50,3 +51,13 @@ nav_order: 1
 이 프로필로는 끝낼 수 없는 퀘스트(다른 진영 전용이거나 이미 닫힌 분기)는 **도달 불가**(Unreachable)로 표시됩니다.
 
 [![상태별 퀘스트]({{ '/assets/images/progress-overview-quests.png' | relative_url }})]({{ '/assets/images/progress-overview-quests.png' | relative_url }})
+
+### 하위 퀘스트와 정렬 {#follow-ups-and-sorting}
+
+줄마다 **하위 퀘스트 N개**(N follow-ups)가 표시됩니다. 그 퀘스트를 끝내면 이어서 열리는 퀘스트 중 아직 끝내지 않은 수입니다. 후속을 끝까지 따라가며 세고, 여러 갈래가 같은 퀘스트로 모이면 한 번만 셉니다. 연계의 마지막 퀘스트는 비워 둡니다.
+
+검색창 옆 정렬 메뉴로 순서를 고릅니다.
+
+- **추천순**(Recommended, 기본): 위에 적은 탭별 순서
+- **하위 퀘스트 많은순**(Most follow-ups left): 뒤로 많이 열리는 퀘스트가 먼저
+- **하위 퀘스트 적은순**(Fewest follow-ups left)

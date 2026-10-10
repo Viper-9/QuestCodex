@@ -41,13 +41,24 @@ Some quest mods replace the files of vanilla quests instead of adding new ones. 
 carry the mod's name in a tag with a dashed outline, in the wiki and on the progress pages.
 
 - The mod gets its own chip in the **Source mod** row, with a hollow dot, so you can list every quest it overrides
-- The expanded quest's meta line reads **Overridden by** and the mod name
+- The expanded quest's meta line reads **Vanilla quest overridden by a mod**
 
 ## Sorting
 
 - **By chain** (default): prerequisites always sit above the quests they unlock
 - **By level**
 - **By name**
+
+## Compact tags
+
+The **Compact tags** button left of the sort menu shrinks each mod name tag into a colored dot, so long mod names
+don't crowd the quest names.
+
+- Dots use the same colors as the **Source mod** chips; overridden vanilla quests get a hollow dot
+- Hover a dot to see the mod name
+- The wiki and the progress quest list each remember their own setting
+
+[![Compact tags](../assets/images/wiki-compact-tags.png)](../assets/images/wiki-compact-tags.png)
 
 ## Deep links
 

@@ -71,7 +71,13 @@
     "vanilla-quests-a-mod-overrides.heading": "모드가 덮어쓴 바닐라 퀘스트",
     "vanilla-quests-a-mod-overrides.p1": "퀘스트 모드 중에는 새 퀘스트를 추가하지 않고 바닐라 퀘스트 파일을 바꿔치기하는 것도 있습니다. 이런 퀘스트는 바닐라로 남지만, 위키와 진행현황 페이지에서 점선 테두리 태그로 모드 이름이 붙습니다.",
     "vanilla-quests-a-mod-overrides.li1": "**출처 모드**(Source mod) 줄에 그 모드 칩이 속이 빈 점으로 따로 생겨서, 그 모드가 덮어쓴 퀘스트를 모아 볼 수 있습니다",
-    "vanilla-quests-a-mod-overrides.li2": "퀘스트를 펼치면 메타 줄에 **○○에 의해 수정됨**(Overridden by)이 모드 이름과 함께 표시됩니다"
+    "vanilla-quests-a-mod-overrides.li2": "퀘스트를 펼치면 메타 줄에 **모드에 의해 수정된 바닐라 퀘스트**(Vanilla quest overridden by a mod)라고 표시됩니다",
+    "compact-tags.heading": "태그 간소화",
+    "compact-tags.p1": "정렬 메뉴 왼쪽의 **태그 간소화**(Compact tags) 버튼을 켜면 모드 이름 태그가 색 점으로 줄어들어, 모드 이름이 길어도 퀘스트 이름이 덜 붐빕니다.",
+    "compact-tags.li1": "점 색은 **출처 모드**(Source mod) 칩과 같고, 모드가 덮어쓴 바닐라 퀘스트는 속이 빈 점입니다",
+    "compact-tags.li2": "점에 마우스를 올리면 모드 이름이 보입니다",
+    "compact-tags.li3": "위키와 진행현황 퀘스트 목록은 설정을 따로 기억합니다",
+    "compact-tags.img.wiki-compact-tags": "태그 간소화"
   },
   "wiki/quest-details": {
     "title": "퀘스트 상세",
@@ -166,11 +172,18 @@
     "quests-by-status.li2": "잠긴 퀘스트는 아직 못 채운 시작 조건을 현재 값과 함께 표시합니다",
     "quests-by-status.li3": "**위키에서 보기**(Open in wiki)로 위키의 해당 퀘스트로 이동하고, 연계 퀘스트 링크는 이 목록 안에서 이동합니다",
     "quests-by-status.p3": "탭마다 먼저 볼 만한 퀘스트가 위로 오게 정렬됩니다.",
-    "quests-by-status.li4": "**진행 중**: 완료 보고할 수 있는 퀘스트가 먼저, 그다음 목표 진행률 순",
-    "quests-by-status.li5": "**잠김**: 해금에 가까운 퀘스트가 먼저",
-    "quests-by-status.li6": "**완료 / 실패**: 최근에 끝난 퀘스트가 먼저",
+    "quests-by-status.li4": "**후속**(Unlocks)에 있는 퀘스트마다 남은 하위 퀘스트 수가 붙습니다",
+    "quests-by-status.li5": "**진행 중**: 완료 보고할 수 있는 퀘스트가 먼저, 그다음 목표 진행률 순",
+    "quests-by-status.li6": "**잠김**: 해금에 가까운 퀘스트가 먼저",
     "quests-by-status.p4": "이 프로필로는 끝낼 수 없는 퀘스트(다른 진영 전용이거나 이미 닫힌 분기)는 **도달 불가**(Unreachable)로 표시됩니다.",
-    "quests-by-status.img.progress-overview-quests": "상태별 퀘스트"
+    "quests-by-status.img.progress-overview-quests": "상태별 퀘스트",
+    "quests-by-status.li7": "**완료 / 실패**: 최근에 끝난 퀘스트가 먼저",
+    "follow-ups-and-sorting.heading": "하위 퀘스트와 정렬",
+    "follow-ups-and-sorting.p1": "줄마다 **하위 퀘스트 N개**(N follow-ups)가 표시됩니다. 그 퀘스트를 끝내면 이어서 열리는 퀘스트 중 아직 끝내지 않은 수입니다. 후속을 끝까지 따라가며 세고, 여러 갈래가 같은 퀘스트로 모이면 한 번만 셉니다. 연계의 마지막 퀘스트는 비워 둡니다.",
+    "follow-ups-and-sorting.p2": "검색창 옆 정렬 메뉴로 순서를 고릅니다.",
+    "follow-ups-and-sorting.li1": "**추천순**(Recommended, 기본): 위에 적은 탭별 순서",
+    "follow-ups-and-sorting.li2": "**하위 퀘스트 많은순**(Most follow-ups left): 뒤로 많이 열리는 퀘스트가 먼저",
+    "follow-ups-and-sorting.li3": "**하위 퀘스트 적은순**(Fewest follow-ups left)"
   },
   "progress/raid-prep": {
     "title": "레이드 준비",
