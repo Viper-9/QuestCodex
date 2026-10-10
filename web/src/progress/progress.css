@@ -238,7 +238,7 @@
 
 /* ---- 필요 아이템 ---- */
 .qc-items { margin-top: 12px; }
-.qc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.qc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .qc-table th {
   position: sticky;
   top: 41px;          /* 프로필 바 높이만큼 아래에 붙는다 */
@@ -247,17 +247,22 @@
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
   color: var(--fg-3);
+  font-size: 12px;
   font-weight: 500;
   text-align: left;
 }
-.qc-table td { padding: 5px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.qc-table td { padding: 7px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .qc-table .qc-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .qc-table__row.is-open > td { background: var(--bg-hover); }
-.qc-table__detail > td { padding: 4px 14px 10px 36px; background: var(--bg-hover); }
+.qc-table__detail > td { padding: 6px 14px 12px 36px; background: var(--bg-hover); }
 .qc-table__detail .qc-lines { margin: 0; }
 .qc-items__toggle { padding: 0; border: 0; background: none; text-align: left; }
 .qc-items__toggle + .qc-tag { margin-left: 6px; }
 .qc-items__quests { color: var(--fg-2); }
+/* 위키와 같이 쓰는 태그·목록 줄은 이 두 페이지(필요 아이템·해금 경로)에서만 한 단계 키운다 */
+.qc-items .qc-tag { font-size: 11px; }
+.qc-items .qc-row__caret { font-size: 12px; }
+.qc-items .qc-lines__aside { font-size: 13px; }
 .qc-unlock .qc-muted .qc-link { color: inherit; } /* 잠긴 선행 퀘스트 — 링크는 되지만 지금 할 것처럼 보이지 않게 */
 
 /* 카테고리 줄 — 아이콘은 SPT 핸드북 PNG(밝은 회색). 라이트 테마에서는 뒤집어 어둡게 */
@@ -310,14 +315,14 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-ucards { display: grid; grid-template-columns: minmax(440px, 3fr) minmax(200px, 1fr); gap: 10px; align-items: start; }
 .qc-ucard {
   padding: 10px 12px;
-  border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); font-size: 12px; text-align: left;
+  border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-3); color: var(--fg); font-size: 13px; text-align: left;
   animation: qc-ucard-in .2s ease-out; /* 고른 입수처가 바뀔 때마다 다시 마운트되어 새로 돈다 */
 }
 @keyframes qc-ucard-in { from { opacity: 0; transform: translateY(2px); } }
 .qc-usrc { min-width: 0; }
 .qc-usrc .qc-tag--mod { margin-left: 6px; }
 .qc-ucard__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: var(--fg); }
-.qc-ucard__meta { color: var(--fg-2); font-size: 11px; font-weight: 400; }
+.qc-ucard__meta { color: var(--fg-2); font-size: 12px; font-weight: 400; }
 .qc-ucard__aside { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 /* 오른쪽 입수처 목록 — 고른 항목은 강조색 테두리 */
 .qc-ulist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -341,7 +346,7 @@ svg.qc-cat__icon { width: 14px; height: 14px; }
 .qc-usteps li.is-series::before { border-radius: 2px; }
 .qc-usteps li.is-gap::before { background: transparent; border: 1px dashed var(--fg-3); }
 .qc-usteps__name { min-width: 0; }
-.qc-usteps__cnt { margin-left: 6px; padding: 0 6px; border-radius: 8px; background: var(--bg-hover); color: var(--fg-2); font-size: 10px; }
+.qc-usteps__cnt { margin-left: 6px; padding: 0 6px; border-radius: 8px; background: var(--bg-hover); color: var(--fg-2); font-size: 11px; }
 .qc-usteps__now { color: var(--accent-fg); white-space: nowrap; }
 .qc-usteps li > span:last-child { white-space: nowrap; }
 .qc-ucard__sum { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); color: var(--fg-2); }
