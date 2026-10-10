@@ -121,7 +121,7 @@ const JUMP_FLASH_MS = 1500
 /** 줄의 "후속 N개". 0 이면 비운다 — 막다른 퀘스트 */
 function FollowupAside({ n }: { n: number }) {
   const t = useT()
-  return <span className="qc-pline__after">{n > 0 ? t('followups.after', { n: formatInt(n) }) : null}</span>
+  return <span className="qc-pline__after">{n === 1 ? t('followups.afterOne') : n > 0 ? t('followups.after', { n: formatInt(n) }) : null}</span>
 }
 
 export function lineId(questId: string): string {

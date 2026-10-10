@@ -161,6 +161,7 @@
   "overview.quests": "Quests",
   "overview.search": "Search quests",
   "followups.after": "{n} follow-ups",
+  "followups.afterOne": "1 follow-up",
   "followups.sortDefault": "Recommended",
   "followups.sortMost": "Most follow-ups left",
   "followups.sortLeast": "Fewest follow-ups left",

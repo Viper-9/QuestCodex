@@ -161,6 +161,7 @@
   "overview.quests": "Задания",
   "overview.search": "Поиск заданий",
   "followups.after": "дальше заданий: {n}",
+  "followups.afterOne": "дальше заданий: 1",
   "followups.sortDefault": "Рекомендуемый порядок",
   "followups.sortMost": "Больше всего дальше",
   "followups.sortLeast": "Меньше всего дальше",

@@ -161,6 +161,7 @@
   "overview.quests": "퀘스트",
   "overview.search": "퀘스트 검색",
   "followups.after": "하위 퀘스트 {n}개",
+  "followups.afterOne": "하위 퀘스트 1개",
   "followups.sortDefault": "추천순",
   "followups.sortMost": "하위 퀘스트 많은순",
   "followups.sortLeast": "하위 퀘스트 적은순",
