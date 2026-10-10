@@ -70,7 +70,7 @@ export function OverviewView({ catalog, progress, inventory, lookup, highlight }
         <div className="qc-group">
           <h4 className="qc-group__h">{t('overview.handover')} <span className="qc-group__n">{ready.length}</span></h4>
           <p className="qc-group__hint">{t('overview.handoverHint')}</p>
-          {ready.length === 0 ? <p className="qc-muted">{t('overview.nothing')}</p> : (
+          {ready.length === 0 ? <p className="qc-muted">-</p> : (
             <ul className="qc-group__list">
               {ready.map((r) => (
                 <li key={r.quest.id}>
@@ -89,11 +89,10 @@ export function OverviewView({ catalog, progress, inventory, lookup, highlight }
 }
 
 function QuestGroup({ title, quests, lookup }: { title: string; quests: CatalogQuest[]; lookup: NameLookup }) {
-  const t = useT()
   return (
     <div className="qc-group">
       <h4 className="qc-group__h">{title} <span className="qc-group__n">{quests.length}</span></h4>
-      {quests.length === 0 ? <p className="qc-muted">{t('overview.nothing')}</p> : (
+      {quests.length === 0 ? <p className="qc-muted">-</p> : (
         <ul className="qc-group__list">
           {quests.map((q) => (
             <li key={q.id}>

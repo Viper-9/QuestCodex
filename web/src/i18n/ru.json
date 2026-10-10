@@ -152,7 +152,7 @@
   "lock.standing": "Нужна репутация {trader} {need} (сейчас {now})",
   "lock.faction": "Только {side}",
   "overview.traders": "Прогресс по торговцам",
-  "overview.visit": "Сходите к торговцу",
+  "overview.visit": "Можно продвинуть",
   "overview.turnIn": "Готово к сдаче",
   "overview.accept": "Доступно для принятия",
   "overview.handover": "Можно передать сейчас",

@@ -152,7 +152,7 @@
   "lock.standing": "{trader} 평판 {need} 필요 (지금 {now})",
   "lock.faction": "{side} 전용",
   "overview.traders": "상인별 진행률",
-  "overview.visit": "상인에게 갈 것",
+  "overview.visit": "진행 가능",
   "overview.turnIn": "완료 보고",
   "overview.accept": "수락 가능",
   "overview.handover": "바로 제출 가능",

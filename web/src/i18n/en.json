@@ -152,7 +152,7 @@
   "lock.standing": "{trader} standing {need} needed (now {now})",
   "lock.faction": "{side} only",
   "overview.traders": "Progress by trader",
-  "overview.visit": "Go see a trader",
+  "overview.visit": "Ready to progress",
   "overview.turnIn": "Ready to turn in",
   "overview.accept": "Available to accept",
   "overview.handover": "Can hand over now",
