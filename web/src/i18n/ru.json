@@ -156,7 +156,6 @@
   "overview.turnIn": "Готово к сдаче",
   "overview.accept": "Доступно для принятия",
   "overview.handover": "Можно передать сейчас",
-  "overview.handoverHint": "Цели передачи, которые уже покрыты вашими предметами",
   "overview.handoverCount": "{ready}/{total} передач",
   "overview.nothing": "Нет",
   "overview.quests": "Задания",

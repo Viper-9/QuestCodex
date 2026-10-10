@@ -156,7 +156,6 @@
   "overview.turnIn": "완료 보고",
   "overview.accept": "수락 가능",
   "overview.handover": "바로 제출 가능",
-  "overview.handoverHint": "가진 아이템으로 채울 수 있는 제출 목표",
   "overview.handoverCount": "제출 {ready}/{total}",
   "overview.nothing": "없음",
   "overview.quests": "퀘스트",

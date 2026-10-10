@@ -84,7 +84,6 @@
   font-size: 11px;
   text-align: center;
 }
-.qc-group__hint { margin-bottom: 4px; color: var(--fg-3); font-size: 11px; }
 .qc-group__list li { padding: 2px 0; }
 
 /* ---- 현황: 퀘스트 줄 ---- */

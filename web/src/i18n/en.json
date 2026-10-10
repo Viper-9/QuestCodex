@@ -156,7 +156,6 @@
   "overview.turnIn": "Ready to turn in",
   "overview.accept": "Available to accept",
   "overview.handover": "Can hand over now",
-  "overview.handoverHint": "Hand-over objectives your items already cover",
   "overview.handoverCount": "{ready}/{total} hand-overs",
   "overview.nothing": "None",
   "overview.quests": "Quests",

@@ -69,7 +69,6 @@ export function OverviewView({ catalog, progress, inventory, lookup, highlight }
         <QuestGroup title={t('overview.accept')} quests={accept} lookup={lookup} />
         <div className="qc-group">
           <h4 className="qc-group__h">{t('overview.handover')} <span className="qc-group__n">{ready.length}</span></h4>
-          <p className="qc-group__hint">{t('overview.handoverHint')}</p>
           {ready.length === 0 ? <p className="qc-muted">-</p> : (
             <ul className="qc-group__list">
               {ready.map((r) => (
