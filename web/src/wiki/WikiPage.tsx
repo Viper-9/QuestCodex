@@ -11,6 +11,7 @@ import { QuestPrepDialog } from './QuestPrepDialog'
 import { QuestMapDialog } from './QuestMapDialog'
 import { QuestList } from './QuestList'
 import { rowId } from './QuestRow'
+import { usePersistedFlag } from './useMapState'
 import { WikiSkeleton } from './WikiSkeleton'
 import './wiki.css'
 
@@ -53,6 +54,8 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
   /** 택일 분기. 역인덱스·연쇄 계산이라 카탈로그 전체로 한 번만 */
   const branches = useMemo(() => branchIndex(quests), [quests])
   const branchIds = useMemo(() => new Set(branches.keys()), [branches])
+  /** 태그 간소화. 현황과 따로 저장 */
+  const [compactTags, setCompactTags] = usePersistedFlag('qc.wiki.compactTags', false)
   /** 연계 영역의 후속 수. 위키는 프로필과 무관한 전체 수 */
   const followups = useMemo<Followups>(() => ({ counts: followupCounts(quests), kind: 'total' }), [quests])
   const visible = useMemo(
@@ -104,7 +107,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
       />
       <FilterBar
         query={query} onQueryChange={setQuery} chips={chips} onToggleChip={toggleChip}
-        sort={sort} onSortChange={setSort}
+        sort={sort} onSortChange={setSort} compact={compactTags} onCompactChange={setCompactTags}
       />
       {chips.mod && modList.length > 0 && (
         <ModStrip mods={modList} modColors={modColors} selected={mods} onToggle={toggleMod} onClear={() => setMods(new Set())} />
@@ -116,6 +119,7 @@ export function WikiPage({ catalog, route }: WikiPageProps) {
         onToggle={toggleExpanded}
         modColors={modColors}
         branchIds={branchIds}
+        compactTags={compactTags}
         renderDetail={(q) => (
           <QuestDetail quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)} onOpenDescription={setDialogId} onOpenPrep={setPrepId} onOpenMap={setMapId} onJump={jumpTo} followups={followups} />
         )}

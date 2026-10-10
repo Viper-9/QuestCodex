@@ -200,7 +200,7 @@ export function sortQuests(
 
 // ---- 모드 태그 색 (스펙 §5) ----
 /** 팔레트 색 개수. `styles.css` 의 `--mod-1` … `--mod-N` 토큰 수와 반드시 같아야 한다. */
-export const MOD_COLOR_COUNT = 6
+export const MOD_COLOR_COUNT = 10
 
 /**
  * 카탈로그에 등장하는 모드 이름을 이름순으로 정렬해 팔레트 색을 1부터 순서대로 배정한다.

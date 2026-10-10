@@ -31,6 +31,7 @@
   "modFilter.label": "출처 모드",
   "modFilter.all": "전체 모드",
   "sort.label": "정렬",
+  "tags.compact": "태그 간소화",
   "sort.level": "레벨순",
   "sort.chain": "연계순",
   "sort.name": "이름순",

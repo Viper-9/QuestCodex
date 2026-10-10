@@ -4,6 +4,7 @@ import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
+import { usePersistedFlag } from '../wiki/useMapState'
 import { assignModColors, branchIndex, followupCounts, listMods, modColorOf, orderTraders, sortByFollowups, toggleMember, type NameLookup } from '../wiki/derive'
 import { ModStrip } from '../wiki/ModStrip'
 import { SourceTag } from '../wiki/SourceTag'
@@ -137,6 +138,8 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
   const [mods, setMods] = useState<ReadonlySet<string>>(() => new Set())
   /** 정렬: 탭별 기본 순서 / 남은 후속 많은순 / 적은순 */
   const [order, setOrder] = useState<FollowupOrder>('default')
+  /** 태그 간소화. 위키와 따로 저장 */
+  const [compactTags, setCompactTags] = usePersistedFlag('qc.progress.compactTags', false)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
   const [prepId, setPrepId] = useState<string | null>(null)
@@ -215,6 +218,9 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <button type="button" className={cls('qc-chip', 'qc-compact', compactTags && 'is-on')} aria-pressed={compactTags} onClick={() => setCompactTags(!compactTags)}>
+          {t('tags.compact')}
+        </button>
         <select
           className="qc-sort"
           aria-label={t('sort.label')}
@@ -248,6 +254,7 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
                 modColor={modColorOf(q, modColors)}
                 onToggle={() => toggle(q.id)}
                 aside={<FollowupAside n={followups.counts.get(q.id) ?? 0} />}
+                compactTag={compactTags}
                 detail={open && (
                   <QuestDetail
                     quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)}
@@ -302,10 +309,12 @@ interface QuestLineProps {
   tag?: ReactNode
   /** 요약 뒤·카운터 앞에 덧붙일 것(카파 트래커의 "뒤로 N개 · 연쇄 N단계") */
   aside?: ReactNode
+  /** 태그 간소화 — 출처 태그를 색 점으로 */
+  compactTag?: boolean
 }
 
 /** 한 줄 요약: 진행 중이면 첫 미완료 목표와 카운터, 잠김이면 첫 잠김 사유. 펼치면 위키와 같은 전체 상세. */
-export function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, detail, tag, aside }: QuestLineProps) {
+export function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, detail, tag, aside, compactTag }: QuestLineProps) {
   const t = useT()
   const locked = qp.status === 'Locked'
   const unreachable = locked && isUnreachable(qp)
@@ -319,7 +328,7 @@ export function QuestLine({ quest, qp, lookup, open, flash, modColor, onToggle, 
       <button type="button" className="qc-pline__row" aria-expanded={open} onClick={onToggle}>
         <span className="qc-pline__name">
           {quest.name}
-          <SourceTag quest={quest} color={modColor} />
+          <SourceTag quest={quest} color={modColor} compact={compactTag} />
           {unreachable &&<span className="qc-tag qc-pline__tag" title={t('overview.unreachableHint')}>{t('overview.unreachable')}</span>}
           {tag}
         </span>

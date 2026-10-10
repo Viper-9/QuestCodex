@@ -9,6 +9,9 @@ interface FilterBarProps {
   onToggleChip(key: ChipKey): void
   sort: SortKey
   onSortChange(sort: SortKey): void
+  /** 태그 간소화(출처 태그 → 색 점). 상태는 WikiPage 소유, 브라우저에 저장 */
+  compact: boolean
+  onCompactChange(compact: boolean): void
 }
 
 // 라벨 키는 `filter.${key}` — en.json/kr.json 의 filter.vanilla / filter.mod / filter.bear / filter.usec
@@ -16,7 +19,7 @@ const CHIP_KEYS: readonly ChipKey[] = ['vanilla', 'mod', 'bear', 'usec']
 // 라벨 키는 `sort.${key}` — en.json/kr.json 의 sort.chain / sort.level / sort.name
 const SORT_KEYS: readonly SortKey[] = ['chain', 'level', 'name']
 
-export function FilterBar({ query, onQueryChange, chips, onToggleChip, sort, onSortChange }: FilterBarProps) {
+export function FilterBar({ query, onQueryChange, chips, onToggleChip, sort, onSortChange, compact, onCompactChange }: FilterBarProps) {
   const t = useT()
   return (
     <div className="qc-tools">
@@ -44,6 +47,10 @@ export function FilterBar({ query, onQueryChange, chips, onToggleChip, sort, onS
           ))}
         </div>
       </div>
+      {/* 태그 간소화: 정렬 바로 왼쪽. 켜면 목록의 출처 태그가 색 점으로 */}
+      <button type="button" className={cls('qc-chip', 'qc-compact', compact && 'is-on')} aria-pressed={compact} onClick={() => onCompactChange(!compact)}>
+        {t('tags.compact')}
+      </button>
       {/* 선택지가 셋뿐이라 네이티브 select — 커스텀 드롭다운은 과하다. 상태는 WikiPage 소유(§3.3) */}
       <select
         className="qc-sort"
