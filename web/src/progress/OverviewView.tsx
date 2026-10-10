@@ -4,17 +4,17 @@ import type { Holding, ProfileProgress, QuestProgress } from '../api/progress'
 import { cls } from '../cls'
 import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
-import { assignModColors, branchIndex, listMods, modColorOf, orderTraders, toggleMember, type NameLookup } from '../wiki/derive'
+import { assignModColors, branchIndex, followupCounts, listMods, modColorOf, orderTraders, sortByFollowups, toggleMember, type NameLookup } from '../wiki/derive'
 import { ModStrip } from '../wiki/ModStrip'
 import { SourceTag } from '../wiki/SourceTag'
 import { QuestDescriptionDialog } from '../wiki/QuestDescriptionDialog'
-import { QuestDetail } from '../wiki/QuestDetail'
+import { QuestDetail, type Followups } from '../wiki/QuestDetail'
 import { QuestMapDialog } from '../wiki/QuestMapDialog'
 import { QuestPrepDialog } from '../wiki/QuestPrepDialog'
 import { TraderStrip } from '../wiki/TraderStrip'
-import { formatObjective, lineText } from '../wiki/format'
+import { formatInt, formatObjective, lineText } from '../wiki/format'
 import {
-  countTabByTrader, countTabs, filterProgressQuests, firstOpenObjective, handoverReady, isUnreachable, QUEST_TABS, questProgress,
+  countTabByTrader, countTabs, filterProgressQuests, firstOpenObjective, handoverReady, isPending, isUnreachable, QUEST_TABS, questProgress,
   questTab, tradersWithQuests, type QuestTab,
 } from './derive'
 import { lockReasonText, requirementLines } from './format'
@@ -114,8 +114,16 @@ interface QuestTableProps {
   highlight: ReadonlySet<string>
 }
 
+type FollowupOrder = 'default' | 'most' | 'least'
+
 /** 연계 점프로 펼친 줄을 강조해 두는 시간 */
 const JUMP_FLASH_MS = 1500
+
+/** 줄의 "후속 N개". 0 이면 비운다 — 막다른 퀘스트 */
+function FollowupAside({ n }: { n: number }) {
+  const t = useT()
+  return <span className="qc-pline__after">{n > 0 ? t('followups.after', { n: formatInt(n) }) : null}</span>
+}
 
 export function lineId(questId: string): string {
   return `qc-pline-${questId}`
@@ -127,6 +135,8 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
   const [traderIds, setTraderIds] = useState<ReadonlySet<string>>(() => new Set())
   const [query, setQuery] = useState('')
   const [mods, setMods] = useState<ReadonlySet<string>>(() => new Set())
+  /** 정렬: 탭별 기본 순서 / 남은 후속 많은순 / 적은순 */
+  const [order, setOrder] = useState<FollowupOrder>('default')
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [dialogId, setDialogId] = useState<string | null>(null)
   const [prepId, setPrepId] = useState<string | null>(null)
@@ -147,10 +157,15 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
     const keep = new Set(traderOrder)
     return orderTraders(catalog.traders).filter((x) => keep.has(x.id))
   }, [catalog, traderOrder])
-  const rows = useMemo(
-    () => filterProgressQuests(catalog, progress, { tab, traderIds, query, mods }),
-    [catalog, progress, tab, traderIds, query, mods],
-  )
+  /** 남은 후속 수 — 끝나지 않았고 도달할 수 있는 후속만 센다. 카탈로그 전체로 한 번만 */
+  const followups = useMemo<Followups>(() => ({
+    counts: followupCounts(Object.values(catalog.quests), (id) => isPending(questProgress(progress, id))),
+    kind: 'remaining',
+  }), [catalog, progress])
+  const rows = useMemo(() => {
+    const base = filterProgressQuests(catalog, progress, { tab, traderIds, query, mods })
+    return order === 'default' ? base : sortByFollowups(base, followups.counts, order)
+  }, [catalog, progress, tab, traderIds, query, mods, order, followups])
   const toggle = (id: string) => setExpanded((prev) => toggleMember(prev, id))
 
   /** 연계 링크: 지금 목록에 없으면 그 퀘스트의 탭으로 옮기고 상인·모드·검색 필터를 푼 뒤 펼침 → 스크롤 → 잠깐 강조 */
@@ -178,7 +193,7 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
   useEffect(() => () => window.clearTimeout(jumpTimer.current), [])
 
   return (
-    <section className="qc-card qc-card--flush">
+    <section className="qc-card qc-card--flush qc-pquests">
       <TraderStrip
         traders={traders} counts={traderCounts} total={counts[tab]}
         selected={traderIds} onToggle={(id) => setTraderIds((prev) => toggleMember(prev, id))} onClear={() => setTraderIds(new Set())}
@@ -200,6 +215,16 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <select
+          className="qc-sort"
+          aria-label={t('sort.label')}
+          value={order}
+          onChange={(e) => setOrder(e.target.value as FollowupOrder)}
+        >
+          <option value="default">{t('followups.sortDefault')}</option>
+          <option value="most">{t('followups.sortMost')}</option>
+          <option value="least">{t('followups.sortLeast')}</option>
+        </select>
       </div>
       {modList.length > 0 && (
         <ModStrip
@@ -222,12 +247,14 @@ function QuestTable({ catalog, progress, lookup, traderOrder, highlight }: Quest
                 flash={highlight.has(q.id) || jumped === q.id}
                 modColor={modColorOf(q, modColors)}
                 onToggle={() => toggle(q.id)}
+                aside={<FollowupAside n={followups.counts.get(q.id) ?? 0} />}
                 detail={open && (
                   <QuestDetail
                     quest={q} catalog={catalog} lookup={lookup} branch={branches.get(q.id)}
                     onOpenDescription={setDialogId} onOpenPrep={setPrepId} onOpenMap={setMapId} onJump={jumpTo}
                     objectiveLines={objectiveLines(q, qp, t)}
                     requirementLines={requirementLines(q, qp, lookup, t)}
+                    followups={followups}
                     actions={
                       <button type="button" className="qc-btn" onClick={() => navigate('wiki', null, { quest: q.id })}>{t('overview.openWiki')}</button>
                     }

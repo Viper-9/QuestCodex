@@ -10,7 +10,7 @@ export function SourceTag({ quest, color }: { quest: CatalogQuest; color?: numbe
   if (quest.isVanilla) {
     if (!quest.overriddenBy) return null
     return (
-      <span className="qc-tag qc-tag--mod qc-tag--override" data-mod-color={color} title={t('tag.overriddenTitle', { mod: quest.overriddenBy })}>
+      <span className="qc-tag qc-tag--mod qc-tag--override" data-mod-color={color} title={t('tag.overriddenTitle')}>
         {quest.overriddenBy}
       </span>
     )

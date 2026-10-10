@@ -28,7 +28,7 @@ export function ModStrip({ mods, modColors, selected, onToggle, onClear }: ModSt
         return (
           <button
             key={key} type="button" className={cls('qc-chip', on && 'is-on')} aria-pressed={on} onClick={() => onToggle(key)}
-            title={overridden ? t('tag.overriddenTitle', { mod: name }) : undefined}
+            title={overridden ? t('tag.overriddenTitle') : undefined}
           >
             <span className={cls('qc-modstrip__dot', overridden && 'qc-modstrip__dot--override')} data-mod-color={modColors[name]} />
             {name === UNKNOWN_MOD ? t('tag.mod') : name}

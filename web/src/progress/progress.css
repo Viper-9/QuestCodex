@@ -108,11 +108,13 @@
 .qc-pline__summary { color: var(--fg-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-pline__counter { margin-left: auto; color: var(--fg-2); font-size: 12px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .qc-pline__detail { padding: 6px 14px 14px 28px; }
+/* 현황 퀘스트 카드: 요약 뒤에 "후속 N개" 칸(followupCounts). 0 이면 빈 칸 */
+.qc-pquests .qc-pline__row { grid-template-columns: minmax(0, 2fr) 110px minmax(0, 3fr) 120px 110px; }
+.qc-pline__after { color: var(--fg-3); font-size: 12px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .qc-pline__obj { flex: 1; }
 .qc-lines li.is-done { color: var(--fg-3); text-decoration: line-through; }
 /* 현황 펼친 행(위키 QuestDetail 재사용): 목표 카운터·미충족 시작 조건 */
 .qc-pline > .qc-detail { margin: 8px 14px 12px; }
-.qc-detail__actions { margin-left: auto; }
 .qc-lines__text { flex: 1; min-width: 0; }
 .qc-lines__aside { color: var(--fg-2); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .qc-lines li.is-unmet { color: var(--warn); }
