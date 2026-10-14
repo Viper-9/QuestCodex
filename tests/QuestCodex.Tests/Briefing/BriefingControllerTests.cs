@@ -21,7 +21,7 @@ public class BriefingControllerTests
 
     private sealed class FakeCatalog : ICatalogSource
     {
-        public IReadOnlySet<string> SupportedLangs { get; } = new HashSet<string> { "en", "kr" };
+        public IReadOnlySet<string> SupportedLangs { get; init; } = new HashSet<string> { "en", "kr", "es", "es-mx" };
         public List<string> Requested { get; } = [];
         public bool Throw { get; init; }
         public CatalogModel Get(string lang)
@@ -61,12 +61,30 @@ public class BriefingControllerTests
         Assert.Equal("missingProfile", Error(r));
     }
 
-    [Fact]
-    public void Unknown_lang_is_400_with_supported_list()
+    [Theory]
+    [InlineData("kr", "kr")]
+    [InlineData("KR", "kr")]
+    [InlineData("es-mx", "es-mx")]
+    [InlineData("kr-en", "kr")]
+    [InlineData("es-xx", "es")]
+    [InlineData("xx-yy", "en")]
+    [InlineData("", "en")]
+    public void Unknown_lang_falls_back_to_the_closest_supported_one(string requested, string expected)
     {
-        var r = Assert.IsType<BadRequestObjectResult>(Controller(Ready()).Get("p1", "ko"));
+        var catalogs = new FakeCatalog();
+        var body = Assert.IsType<BriefingResponse>(Assert.IsType<JsonResult>(Controller(Ready(), catalogs).Get("p1", requested)).Value);
+        Assert.Equal((1, expected), (body.SchemaVersion, body.Lang));
+        Assert.Equal([expected], catalogs.Requested);
+    }
+
+    [Fact]
+    public void Unknown_lang_is_400_only_when_en_is_missing_too()
+    {
+        var catalogs = new FakeCatalog { SupportedLangs = new HashSet<string> { "kr" } };
+        var r = Assert.IsType<BadRequestObjectResult>(Controller(Ready(), catalogs).Get("p1", "xx"));
         var body = Assert.IsType<BriefingController.ErrorBody>(r.Value);
-        Assert.Equal(("unknownLang", "en,kr"), (body.Error, string.Join(",", body.Supported!)));
+        Assert.Equal(("unknownLang", "kr"), (body.Error, string.Join(",", body.Supported!)));
+        Assert.Empty(catalogs.Requested);
     }
 
     [Fact]
