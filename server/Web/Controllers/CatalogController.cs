@@ -1,26 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using QuestCodex.Services;
+using SPTarkov.Common.Models.Logging;
 
 namespace QuestCodex.Web.Controllers;
 
 [ApiController]
 [Route("questcodex/api")]
-public class CatalogController(ICatalogSource catalogs) : ControllerBase
+public class CatalogController(ICatalogSource catalogs, ISptLogger<CatalogController> logger) : ControllerBase
 {
     public sealed record ErrorBody(string Error, IReadOnlyList<string>? Supported = null);
 
     [HttpGet("catalog")]
     public IActionResult Get([FromQuery] string? lang)
     {
-        var requested = string.IsNullOrWhiteSpace(lang) ? "en" : lang;
-        if (!catalogs.SupportedLangs.Contains(requested))
+        // 모르는 언어는 가까운 언어로 대체한다. 실제로 쓴 언어는 응답의 lang 에 그대로 들어간다.
+        var resolved = LangFallback.Resolve(lang, catalogs.SupportedLangs, logger);
+        if (resolved is null)
         {
             return BadRequest(new ErrorBody("unknownLang", catalogs.SupportedLangs.Order(StringComparer.Ordinal).ToList()));
         }
 
         try
         {
-            return new JsonResult(catalogs.Get(requested), QuestCodexJson.Options);
+            return new JsonResult(catalogs.Get(resolved), QuestCodexJson.Options);
         }
         catch (Exception)
         {

@@ -21,8 +21,10 @@ public class BriefingController(IProfileSource profiles, ICatalogSource catalogs
     {
         if (string.IsNullOrWhiteSpace(profile)) return BadRequest(new ErrorBody("missingProfile"));
 
-        var requested = string.IsNullOrWhiteSpace(lang) ? "en" : lang;
-        if (!catalogs.SupportedLangs.Contains(requested))
+        // 한글화 모드가 붙인 kr-en 같은 culture 도 그대로 넘어오므로 가까운 언어로 대체한다.
+        // 실제로 쓴 언어는 응답의 lang 에 들어간다.
+        var resolved = LangFallback.Resolve(lang, catalogs.SupportedLangs, logger);
+        if (resolved is null)
         {
             return BadRequest(new ErrorBody("unknownLang", catalogs.SupportedLangs.Order(StringComparer.Ordinal).ToList()));
         }
@@ -39,7 +41,7 @@ public class BriefingController(IProfileSource profiles, ICatalogSource catalogs
         try
         {
             // 진행 상태는 텍스트를 쓰지 않으므로 요청 언어 카탈로그 하나로 둘 다 만든다.
-            var catalog = catalogs.Get(requested);
+            var catalog = catalogs.Get(resolved);
             var progress = ProgressBuilder.Build(catalog, lookup.Pmc!, profile, lookup.IsActive);
             var body = BriefingBuilder.Build(catalog, progress, mapIndex.Index, ModMetadata.AssemblyVersion, DateTimeOffset.UtcNow);
             return new JsonResult(body, QuestCodexJson.Options);
@@ -47,7 +49,7 @@ public class BriefingController(IProfileSource profiles, ICatalogSource catalogs
         catch (Exception ex)
         {
             // 원인은 서버 로그에만 남기고 응답에는 넣지 않는다.
-            logger.Error($"[QuestCodex] briefing build failed for {profile}/{requested}", ex);
+            logger.Error($"[QuestCodex] briefing build failed for {profile}/{resolved}", ex);
             return StatusCode(500, new ErrorBody("briefingBuildFailed"));
         }
     }
