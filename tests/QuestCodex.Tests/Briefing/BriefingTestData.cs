@@ -16,8 +16,9 @@ internal static class B
         PrepItem? item = null, IReadOnlyList<string>? mapKeys = null, IReadOnlyList<ItemRef>? weapons = null,
         IReadOnlyList<string>? calibers = null, IReadOnlyList<IReadOnlyList<ItemRef>>? weaponMods = null,
         IReadOnlyList<IReadOnlyList<IReadOnlyList<ItemRef>>>? equipment = null, IReadOnlyList<ItemRef>? forbidden = null,
-        bool oneRaid = false, IReadOnlyList<string>? exitStatuses = null, string? exitName = null)
-        => new([], mapKeys ?? [], item, weapons ?? [], calibers ?? [], weaponMods ?? [], equipment ?? [], forbidden ?? [],
+        bool oneRaid = false, IReadOnlyList<string>? exitStatuses = null, string? exitName = null,
+        IReadOnlyList<WeaponBuild>? builds = null)
+        => new([], mapKeys ?? [], item, weapons ?? [], calibers ?? [], weaponMods ?? [], builds ?? [], equipment ?? [], forbidden ?? [],
             oneRaid, exitStatuses ?? [], exitName);
 
     public static PrepItem Item(string action = "handover", IReadOnlyList<ItemRef>? items = null, double count = 1, bool fir = false)

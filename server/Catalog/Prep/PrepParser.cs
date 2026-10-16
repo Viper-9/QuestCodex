@@ -8,7 +8,7 @@ namespace QuestCodex.Catalog.Prep;
 /// 데이터에서 그대로 꺼낸다. FindItem 은 "레이드에서 찾기"라 챙겨갈 물건이 아니므로 다루지 않는다.
 /// 모드가 런타임에 바꾼 조건도 메모리 테이블에서 읽으므로 그대로 반영된다.
 /// </summary>
-public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemName)
+public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemName, Func<string, string?> itemParent)
 {
     public ObjectivePrep? Parse(QuestCondition c)
     {
@@ -17,6 +17,7 @@ public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemN
         var weapons = new List<ItemRef>();
         var calibers = new List<string>();
         var weaponMods = new List<IReadOnlyList<ItemRef>>();
+        var builds = new List<WeaponBuild>();
         var equipment = new List<IReadOnlyList<IReadOnlyList<ItemRef>>>();
         var forbidden = new List<ItemRef>();
         var exitStatuses = new List<string>();
@@ -37,7 +38,21 @@ public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemN
                 case "Shots":
                     foreach (var tpl in sub.Weapon ?? []) AddDistinct(weapons, Ref(tpl));
                     foreach (var cal in sub.WeaponCaliber ?? []) AddDistinct(calibers, cal);
-                    weaponMods.AddRange(Options(sub.WeaponModsInclusive));
+                    var mods = Options(sub.WeaponModsInclusive);
+                    weaponMods.AddRange(mods);
+                    // 부착물 조건이 있으면 같은 하위 조건의 무기·구경과 한 묶음으로도 남긴다.
+                    // 빈 대안 묶음이 하나라도 있으면 게임은 부착물 조건을 늘 통과시키므로(빈 목록의 All 은 true) 묶지 않는다.
+                    // 웹은 부착물 장착을 확인하지 않으니 WeaponMods 는 예전처럼 둔다.
+                    var anyMods = sub.WeaponModsInclusive?.Any(group => group.Count == 0) == true;
+                    if (mods.Count > 0 && !anyMods)
+                    {
+                        builds.Add(new WeaponBuild(
+                            (sub.Weapon ?? []).Select(Ref).ToList(),
+                            (sub.WeaponCaliber ?? []).Distinct().ToList(),
+                            mods,
+                            ModParents(mods)));
+                    }
+
                     break;
                 case "Equipment":
                     var slot = Options(sub.EquipmentInclusive);
@@ -66,7 +81,7 @@ public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemN
             return null;
         }
 
-        return new ObjectivePrep(maps, mapKeys, item, weapons, calibers, weaponMods, equipment, forbidden, oneRaid, exitStatuses, exitName);
+        return new ObjectivePrep(maps, mapKeys, item, weapons, calibers, weaponMods, builds, equipment, forbidden, oneRaid, exitStatuses, exitName);
     }
 
     private PrepItem? ParseItem(QuestCondition c)
@@ -94,6 +109,14 @@ public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemN
     }
 
     private ItemRef Ref(string tpl) => new(tpl, itemName(tpl));
+
+    // 부착물 대안에 나오는 아이템의 부모 분류(items.json _parent). 아이템 테이블에 없는 tpl 은 건너뛴다.
+    private List<string> ModParents(IEnumerable<IReadOnlyList<ItemRef>> options)
+        => options.SelectMany(o => o)
+            .Select(i => itemParent(i.Tpl))
+            .OfType<string>()
+            .Distinct()
+            .ToList();
 
     private List<IReadOnlyList<ItemRef>> Options(IEnumerable<List<string>>? options)
         => (options ?? [])

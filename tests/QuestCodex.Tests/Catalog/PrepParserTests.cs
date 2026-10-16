@@ -20,6 +20,8 @@ public class PrepParserTests
     private static readonly MongoId Balaclava = Id(705);
     private static readonly MongoId Knife = Id(706);
     private static readonly MongoId Marker = Id(707);
+    private static readonly MongoId Silencer = Id(708);
+    private static readonly MongoId Scope = Id(709);
 
     private static readonly Dictionary<string, string> Locale = new()
     {
@@ -40,6 +42,8 @@ public class PrepParserTests
     private static readonly Dictionary<MongoId, TemplateItem> Items = new()
     {
         [Tkpd] = Template(Tkpd, Id(1), "TKPD 9.3x64 carbine"),
+        [Silencer] = Template(Silencer, Id(2), "PBS-1"),
+        [Scope] = Template(Scope, Id(3), "PSO"),
     };
 
     private static CatalogQuest Build(Quest q, IReadOnlyDictionary<string, string>? locationKeys = null) => CatalogBuilder.Build(
@@ -101,6 +105,60 @@ public class PrepParserTests
         Assert.Equal(2, p2.Equipment.Count); // 슬롯끼리는 AND
         Assert.Equal(["스캐브 조끼", "보안 조끼"], p2.Equipment[0].Select(opt => Assert.Single(opt).Name)); // 슬롯 안은 OR
         Assert.Equal("발라클라바", Assert.Single(Assert.Single(p2.Equipment[1])).Name);
+    }
+
+    private static QuestConditionCounterCondition WithMods(QuestConditionCounterCondition sub, params MongoId[][] options)
+    {
+        sub.WeaponModsInclusive = options.Select(o => o.Select(x => x.ToString()).ToList()).ToList();
+        return sub;
+    }
+
+    [Fact]
+    public void Kills_with_mods_also_keep_one_build_per_sub_condition()
+    {
+        var kills = WithMods(Kills(Svds), [Silencer], [Silencer, Scope]);
+        kills.WeaponCaliber = ["Caliber762x54R"];
+
+        var prep = Build(Quest(Id(1), finish: [Counter(Id(201), subs: [kills])])).Objectives[0].Prep!;
+
+        var build = Assert.Single(prep.Builds);
+        Assert.Equal([Svds.ToString()], build.Weapons.Select(w => w.Tpl));
+        Assert.Equal(["Caliber762x54R"], build.Calibers);
+        Assert.Equal([[Silencer.ToString()], [Silencer.ToString(), Scope.ToString()]], build.ModOptions.Select(o => o.Select(i => i.Tpl).ToArray()));
+        Assert.Equal([Id(2).ToString(), Id(3).ToString()], build.ModParents); // 중복 제거
+        // 기존 펼친 필드는 그대로 둔다
+        Assert.Equal("SVDS", Assert.Single(prep.Weapons).Name);
+        Assert.Equal(2, prep.WeaponMods.Count);
+    }
+
+    [Fact]
+    public void Build_without_weapon_means_any_weapon()
+    {
+        var prep = Build(Quest(Id(1), finish: [Counter(Id(201), subs: [WithMods(Kills(), [Silencer])])])).Objectives[0].Prep!;
+
+        var build = Assert.Single(prep.Builds);
+        Assert.Empty(build.Weapons);
+        Assert.Empty(build.Calibers);
+        Assert.Single(build.ModOptions);
+    }
+
+    [Fact]
+    public void Empty_mod_group_makes_no_build_but_keeps_web_fields()
+    {
+        // 빈 묶음이 섞이면 게임은 부착물 조건을 늘 통과시키므로 build 로 묶지 않는다. 웹용 WeaponMods 는 예전처럼 둔다.
+        var prep = Build(Quest(Id(1), finish: [Counter(Id(201), subs: [WithMods(Kills(Svds), [Silencer], [])])])).Objectives[0].Prep!;
+
+        Assert.Empty(prep.Builds);
+        Assert.Equal("PBS-1", Assert.Single(Assert.Single(prep.WeaponMods)).Name);
+        Assert.Equal("SVDS", Assert.Single(prep.Weapons).Name);
+    }
+
+    [Fact]
+    public void Kills_without_mods_have_no_builds()
+    {
+        var prep = Build(Quest(Id(1), finish: [Counter(Id(201), subs: [Kills(Svds), Location("Lighthouse")])])).Objectives[0].Prep!;
+
+        Assert.Empty(prep.Builds);
     }
 
     [Fact]
@@ -251,7 +309,7 @@ public class PrepParserTests
 
         var prep = json[0].GetProperty("prep");
         Assert.Equal(
-            ["maps", "mapKeys", "item", "weapons", "calibers", "weaponMods", "equipment", "forbiddenEquipment", "oneRaid", "exitStatuses", "exitName"],
+            ["maps", "mapKeys", "item", "weapons", "calibers", "weaponMods", "builds", "equipment", "forbiddenEquipment", "oneRaid", "exitStatuses", "exitName"],
             prep.EnumerateObject().Select(p => p.Name));
         Assert.Equal(
             ["action", "items", "count", "foundInRaid", "minDurability", "maxDurability", "dogtagLevel", "plantSeconds"],

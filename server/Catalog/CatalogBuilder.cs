@@ -33,7 +33,8 @@ public static class CatalogBuilder
         var locale = new LocaleResolver(input.Locale, input.FallbackLocale);
         var categorizer = new ItemCategorizer(input.Items);
         var rewardParser = new RewardParser(categorizer, locale, input.Items);
-        var prepParser = new PrepParser(locale, rewardParser.NameOf);
+        var prepParser = new PrepParser(locale, rewardParser.NameOf, tpl =>
+            MongoId.IsValidMongoId(tpl) && input.Items.TryGetValue(new MongoId(tpl), out var t) && t.Parent != default ? t.Parent.ToString() : null);
         var empty = new PointTableBuilder().Build();
         var locationResolver = new LocationResolver(
             input.QuestZones ?? empty, input.QuestItemSpawns ?? empty, input.LocationKeys ?? new Dictionary<string, string>(), input.Items,
