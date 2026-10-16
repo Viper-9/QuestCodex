@@ -263,6 +263,7 @@ public static class CatalogBuilder
             {
                 Prep = prepParser.Parse(c),
                 Locations = locationResolver.Resolve(c, questMap, warnings, questId),
+                VisibleAfter = VisibleAfterOf(c),
             })
             .ToList();
 
@@ -309,6 +310,17 @@ public static class CatalogBuilder
         var tpl = RequirementParser.TargetOf(c);
         var targetName = tpl is null ? null : locale.TryResolve($"{tpl} Name");
         return new Objective(condId, c.ConditionType, "", c.Value, targetName);
+    }
+
+    /// <summary>게임은 CompleteCondition 의 대상 조건이 끝나기 전까지 이 목표를 임무 탭에 보이지 않는다.</summary>
+    private static IReadOnlyList<string> VisibleAfterOf(QuestCondition c)
+    {
+        var ids = (c.VisibilityConditions ?? [])
+            .Where(v => v.ConditionType == "CompleteCondition" && !string.IsNullOrEmpty(v.Target))
+            .Select(v => v.Target!)
+            .Distinct()
+            .ToList();
+        return ids.Count == 0 ? Array.Empty<string>() : ids;
     }
 
     /// <summary>

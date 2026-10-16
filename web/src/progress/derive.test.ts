@@ -218,6 +218,22 @@ describe('mapsFromText / 추정 맵', () => {
   })
 })
 
+describe('raidEntries 숨은 목표', () => {
+  it('게임이 아직 숨기는 목표는 앞 조건이 끝나야 들어온다', () => {
+    const lotus = quest('lotus', [
+      obj('kill', 'CounterCreator', prep()),
+      { ...obj('plant', 'LeaveItemAtLocation', prep({ mapKeys: ['factory4_day'] })), visibleAfter: ['kill'] },
+      { ...obj('exit', 'CounterCreator', prep({ mapKeys: ['factory4_day'] })), visibleAfter: ['plant'] },
+      { ...obj('odd', 'VisitPlace', prep()), visibleAfter: ['gone'] },   // 이 퀘스트에 없는 조건 → 보임
+    ])
+    const ids = (kill: boolean) => raidEntries(catalog([lotus]),
+      progress({ lotus: qp('Started', { kill: { current: kill ? 1 : 0, target: 1, done: kill } }) }))
+      .map((e) => e.objective.conditionId)
+    expect(ids(false)).toEqual(['kill', 'odd'])
+    expect(ids(true)).toEqual(['plant', 'odd'])
+  })
+})
+
 describe('raidEntries / mapTabs / mapBrief', () => {
   const cult = quest('cult', [
     obj('c1', 'PlaceBeacon', prep({ item: item({ action: 'plant', count: 1 }) })),

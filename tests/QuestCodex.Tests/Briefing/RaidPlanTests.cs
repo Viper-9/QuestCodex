@@ -62,6 +62,24 @@ public class RaidPlanTests
             e.Select(x => (x.Objective.ConditionId, string.Join(",", x.Maps), x.Inferred)));
     }
 
+    [Fact]
+    public void RaidEntries_skip_objectives_the_game_still_hides()
+    {
+        var lotus = Quest("lotus", [
+            Obj("kill", "CounterCreator"),
+            Obj("plant", "LeaveItemAtLocation", Prep(mapKeys: ["factory4_day"])) with { VisibleAfter = ["kill"] },
+            Obj("exit", "CounterCreator", Prep(mapKeys: ["factory4_day"])) with { VisibleAfter = ["plant"] },
+            Obj("odd", "VisitPlace") with { VisibleAfter = ["gone"] }, // 이 퀘스트에 없는 조건을 가리키면 보이는 것으로 본다
+        ]);
+        var catalog = B.Catalog([lotus]);
+
+        var before = RaidPlan.RaidEntries(catalog, B.Progress(new() { ["lotus"] = Qp("Started", new() { ["kill"] = Op(0, 1) }) }));
+        var after = RaidPlan.RaidEntries(catalog, B.Progress(new() { ["lotus"] = Qp("Started", new() { ["kill"] = Op(1, 1, done: true) }) }));
+
+        Assert.Equal(new[] { "kill", "odd" }, before.Select(e => e.Objective.ConditionId));
+        Assert.Equal(new[] { "plant", "odd" }, after.Select(e => e.Objective.ConditionId));
+    }
+
     // 아래는 derive.test.ts 의 raidEntries, mapTabs, mapBrief 테스트를 옮긴 것
 
     private static readonly CatalogQuest Cult = Quest("cult", [

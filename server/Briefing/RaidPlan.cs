@@ -84,7 +84,7 @@ public static class RaidPlan
     // 데이터에 맵이 없는 목표에만 쓴다.
     public static IReadOnlyList<string> MapsFromText(string text) => MapText.Find(text);
 
-    // 진행 중인 퀘스트에서 아직 끝나지 않은 레이드 목표를 전부 모은다.
+    // 진행 중인 퀘스트에서 아직 끝나지 않은 레이드 목표를 전부 모은다. 게임이 아직 숨기는 목표는 뺀다.
     public static List<RaidEntry> RaidEntries(CatalogModel catalog, ProfileProgress progress)
     {
         var list = new List<RaidEntry>();
@@ -94,7 +94,7 @@ public static class RaidPlan
             if (qp.Status != "Started") continue;
             foreach (var o in quest.Objectives)
             {
-                if (!IsRaidObjective(o)) continue;
+                if (!IsRaidObjective(o) || IsHidden(quest, o, qp)) continue;
                 var op = qp.Objectives.GetValueOrDefault(o.ConditionId);
                 if (op?.Done == true) continue;
                 var known = ObjectiveMaps(quest, o);
@@ -104,6 +104,10 @@ public static class RaidPlan
         }
         return list;
     }
+
+    // 먼저 끝나야 하는 조건 중 하나라도 안 끝났으면 숨은 목표다. 이 퀘스트에 없는 조건을 가리키면 끝날 수 없으니 보이는 것으로 본다.
+    public static bool IsHidden(CatalogQuest quest, Objective o, QuestProgress qp)
+        => o.VisibleAfter.Any(id => quest.Objectives.Any(x => x.ConditionId == id) && qp.Objectives.GetValueOrDefault(id)?.Done != true);
 
     // 퀘스트별로 묶는다. 퀘스트는 처음 나온 순서, 퀘스트 안의 목표는 원래 순서 그대로.
     public static List<QuestGroup> GroupByQuest(IEnumerable<RaidEntry> entries)

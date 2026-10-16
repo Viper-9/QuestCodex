@@ -274,14 +274,23 @@ export interface RaidEntry {
   inferred: boolean
 }
 
-/** 진행 중 퀘스트의 끝나지 않은 레이드 목표 전부 */
+/**
+ * 먼저 끝나야 하는 조건 중 하나라도 안 끝났으면 게임이 아직 숨기는 목표다.
+ * 이 퀘스트에 없는 조건을 가리키면 끝날 수 없으니 보이는 것으로 본다.
+ */
+export function isHidden(quest: CatalogQuest, o: Objective, qp: QuestProgress): boolean {
+  return (o.visibleAfter ?? []).some((id) =>
+    quest.objectives.some((x) => x.conditionId === id) && qp.objectives[id]?.done !== true)
+}
+
+/** 진행 중 퀘스트의 끝나지 않은 레이드 목표 전부. 게임이 아직 숨기는 목표는 뺀다. */
 export function raidEntries(catalog: Catalog, progress: ProfileProgress): RaidEntry[] {
   const out: RaidEntry[] = []
   for (const quest of Object.values(catalog.quests)) {
     const qp = questProgress(progress, quest.id)
     if (qp.status !== 'Started') continue
     for (const o of quest.objectives) {
-      if (!isRaidObjective(o)) continue
+      if (!isRaidObjective(o) || isHidden(quest, o, qp)) continue
       const op = qp.objectives[o.conditionId]
       if (op?.done) continue
       const known = objectiveMaps(quest, o)
