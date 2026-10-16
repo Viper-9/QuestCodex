@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using QuestCodex.Briefing;
 using QuestCodex.Progress;
@@ -40,11 +42,19 @@ public class BriefingController(IProfileSource profiles, ICatalogSource catalogs
 
         try
         {
+            // 단계별 소요 시간(16 catalog-warmup 스펙 §6). 직렬화도 재려고 JsonResult 대신 여기서 바이트로 만든다.
+            var t0 = Stopwatch.GetTimestamp();
             // 진행 상태는 텍스트를 쓰지 않으므로 요청 언어 카탈로그 하나로 둘 다 만든다.
             var catalog = catalogs.Get(resolved);
+            var t1 = Stopwatch.GetTimestamp();
             var progress = ProgressBuilder.Build(catalog, lookup.Pmc!, profile, lookup.IsActive);
+            var t2 = Stopwatch.GetTimestamp();
             var body = BriefingBuilder.Build(catalog, progress, mapIndex.Index, ModMetadata.AssemblyVersion, DateTimeOffset.UtcNow);
-            return new JsonResult(body, QuestCodexJson.Options);
+            var t3 = Stopwatch.GetTimestamp();
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(body, QuestCodexJson.Options);
+            var t4 = Stopwatch.GetTimestamp();
+            LogTimings(resolved, t0, t1, t2, t3, t4);
+            return File(bytes, "application/json; charset=utf-8");
         }
         catch (Exception ex)
         {
@@ -52,5 +62,16 @@ public class BriefingController(IProfileSource profiles, ICatalogSource catalogs
             logger.Error($"[QuestCodex] briefing build failed for {profile}/{resolved}", ex);
             return StatusCode(500, new ErrorBody("briefingBuildFailed"));
         }
+    }
+
+    /// <summary>이 합계 이상이면 Info, 아니면 Debug. 기본 설정에서 Debug 는 로그 파일에 남지 않아 사용자 로그엔 느린 요청만 보인다.</summary>
+    internal const double SlowMs = 500;
+
+    private void LogTimings(string lang, long t0, long t1, long t2, long t3, long t4)
+    {
+        static double Ms(long from, long to) => Stopwatch.GetElapsedTime(from, to).TotalMilliseconds;
+        var message = $"[QuestCodex] briefing {lang}: catalog {Ms(t0, t1):F0} ms, progress {Ms(t1, t2):F0} ms, build {Ms(t2, t3):F0} ms, serialize {Ms(t3, t4):F0} ms";
+        if (Ms(t0, t4) >= SlowMs) logger.Info(message);
+        else logger.Debug(message);
     }
 }
