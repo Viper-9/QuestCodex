@@ -55,6 +55,8 @@ public sealed record BriefingFindRow(
     IReadOnlyList<ItemRef> Items, double Need, double Have, bool Fir, double Missing, IReadOnlyList<BriefingSource> Sources, string Place)
     : BriefingItemRow(Items, Need, Have, Fir, Missing, Sources);
 
+// Rows 의 Label 은 build, weapon, caliber, weaponMod, equipment, forbidden 중 하나.
+// build 줄은 무기와 필수 부착물을 한 총에 묶은 것이라 같은 목표의 weapon·caliber·weaponMod 줄을 대신한다(RaidRules.GearRow 참고).
 public sealed record BriefingGear(string QuestId, IReadOnlyList<GearRow> Rows);
 
 public sealed record BriefingSpecial(string QuestId, IReadOnlyList<SpecialRow> Rows);

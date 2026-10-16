@@ -9,6 +9,8 @@ public class RaidRulesTests
     private static readonly ItemRef Svd = new("svd", "SVD");
     private static readonly ItemRef Scope = new("scope", "PSO");
     private static readonly ItemRef Silencer = new("sil", "PBS-1");
+    private static readonly ItemRef Ak = new("ak105", "AK-105");
+    private static readonly ItemRef Hybrid = new("hybrid", "Hybrid 46");
 
     [Fact]
     public void GearRows_keeps_alternatives_and_and_bundles_side_by_side()
@@ -26,6 +28,59 @@ public class RaidRulesTests
         Assert.Equal(new[] { new[] { "vest", "bag" } }, rows[4].Tpls.Select(t => t.ToArray()).ToArray());
         Assert.Equal(new[] { Array.Empty<string>() }, rows[1].Tpls.Select(t => t.ToArray()).ToArray());   // 구경은 tpl 이 없어서 빈 목록으로 개수만 맞춘다
         Assert.All(rows, r => Assert.Equal(r.Names.Count, r.Tpls.Count));
+    }
+
+    [Fact]
+    public void Build_row_ties_weapon_and_mods_and_replaces_their_own_rows()
+    {
+        var build = new WeaponBuild([Ak], ["Caliber545x39"], [[Hybrid], [Silencer, Scope]], ["silencerParent", "scopeParent"]);
+        var p = Prep(
+            weapons: [Ak], calibers: ["Caliber545x39"], weaponMods: [[Hybrid], [Silencer, Scope]], builds: [build],
+            equipment: [[[new("helm", "6B47")]]]);
+
+        var rows = RaidRules.GearRows(p);
+
+        Assert.Equal(new[] { "build", "equipment" }, rows.Select(r => r.Label).ToArray());
+        var b = rows[0];
+        Assert.Equal(new[] { "Hybrid 46", "PBS-1 + PSO" }, b.Names.ToArray());
+        Assert.Equal(new[] { new[] { "hybrid" }, new[] { "sil", "scope" } }, b.Tpls.Select(t => t.ToArray()).ToArray());
+        Assert.Equal(new[] { Ak }, b.Weapons!.ToArray());
+        Assert.Equal(new[] { "Caliber545x39" }, b.Calibers!.ToArray());
+        Assert.Equal(new[] { "silencerParent", "scopeParent" }, b.ModParents!.ToArray());
+        Assert.Null(rows[1].Weapons);   // build 가 아닌 줄은 null
+        Assert.Null(rows[1].ModParents);
+    }
+
+    [Fact]
+    public void Weapon_conditions_outside_builds_stay_as_rows()
+    {
+        // 다른 하위 조건의 SVD 와 부착물 없는 AK 빌드
+        var p = Prep(weapons: [Ak, Svd], weaponMods: [[Hybrid]], builds: [new WeaponBuild([], [], [[Hybrid]], [])]);
+
+        var rows = RaidRules.GearRows(p);
+
+        Assert.Equal(new[] { "build", "weapon" }, rows.Select(r => r.Label).ToArray());
+        Assert.Empty(rows[0].Weapons!);   // 아무 총
+        Assert.Equal(new[] { "AK-105", "SVD" }, rows[1].Names.ToArray());
+    }
+
+    [Fact]
+    public void Old_catalog_without_builds_falls_back_to_separate_rows()
+    {
+        var p = Prep(weapons: [Ak], weaponMods: [[Hybrid]]) with { Builds = null! };   // 녹화된 예전 카탈로그 JSON
+
+        Assert.Equal(new[] { "weapon", "weaponMod" }, RaidRules.GearRows(p).Select(r => r.Label).ToArray());
+    }
+
+    [Fact]
+    public void Dedupe_tells_builds_apart_by_weapon_and_caliber()
+    {
+        GearRow Build(IReadOnlyList<ItemRef> weapons, IReadOnlyList<string> calibers)
+            => new("build", ["Hybrid 46"], [["hybrid"]], weapons, calibers, ["p"]);
+
+        var rows = RaidRules.DedupeGear([Build([Ak], []), Build([Svd], []), Build([Ak], []), Build([Ak], ["Caliber545x39"])]);
+
+        Assert.Equal(3, rows.Count);
     }
 
     [Fact]
