@@ -35,7 +35,7 @@ public class CatalogService(
     ImageRouterService imageRouterService,
     IReadOnlyList<SptMod> loadedMods,
     FileUtil fileUtil,
-    ISptLogger<CatalogService> logger) : ICatalogSource
+    ISptLogger<CatalogService> logger) : ICatalogSource, ICatalogWarmSource
 {
     private const string FallbackLang = "en";
 
@@ -69,18 +69,19 @@ public class CatalogService(
 
     /// <summary>
     /// 한 세대 = 언어별 카탈로그 + 그 재료. 다시 만들기 중에 진행 중이던 빌드는 옛 세대를 끝까지 쓰고, 새 요청은 새 세대를 쓴다.
+    /// 재료는 RetryingLazy 라 한 번 실패해도 세대에 고착되지 않는다(16 catalog-warmup 스펙 §5).
     /// </summary>
     private sealed record Generation(
         ConcurrentDictionary<string, Lazy<QuestCodex.Catalog.Models.Catalog>> Catalogs,
-        Lazy<LocationData> Locations,
-        Lazy<CachedLootData> Loot,
-        Lazy<(IReadOnlyDictionary<string, HandbookCategoryInput> Categories, IReadOnlyDictionary<string, string> ItemParents)> Handbook);
+        RetryingLazy<LocationData> Locations,
+        RetryingLazy<CachedLootData> Loot,
+        RetryingLazy<(IReadOnlyDictionary<string, HandbookCategoryInput> Categories, IReadOnlyDictionary<string, string> ItemParents)> Handbook);
 
     private Generation NewGeneration(bool readDiskCache) => new(
         new ConcurrentDictionary<string, Lazy<QuestCodex.Catalog.Models.Catalog>>(StringComparer.Ordinal),
-        new Lazy<LocationData>(() => LoadLocationData(questZoneSnapshot, modQuestZoneIndex, locationTable), LazyThreadSafetyMode.ExecutionAndPublication),
-        new Lazy<CachedLootData>(() => LoadLootData(readDiskCache), LazyThreadSafetyMode.ExecutionAndPublication),
-        new(LoadHandbook, LazyThreadSafetyMode.ExecutionAndPublication));
+        new(() => LoadLocationData(questZoneSnapshot, modQuestZoneIndex, locationTable)),
+        new(() => LoadLootData(readDiskCache)),
+        new(LoadHandbook));
 
     private sealed record LocationData(
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapPoint>>> Zones,
@@ -90,10 +91,54 @@ public class CatalogService(
         IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationExits> Exits);
 
     /// <summary>디스크 캐시 파일. 모드 폴더 안이라 모드를 지우면 같이 사라진다.</summary>
-    private static readonly string CachePath = Path.Combine(
-        Path.GetDirectoryName(typeof(CatalogService).Assembly.Location) ?? ".", "cache", "loot-data.json");
+    private static readonly string CacheDir = Path.Combine(
+        Path.GetDirectoryName(typeof(CatalogService).Assembly.Location) ?? ".", "cache");
 
+    private static readonly string CachePath = Path.Combine(CacheDir, "loot-data.json");
+
+    /// <summary>미리 만들 언어 기록(16 catalog-warmup 스펙 §4).</summary>
+    private static readonly string WarmLangsPath = Path.Combine(CacheDir, "warm-langs.json");
+
+    private readonly Lock _recentLangsLock = new();
+    private IReadOnlyList<string>? _recentLangs;
+
+    public IReadOnlyList<string> RecentLangs
+    {
+        get
+        {
+            lock (_recentLangsLock) return _recentLangs ??= WarmLangs.Read(WarmLangsPath);
+        }
+    }
+
+    /// <summary>요청 경로. 언어를 기록한 뒤 카탈로그를 돌려준다.</summary>
     public QuestCodex.Catalog.Models.Catalog Get(string lang)
+    {
+        RememberLang(lang);
+        return GetCached(lang);
+    }
+
+    /// <summary>미리 만들기 경로. 기록하지 않는다 — 기록하면 시작마다 언어 순서가 바뀐다.</summary>
+    public void Prebuild(string lang) => GetCached(lang);
+
+    private void RememberLang(string lang)
+    {
+        lock (_recentLangsLock)
+        {
+            _recentLangs ??= WarmLangs.Read(WarmLangsPath);
+            if (WarmLangs.Add(_recentLangs, lang) is not { } next) return;
+            _recentLangs = next;
+            try
+            {
+                WarmLangs.Write(WarmLangsPath, next);
+            }
+            catch (Exception ex)
+            {
+                logger.Warning($"[QuestCodex] warm-up languages not saved: {ex.Message}");
+            }
+        }
+    }
+
+    private QuestCodex.Catalog.Models.Catalog GetCached(string lang)
     {
         var generation = Current;
         var lazy = generation.Catalogs.GetOrAdd(lang, l => new Lazy<QuestCodex.Catalog.Models.Catalog>(() => Build(l, generation), LazyThreadSafetyMode.ExecutionAndPublication));
