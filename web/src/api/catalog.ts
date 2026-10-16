@@ -126,6 +126,8 @@ export interface Objective {
   prep: ObjectivePrep | null
   /** 목표 위치. 좌표를 모르는 조건이면 빈 배열. 필드가 생기기 전 서버(구버전 DLL)는 undefined 를 보낸다. */
   locations?: ObjectiveLocation[]
+  /** 이 목표가 게임에 보이려면 먼저 끝나야 하는 같은 퀘스트의 조건 ID. 대부분 빈 배열, 필드가 생기기 전 서버는 undefined. */
+  visibleAfter?: string[]
 }
 
 export type Reward =

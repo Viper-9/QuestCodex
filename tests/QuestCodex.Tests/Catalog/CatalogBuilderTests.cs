@@ -440,6 +440,25 @@ public class CatalogBuilderTests
     }
 
     [Fact]
+    public void Objectives_carry_the_conditions_that_reveal_them()
+    {
+        var q = Quest(Id(1), finish:
+        [
+            new QuestCondition { Id = Id(11), ConditionType = "CounterCreator", DynamicLocale = false },
+            new QuestCondition
+            {
+                Id = Id(12), ConditionType = "LeaveItemAtLocation", DynamicLocale = false,
+                VisibilityConditions = [new VisibilityCondition { ConditionType = "CompleteCondition", Target = Id(11).ToString() }],
+            },
+        ]);
+
+        var objectives = CatalogBuilder.Build(Input([q]), Now).Quests[Id(1)].Objectives;
+
+        Assert.Empty(objectives[0].VisibleAfter);
+        Assert.Equal([Id(11).ToString()], objectives[1].VisibleAfter);
+    }
+
+    [Fact]
     public void Missing_zone_snapshot_warns_once_and_zone_lookups_still_warn()
     {
         var q = Quest(Id(1), finish: [new QuestCondition { Id = Id(11), ConditionType = "PlaceBeacon", DynamicLocale = false, ZoneId = "fuel4" }]);

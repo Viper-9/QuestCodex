@@ -33,6 +33,12 @@ public sealed record Objective(
     /// 빈 값은 항상 공유 인스턴스(Array.Empty)를 쓴다 — LocationResolver 도 같은 인스턴스를 돌려준다.
     /// </summary>
     public IReadOnlyList<ObjectiveLocation> Locations { get; init; } = Array.Empty<ObjectiveLocation>();
+
+    /// <summary>
+    /// 이 목표가 게임에 보이려면 먼저 끝나야 하는 같은 퀘스트의 조건 ID(visibilityConditions 의 CompleteCondition).
+    /// 대부분 비어 있다. 빈 값은 Locations 와 같은 이유로 Array.Empty.
+    /// </summary>
+    public IReadOnlyList<string> VisibleAfter { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>Unity 월드 좌표 그대로. Y = 높이. SVG 투영은 브라우저가 한다.</summary>
