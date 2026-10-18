@@ -219,20 +219,29 @@ export function mapGroup(key: string): string | null {
   return IGNORED_MAPS.has(k) ? null : MAP_GROUP[k] ?? k
 }
 
-/** 레이드 안에서 하는 목표. 제출(상인)·레벨·스킬·찾기(FIR 은 필요 아이템 화면) 같은 것은 브리핑에 넣지 않는다. */
+/**
+ * 레이드 안에서 하는 목표. 제출(상인)·레벨·스킬 같은 것은 브리핑에 넣지 않는다.
+ * 찾기는 정해진 자리에 생기는 퀘스트 아이템(좌표가 있는 것)만 넣고, 일반 아이템은 필요 아이템 화면에 둔다.
+ */
 const RAID_TYPES = new Set(['CounterCreator', 'LeaveItemAtLocation', 'PlaceBeacon', 'VisitPlace'])
 
 export function isRaidObjective(o: Objective): boolean {
-  return RAID_TYPES.has(o.conditionType)
+  return RAID_TYPES.has(o.conditionType) || isQuestItemFind(o)
+}
+
+function isQuestItemFind(o: Objective): boolean {
+  return o.conditionType === 'FindItem' && (o.locations ?? []).length > 0
 }
 
 /**
  * 목표를 할 수 있는 맵(탭 키). 빈 배열 = 어느 맵이든.
  * 목표에 맵 조건이 없으면 퀘스트의 맵을 쓴다 — 표식 설치·존 방문은 조건에 맵이 없고 퀘스트에만 묶여 있다(인게임 맵 정렬과 같은 기준).
+ * 퀘스트 아이템 찾기는 아이템이 생기는 맵을 쓴다.
  */
 export function objectiveMaps(q: CatalogQuest, o: Objective): string[] {
   const keys = o.prep?.mapKeys ?? []
-  const src = keys.length > 0 ? keys : q.locationKey ? [q.locationKey] : []
+  const src = isQuestItemFind(o) ? (o.locations ?? []).map((l) => l.map)
+    : keys.length > 0 ? keys : q.locationKey ? [q.locationKey] : []
   const out: string[] = []
   for (const k of src) {
     const g = mapGroup(k)
