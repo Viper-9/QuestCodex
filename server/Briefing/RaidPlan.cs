@@ -66,13 +66,18 @@ public static class RaidPlan
     private static readonly HashSet<string> RaidTypes = new(StringComparer.Ordinal)
         { "CounterCreator", "LeaveItemAtLocation", "PlaceBeacon", "VisitPlace" };
 
-    public static bool IsRaidObjective(Objective o) => RaidTypes.Contains(o.ConditionType);
+    // 찾기는 정해진 자리에 생기는 퀘스트 아이템(좌표가 있는 것)만 레이드 목표로 본다.
+    // 어디서나 줍는 일반 아이템은 찾을 것 목록에만 둔다.
+    public static bool IsRaidObjective(Objective o) => RaidTypes.Contains(o.ConditionType) || IsQuestItemFind(o);
 
-    // 목표 조건에 맵이 없으면 퀘스트에 묶인 맵을 쓴다.
+    private static bool IsQuestItemFind(Objective o) => o.ConditionType == "FindItem" && o.Locations.Count > 0;
+
+    // 목표 조건에 맵이 없으면 퀘스트에 묶인 맵을 쓴다. 퀘스트 아이템 찾기는 아이템이 생기는 맵을 쓴다.
     public static IReadOnlyList<string> ObjectiveMaps(CatalogQuest q, Objective o)
     {
         var keys = o.Prep?.MapKeys ?? [];
-        IReadOnlyList<string> src = keys.Count > 0 ? keys : q.LocationKey is { } l ? [l] : [];
+        IReadOnlyList<string> src = IsQuestItemFind(o) ? o.Locations.Select(l => l.Map).ToList()
+            : keys.Count > 0 ? keys : q.LocationKey is { } l ? [l] : [];
         var list = new List<string>();
         foreach (var k in src)
         {
