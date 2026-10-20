@@ -234,6 +234,21 @@ describe('raidEntries 숨은 목표', () => {
   })
 })
 
+describe('raidEntries 퀘스트 아이템 찾기', () => {
+  it('좌표가 있는 찾기만 아이템이 생기는 맵의 레이드 목표가 된다', () => {
+    const db = quest('db', [
+      { ...obj('find', 'FindItem'), locations: [{ map: 'interchange', points: [{ x: 1, y: 2, z: 3 }] }] },
+      obj('hand', 'HandoverItem'),
+      obj('bolts', 'FindItem'),   // 좌표가 없는 일반 아이템 찾기는 그대로 뺀다
+    ])
+    db.locationKey = 'bigmap'     // 퀘스트 맵보다 아이템이 생기는 맵이 맞다
+    const entries = (done: boolean) => raidEntries(catalog([db]),
+      progress({ db: qp('Started', { find: { current: done ? 1 : 0, target: 1, done } }) }))
+    expect(entries(false).map((e) => [e.objective.conditionId, e.maps, e.inferred])).toEqual([['find', ['interchange'], false]])
+    expect(entries(true)).toEqual([])
+  })
+})
+
 describe('raidEntries / mapTabs / mapBrief', () => {
   const cult = quest('cult', [
     obj('c1', 'PlaceBeacon', prep({ item: item({ action: 'plant', count: 1 }) })),

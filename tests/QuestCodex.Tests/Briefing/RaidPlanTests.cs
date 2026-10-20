@@ -80,6 +80,24 @@ public class RaidPlanTests
         Assert.Equal(new[] { "plant", "odd" }, after.Select(e => e.Objective.ConditionId));
     }
 
+    [Fact]
+    public void RaidEntries_take_quest_item_finds_on_the_map_where_the_item_spawns()
+    {
+        var db = Quest("db", [
+            Obj("find", "FindItem", locations: At("interchange", 1, 2, 3)),
+            Obj("hand", "HandoverItem"),
+            Obj("bolts", "FindItem"),   // 좌표가 없는 일반 아이템 찾기는 그대로 뺀다
+        ], locationKey: "bigmap");     // 퀘스트 맵보다 아이템이 생기는 맵이 맞다
+        var catalog = B.Catalog([db]);
+
+        var open = RaidPlan.RaidEntries(catalog, B.Progress(new() { ["db"] = Qp("Started", new() { ["find"] = Op(0, 1) }) }));
+        var found = RaidPlan.RaidEntries(catalog, B.Progress(new() { ["db"] = Qp("Started", new() { ["find"] = Op(1, 1, done: true) }) }));
+
+        var e = Assert.Single(open);
+        Assert.Equal(("find", "interchange", false), (e.Objective.ConditionId, string.Join(",", e.Maps), e.Inferred));
+        Assert.Empty(found);
+    }
+
     // 아래는 derive.test.ts 의 raidEntries, mapTabs, mapBrief 테스트를 옮긴 것
 
     private static readonly CatalogQuest Cult = Quest("cult", [
