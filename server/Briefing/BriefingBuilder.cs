@@ -1,4 +1,5 @@
 using QuestCodex.Briefing.Models;
+using QuestCodex.Catalog;
 using QuestCodex.Catalog.Models;
 using QuestCodex.Progress.Models;
 using CatalogModel = QuestCodex.Catalog.Models.Catalog;
@@ -25,6 +26,8 @@ public static class BriefingBuilder
         var entries = RaidPlan.RaidEntries(catalog, progress);
         var finds = RaidFinds.Rows(catalog, progress, inventory, names);
         var serverMaps = catalog.Exits.Keys.Concat(catalog.LockedDoors.Keys).ToList();
+        var flags = new QuestFlags(
+            QuestChains.PrerequisitesOf(catalog, CatalogBuilder.CollectorId), QuestChains.PrerequisitesOf(catalog, QuestChains.InformationSourceId));
 
         var maps = RaidPlan.MapTabs(entries, catalog.Exits.Keys).Select(tab =>
         {
@@ -38,7 +41,7 @@ public static class BriefingBuilder
                 tab.Count,
                 folder is not null,
                 folder,
-                RaidPlan.OrderRaidQuests(brief.Here, tab.Key, names).Select(g => Quest(g, tab.Key, plan.Numbers, lang)).ToList(),
+                RaidPlan.OrderRaidQuests(brief.Here, tab.Key, names).Select(g => Quest(g, tab.Key, plan.Numbers, lang, flags)).ToList(),
                 brief.Bring.Select(ItemRow).ToList(),
                 RaidFinds.Place(finds, catalog, tab.Key).Select(FindRow).ToList(),
                 Gear(brief.Gear.Where(e => e.Maps.Count > 0)),
@@ -56,22 +59,28 @@ public static class BriefingBuilder
         return new BriefingResponse(
             SchemaVersion, questCodexVersion, generatedAt, lang, traders, maps,
             new BriefingAnywhere(
-                RaidPlan.OrderRaidQuests(anywhere, "", names).Select(g => Quest(g, null, null, lang)).ToList(),
+                RaidPlan.OrderRaidQuests(anywhere, "", names).Select(g => Quest(g, null, null, lang, flags)).ToList(),
                 RaidNeeds.AggregateNeeds(RaidPlan.PlantNeeds(anywhere), inventory).Select(ItemRow).ToList(),
                 Gear(anywhere.Where(e => e.Objective.Prep is { } p && RaidPlan.HasGear(p))),
-                Special(anywhere.Where(e => e.Objective.Prep is { } p && RaidPlan.HasSpecial(p)))));
+                Special(anywhere.Where(e => e.Objective.Prep is { } p && RaidPlan.HasSpecial(p)))),
+            flags.Kappa.Order(StringComparer.Ordinal).ToList(),
+            flags.Lightkeeper.Order(StringComparer.Ordinal).ToList());
     }
 
     // map 이 null 이면 아무 맵 목록용이라 지도 번호를 붙이지 않고 좌표도 손대지 않는다.
-    private static BriefingQuest Quest(QuestGroup g, string? map, IReadOnlyDictionary<string, int>? numbers, string lang)
+    private static BriefingQuest Quest(QuestGroup g, string? map, IReadOnlyDictionary<string, int>? numbers, string lang, QuestFlags flags)
     {
         var line = QuestLines.Of(g.Entries, lang);
         int? marker = numbers is not null && numbers.TryGetValue(g.Quest.Id, out var n) ? n : null;
         var objectives = g.Entries.Select(e => new BriefingObjective(
             e.Objective.ConditionId, BriefingText.ObjectiveText(e.Objective), e.Progress?.Current ?? 0, e.Progress?.Target,
             e.Inferred, map is null ? e.Objective.Locations : LocationsFor(e.Objective, map))).ToList();
-        return new BriefingQuest(g.Quest.Id, g.Quest.TraderId, g.Quest.Name, marker, line.Summary, line.Current, line.Target, objectives);
+        return new BriefingQuest(g.Quest.Id, g.Quest.TraderId, g.Quest.Name, marker, line.Summary, line.Current, line.Target, objectives,
+            flags.Kappa.Contains(g.Quest.Id), flags.Lightkeeper.Contains(g.Quest.Id));
     }
+
+    // Build 에서 한 번만 계산해 퀘스트마다 넘기는 선행 퀘스트 목록.
+    private sealed record QuestFlags(IReadOnlySet<string> Kappa, IReadOnlySet<string> Lightkeeper);
 
     // 이 탭에 속한 위치만 골라 하나로 합친다. 공장 주간·야간처럼 짝이 있는 맵은 같은 존이 같은 좌표로 양쪽에 들어 있어서
     // 그냥 두면 마커가 두 번 찍힌다. 웹 mapProjection 의 buildNumberedTabs 도 같은 이유로 합친다.

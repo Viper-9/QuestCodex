@@ -91,6 +91,17 @@ public class BriefingSnapshotTests
             Assert.Equal(m.Count, m.Quests.Sum(q => q.Objectives.Count));
         }
         Assert.All(r.Anywhere.Quests, q => Assert.Null(q.Marker));
+
+        // 맨 위 목록은 바닐라 기준 전체 집합이고, 퀘스트마다 붙은 bool 과 어긋나지 않는다.
+        Assert.Equal(251, r.KappaQuests.Count);
+        Assert.Equal(100, r.LightkeeperQuests.Count);
+        Assert.Equal(r.KappaQuests.Order(StringComparer.Ordinal), r.KappaQuests);
+        Assert.Equal(r.LightkeeperQuests.Order(StringComparer.Ordinal), r.LightkeeperQuests);
+        foreach (var q in r.Maps.SelectMany(m => m.Quests).Concat(r.Anywhere.Quests))
+        {
+            Assert.Equal(r.KappaQuests.Contains(q.QuestId), q.Kappa);
+            Assert.Equal(r.LightkeeperQuests.Contains(q.QuestId), q.Lightkeeper);
+        }
         var size = JsonSerializer.Serialize(r, QuestCodexJson.Options).Length;
         Assert.True(size < 1_000_000, $"briefing is {size} chars");             // 응답은 수백 KB 안쪽이어야 한다
     }

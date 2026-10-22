@@ -1,6 +1,7 @@
 using System.Text.Json;
 using QuestCodex.Briefing;
 using QuestCodex.Briefing.Models;
+using QuestCodex.Catalog;
 using QuestCodex.Catalog.Models;
 using QuestCodex.Web;
 using static QuestCodex.Tests.Briefing.B;
@@ -182,5 +183,59 @@ public class BriefingBuilderTests
         });
         var r = BriefingBuilder.Build(B.Catalog([a, b, c]), prog, MapIndex.Parse(IndexJson), "9.9.9", DateTimeOffset.UnixEpoch);
         Assert.Equal(new[] { "b", "c", "a" }, r.Anywhere.Quests.Select(q => q.QuestId));
+    }
+
+    // Collector 는 a 를, Information Source 는 a·c 를 Success 로 요구한다. x 는 어느 쪽도 아니다.
+    // 맵 탭과 아무 맵 목록 양쪽에서 채워지는지 본다.
+    [Fact]
+    public void Quests_carry_kappa_and_lightkeeper_flags()
+    {
+        static QuestRequirement Done(string id) => new(id, ["Success"], 0, true);
+        var a = Quest("a", [Obj("a1", "CounterCreator", Prep(mapKeys: ["woods"]), 5, text: "Kill")]);
+        var c = Quest("c", [Obj("c1", "CounterCreator", Prep(exitStatuses: ["Survived"]), 10, text: "Any")]);
+        var x = Quest("x", [Obj("x1", "CounterCreator", Prep(exitStatuses: ["Survived"]), 10, text: "Other")]);
+        var collector = Quest(CatalogBuilder.CollectorId, [], requirements: [Done("a")]);
+        var source = Quest(QuestChains.InformationSourceId, [], requirements: [Done("a"), Done("c")]);
+        var prog = B.Progress(new()
+        {
+            ["a"] = Qp("Started", new() { ["a1"] = Op(1, 5) }),
+            ["c"] = Qp("Started", new() { ["c1"] = Op(1, 10) }),
+            ["x"] = Qp("Started", new() { ["x1"] = Op(1, 10) }),
+        });
+        var r = BriefingBuilder.Build(B.Catalog([a, c, x, collector, source]), prog, MapIndex.Parse(IndexJson), "9.9.9", DateTimeOffset.UnixEpoch);
+
+        var woods = r.Maps.Single(m => m.Key == "woods").Quests.Single();
+        Assert.Equal(("a", true, true), (woods.QuestId, woods.Kappa, woods.Lightkeeper));
+        var anywhere = r.Anywhere.Quests.ToDictionary(q => q.QuestId, q => (q.Kappa, q.Lightkeeper));
+        Assert.Equal((false, true), anywhere["c"]);
+        Assert.Equal((false, false), anywhere["x"]);
+
+        var json = JsonSerializer.Serialize(woods, QuestCodexJson.Options);
+        Assert.Contains("\"kappa\":true", json);
+        Assert.Contains("\"lightkeeper\":true", json);
+    }
+
+    // 응답 맨 위 목록은 진행 상태와 상관없이 전체 집합을 ordinal 순으로 보낸다. "B" 는 진행 중이 아니라 퀘스트 목록에는 없지만
+    // kappaQuests 에는 들어가고, ordinal 이라 "a" 보다 앞에 온다(문화권 정렬이면 뒤).
+    [Fact]
+    public void Response_lists_every_kappa_and_lightkeeper_quest_in_ordinal_order()
+    {
+        static QuestRequirement Done(string id) => new(id, ["Success"], 0, true);
+        var a = Quest("a", [Obj("a1", "CounterCreator", Prep(mapKeys: ["woods"]), 5, text: "Kill")]);
+        var c = Quest("c", [Obj("c1", "CounterCreator", Prep(exitStatuses: ["Survived"]), 10, text: "Any")]);
+        var collector = Quest(CatalogBuilder.CollectorId, [], requirements: [Done("a"), Done("B")]);
+        var source = Quest(QuestChains.InformationSourceId, [], requirements: [Done("c"), Done("a")]);
+        var prog = B.Progress(new()
+        {
+            ["a"] = Qp("Started", new() { ["a1"] = Op(1, 5) }),
+            ["c"] = Qp("Started", new() { ["c1"] = Op(1, 10) }),
+        });
+        var r = BriefingBuilder.Build(B.Catalog([a, c, Quest("B", []), collector, source]), prog, MapIndex.Parse(IndexJson), "9.9.9", DateTimeOffset.UnixEpoch);
+
+        Assert.Equal(["B", "a"], r.KappaQuests);
+        Assert.Equal(["a", "c"], r.LightkeeperQuests);
+        var json = JsonSerializer.Serialize(r, QuestCodexJson.Options);
+        Assert.Contains("\"kappaQuests\":[\"B\",\"a\"]", json);
+        Assert.Contains("\"lightkeeperQuests\":[\"a\",\"c\"]", json);
     }
 }
