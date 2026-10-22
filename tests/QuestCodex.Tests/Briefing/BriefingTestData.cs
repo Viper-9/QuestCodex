@@ -32,10 +32,10 @@ internal static class B
         => [new ObjectiveLocation(map, [new MapPoint(x, y, z)])];
 
     public static CatalogQuest Quest(string id, IReadOnlyList<Objective> objectives, string? locationKey = null,
-        string traderId = "t1", string? name = null) => new()
+        string traderId = "t1", string? name = null, IReadOnlyList<Requirement>? requirements = null) => new()
     {
         Id = id, Name = name ?? id, Description = "", TraderId = traderId, Side = "Pmc", IsVanilla = true,
-        LocationKey = locationKey, Requirements = [], Prerequisites = [], Objectives = objectives,
+        LocationKey = locationKey, Requirements = requirements ?? [], Prerequisites = [], Objectives = objectives,
         Rewards = new QuestRewards([], [], []),
     };
 

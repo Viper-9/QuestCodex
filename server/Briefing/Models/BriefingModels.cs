@@ -5,6 +5,9 @@ namespace QuestCodex.Briefing.Models;
 // 브리핑 응답 형식(schemaVersion 1). Briefing 모드가 이 JSON 을 그대로 읽는다.
 // 필드를 추가하는 건 괜찮지만 이름이나 뜻을 바꾸면 BriefingBuilder.SchemaVersion 을 올린다.
 
+// KappaQuests, LightkeeperQuests 는 Collector, Information Source 의 선행 퀘스트 전체(완료 여부와 상관없이, ordinal 정렬).
+// 응답에 없는 퀘스트(Briefing 이 게임에서 직접 만드는 제출·완료 가능 묶음)에도 배지를 붙이려고 따로 싣는다.
+// 응답 안 퀘스트의 Kappa, Lightkeeper 와 같은 집합이다.
 public sealed record BriefingResponse(
     int SchemaVersion,
     string QuestCodexVersion,
@@ -12,7 +15,9 @@ public sealed record BriefingResponse(
     string Lang,
     SortedDictionary<string, BriefingTrader> Traders,
     IReadOnlyList<BriefingMap> Maps,
-    BriefingAnywhere Anywhere);
+    BriefingAnywhere Anywhere,
+    IReadOnlyList<string> KappaQuests,
+    IReadOnlyList<string> LightkeeperQuests);
 
 public sealed record BriefingTrader(string Name);
 
@@ -35,9 +40,10 @@ public sealed record BriefingMap(
     IReadOnlyList<LockedDoor> LockedDoors);
 
 // Marker 는 지도 번호. 좌표가 있는 퀘스트에만 1부터 붙고 나머지는 null. Current, Target 은 QuestLines 에서 계산한다.
+// Kappa 는 Collector 의 선행 퀘스트, Lightkeeper 는 Information Source(등대지기 첫 퀘스트)의 선행 퀘스트라는 뜻(QuestChains 참고).
 public sealed record BriefingQuest(
     string QuestId, string TraderId, string Name, int? Marker, string Summary, double? Current, double? Target,
-    IReadOnlyList<BriefingObjective> Objectives);
+    IReadOnlyList<BriefingObjective> Objectives, bool Kappa, bool Lightkeeper);
 
 // Locations 는 월드 좌표 그대로. 맵 탭 안에서는 그 탭 것만 하나로 합치고 Map 을 탭 키로 둔다.
 public sealed record BriefingObjective(
