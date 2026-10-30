@@ -39,6 +39,12 @@ public sealed record Objective(
     /// 대부분 비어 있다. 빈 값은 Locations 와 같은 이유로 Array.Empty.
     /// </summary>
     public IReadOnlyList<string> VisibleAfter { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// 이 목표에 필요한 열쇠(tarkov.dev 스냅샷). 묶음은 모두 필요하고 묶음 안에서는 하나만 있으면 된다.
+    /// 대부분 비어 있다. 빈 값은 Locations 와 같은 이유로 Array.Empty.
+    /// </summary>
+    public IReadOnlyList<IReadOnlyList<ItemRef>> RequiredKeys { get; init; } = Array.Empty<IReadOnlyList<ItemRef>>();
 }
 
 /// <summary>Unity 월드 좌표 그대로. Y = 높이. SVG 투영은 브라우저가 한다.</summary>

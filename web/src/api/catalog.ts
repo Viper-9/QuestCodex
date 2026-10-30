@@ -128,6 +128,8 @@ export interface Objective {
   locations?: ObjectiveLocation[]
   /** 이 목표가 게임에 보이려면 먼저 끝나야 하는 같은 퀘스트의 조건 ID. 대부분 빈 배열, 필드가 생기기 전 서버는 undefined. */
   visibleAfter?: string[]
+  /** 필요한 열쇠(tarkov.dev 스냅샷). 묶음은 모두 필요, 묶음 안에서는 하나면 된다. 대부분 빈 배열, 필드가 생기기 전 서버는 undefined. */
+  requiredKeys?: ItemRef[][]
 }
 
 export type Reward =

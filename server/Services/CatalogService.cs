@@ -28,6 +28,7 @@ public class CatalogService(
     LocaleService localeService,
     LocaleTable localeTable,
     VanillaSnapshot vanilla,
+    RequiredKeysSnapshot requiredKeys,
     ModQuestIndex modQuestIndex,
     QuestZoneSnapshot questZoneSnapshot,
     ModQuestZoneIndex modQuestZoneIndex,
@@ -200,7 +201,8 @@ public class CatalogService(
             MapVariants: mapVariants.Active,
             ExitPositions: questZoneSnapshot.Exits,
             LocationExits: locations.Exits,
-            LootSources: loot.LootSources);
+            LootSources: loot.LootSources,
+            RequiredKeys: requiredKeys.Objectives);
 
         var catalog = CatalogBuilder.Build(input, started);
 

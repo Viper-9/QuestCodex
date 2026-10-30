@@ -46,8 +46,10 @@ public sealed record BriefingQuest(
     IReadOnlyList<BriefingObjective> Objectives, bool Kappa, bool Lightkeeper);
 
 // Locations 는 월드 좌표 그대로. 맵 탭 안에서는 그 탭 것만 하나로 합치고 Map 을 탭 키로 둔다.
+// RequiredKeys 는 카탈로그 Objective.RequiredKeys 그대로(묶음은 모두 필요, 묶음 안에서는 하나면 된다).
 public sealed record BriefingObjective(
-    string ConditionId, string Text, double Current, double? Target, bool InferredMap, IReadOnlyList<ObjectiveLocation> Locations);
+    string ConditionId, string Text, double Current, double? Target, bool InferredMap, IReadOnlyList<ObjectiveLocation> Locations,
+    IReadOnlyList<IReadOnlyList<ItemRef>> RequiredKeys);
 
 public sealed record BriefingSource(string QuestId, double Count);
 

@@ -238,4 +238,21 @@ public class BriefingBuilderTests
         Assert.Contains("\"kappaQuests\":[\"B\",\"a\"]", json);
         Assert.Contains("\"lightkeeperQuests\":[\"a\",\"c\"]", json);
     }
+
+    // 열쇠는 카탈로그 목표에 붙은 그대로 나간다. 묶음 구조(모두 필요, 묶음 안에서는 하나)를 유지한다.
+    [Fact]
+    public void Objectives_carry_their_required_keys()
+    {
+        IReadOnlyList<IReadOnlyList<ItemRef>> keys = [[new("k1", "Key 1")], [new("k2", "Key 2"), new("k3", "Key 3")]];
+        var a = Quest("a", [Obj("a1", "VisitPlace", Prep(mapKeys: ["woods"]), text: "Visit") with { RequiredKeys = keys }, Obj("a2", "CounterCreator", Prep(mapKeys: ["woods"]), 5)]);
+        var prog = B.Progress(new() { ["a"] = Qp("Started", new() { ["a1"] = Op(0, null), ["a2"] = Op(0, 5) }) });
+
+        var r = BriefingBuilder.Build(B.Catalog([a]), prog, MapIndex.Parse(IndexJson), "9.9.9", DateTimeOffset.UnixEpoch);
+
+        var objectives = r.Maps.Single(m => m.Key == "woods").Quests.Single().Objectives;
+        Assert.Same(keys, objectives.Single(o => o.ConditionId == "a1").RequiredKeys);
+        Assert.Empty(objectives.Single(o => o.ConditionId == "a2").RequiredKeys);
+        var json = JsonSerializer.Serialize(r, QuestCodexJson.Options);
+        Assert.Contains("\"requiredKeys\":[[{\"tpl\":\"k1\",\"name\":\"Key 1\"}],[{\"tpl\":\"k2\"", json);
+    }
 }

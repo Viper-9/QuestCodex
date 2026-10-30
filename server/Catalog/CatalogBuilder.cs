@@ -219,6 +219,20 @@ public static class CatalogBuilder
         return new CatalogTrader(id, name, avatar, VanillaTraderIds.Contains(id));
     }
 
+    // 서버에 없는 tpl(다른 게임 버전 열쇠)은 빼고, 그래서 빈 묶음이 되면 묶음째 뺀다.
+    private static IReadOnlyList<IReadOnlyList<ItemRef>> RequiredKeysOf(QuestCondition c, CatalogInput input, RewardParser rewardParser)
+    {
+        if (input.RequiredKeys is null || !input.RequiredKeys.TryGetValue(c.Id.ToString(), out var groups)) return Array.Empty<IReadOnlyList<ItemRef>>();
+        var result = groups
+            .Select(g => (IReadOnlyList<ItemRef>)g
+                .Where(tpl => MongoId.IsValidMongoId(tpl) && input.Items.ContainsKey(new MongoId(tpl)))
+                .Select(tpl => new ItemRef(tpl, rewardParser.NameOf(tpl)))
+                .ToList())
+            .Where(g => g.Count > 0)
+            .ToList();
+        return result.Count == 0 ? Array.Empty<IReadOnlyList<ItemRef>>() : result;
+    }
+
     private static CatalogQuest BuildQuest(
         string questId,
         Quest quest,
@@ -264,6 +278,7 @@ public static class CatalogBuilder
                 Prep = prepParser.Parse(c),
                 Locations = locationResolver.Resolve(c, questMap, warnings, questId),
                 VisibleAfter = VisibleAfterOf(c),
+                RequiredKeys = RequiredKeysOf(c, input, rewardParser),
             })
             .ToList();
 

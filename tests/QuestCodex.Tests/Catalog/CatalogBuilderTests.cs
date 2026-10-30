@@ -560,4 +560,28 @@ public class CatalogBuilderTests
     [Fact]
     public void Null_input_throws()
         => Assert.Throws<ArgumentNullException>(() => CatalogBuilder.Build(null!, Now));
+
+    [Fact]
+    public void Objectives_carry_required_keys_the_server_knows()
+    {
+        var q = Quest(Id(1), finish:
+        [
+            new QuestCondition { Id = Id(11), ConditionType = "VisitPlace", DynamicLocale = false },
+            new QuestCondition { Id = Id(12), ConditionType = "HandoverItem", DynamicLocale = false },
+        ]);
+        var items = new Dictionary<MongoId, TemplateItem> { [Id(50)] = new() { Id = Id(50), Name = "key_a" }, [Id(51)] = new() { Id = Id(51), Name = "key_b" } };
+        var en = new Dictionary<string, string> { [$"{Id(50)} Name"] = "Key A" };
+        var keys = new Dictionary<string, IReadOnlyList<IReadOnlyList<string>>>
+        {
+            [Id(11).ToString()] = [[Id(50).ToString()], [Id(51).ToString(), Id(60).ToString()], [Id(61).ToString()]],
+        };
+
+        var cat = CatalogBuilder.Build(Input([q], en: en, items: items) with { RequiredKeys = keys }, Now);
+
+        var objectives = cat.Quests[Id(1)].Objectives;
+        Assert.Equal(2, objectives[0].RequiredKeys.Count);
+        Assert.Equal([new ItemRef(Id(50).ToString(), "Key A")], objectives[0].RequiredKeys[0]);
+        Assert.Equal([new ItemRef(Id(51).ToString(), "key_b")], objectives[0].RequiredKeys[1]);
+        Assert.Empty(objectives[1].RequiredKeys);
+    }
 }
