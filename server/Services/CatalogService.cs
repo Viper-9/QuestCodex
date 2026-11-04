@@ -29,6 +29,7 @@ public class CatalogService(
     LocaleTable localeTable,
     VanillaSnapshot vanilla,
     ModQuestIndex modQuestIndex,
+    ModAlternativeGroups modAlternativeGroups,
     QuestZoneSnapshot questZoneSnapshot,
     ModQuestZoneIndex modQuestZoneIndex,
     MapVariantDetector mapVariants,
@@ -187,7 +188,7 @@ public class CatalogService(
             VanillaQuestIds: vanilla.QuestIds,
             VanillaSnapshotSptVersion: vanilla.SptVersion,
             ModQuestOrigins: modQuestIndex.QuestOrigins,
-            ModQuestScanWarnings: modQuestIndex.Warnings,
+            ModQuestScanWarnings: [.. modQuestIndex.Warnings, .. modAlternativeGroups.Warnings],
             AvatarIsServable: IsAvatarServable,
             QuestZones: locations.Zones,
             QuestItemSpawns: loot.QuestItemSpawns,
@@ -200,7 +201,8 @@ public class CatalogService(
             MapVariants: mapVariants.Active,
             ExitPositions: questZoneSnapshot.Exits,
             LocationExits: locations.Exits,
-            LootSources: loot.LootSources);
+            LootSources: loot.LootSources,
+            AlternativeGroups: modAlternativeGroups.Groups);
 
         var catalog = CatalogBuilder.Build(input, started);
 

@@ -557,6 +557,107 @@ public class CatalogBuilderTests
     public void Locked_doors_are_empty_without_input()
         => Assert.Empty(CatalogBuilder.Build(Input([]), Now).LockedDoors);
 
+    private static QuestCondition Beacon(MongoId id, string zone) => new()
+    {
+        Id = id, ConditionType = "PlaceBeacon", DynamicLocale = false, Value = 1, ZoneId = zone,
+    };
+
+    private static AlternativeGroup Group(MongoId quest, params MongoId[] conditions)
+        => new(quest.ToString(), conditions.Select(c => c.ToString()).ToList());
+
+    [Fact]
+    public void Alternative_group_becomes_one_objective_in_place_of_the_first_option()
+    {
+        var q = Quest(Id(1), finish: [FinishCond(Id(10)), Beacon(Id(11), "a"), Beacon(Id(12), "b"), Beacon(Id(13), "c"), FinishCond(Id(14))]);
+
+        var objectives = CatalogBuilder.Build(Input([q]) with { AlternativeGroups = [Group(Id(1), Id(13), Id(11), Id(12))] }, Now)
+            .Quests[Id(1)].Objectives;
+
+        Assert.Equal([Id(10).ToString(), Id(11).ToString(), Id(14).ToString()], objectives.Select(o => o.ConditionId));
+        Assert.Equal([Id(11).ToString(), Id(12).ToString(), Id(13).ToString()], objectives[1].AnyOf);
+        Assert.Empty(objectives[0].AnyOf);
+    }
+
+    [Fact]
+    public void Merged_objective_keeps_every_option_location()
+    {
+        var a = new MapPoint(1, 0, 1);
+        var b = new MapPoint(2, 0, 2);
+        var other = new MapPoint(3, 0, 3);
+        var q = Quest(Id(1), finish: [Beacon(Id(11), "a"), Beacon(Id(12), "b")]);
+        var zones = new PointTableBuilder().Add("bigmap", "a", a).Add("bigmap", "b", b).Add("woods", "b", other).Build();
+
+        var objective = Assert.Single(CatalogBuilder.Build(Input([q]) with
+        {
+            QuestZones = zones,
+            AlternativeGroups = [Group(Id(1), Id(11), Id(12))],
+        }, Now).Quests[Id(1)].Objectives);
+
+        Assert.Equal(["bigmap", "woods"], objective.Locations.Select(l => l.Map));
+        Assert.Equal([a, b], objective.Locations[0].Points);
+        Assert.Equal([other], objective.Locations[1].Points);
+    }
+
+    [Fact]
+    public void Objective_waiting_for_a_group_waits_for_the_merged_objective()
+    {
+        var after = FinishCond(Id(14));
+        after.VisibilityConditions =
+        [
+            new VisibilityCondition { ConditionType = "CompleteCondition", Target = Id(11).ToString() },
+            new VisibilityCondition { ConditionType = "CompleteCondition", Target = Id(12).ToString() },
+        ];
+        var q = Quest(Id(1), finish: [Beacon(Id(11), "a"), Beacon(Id(12), "b"), after]);
+
+        var objectives = CatalogBuilder.Build(Input([q]) with { AlternativeGroups = [Group(Id(1), Id(11), Id(12))] }, Now)
+            .Quests[Id(1)].Objectives;
+
+        Assert.Equal([Id(11).ToString()], objectives[1].VisibleAfter);
+    }
+
+    [Fact]
+    public void Group_of_another_quest_leaves_objectives_alone()
+    {
+        var q = Quest(Id(1), finish: [Beacon(Id(11), "a"), Beacon(Id(12), "b")]);
+
+        var cat = CatalogBuilder.Build(Input([q]) with { AlternativeGroups = [Group(Id(2), Id(21), Id(22))] }, Now);
+
+        Assert.Equal(2, cat.Quests[Id(1)].Objectives.Count);
+        Assert.All(cat.Quests[Id(1)].Objectives, o => Assert.Empty(o.AnyOf));
+        Assert.DoesNotContain(cat.Warnings, w => w.Code == WarningCodes.AlternativeGroupInvalid);
+    }
+
+    [Theory]
+    [InlineData(new[] { 11, 99 })] // 퀘스트에 없는 조건
+    [InlineData(new[] { 11 })]     // 2개 미만
+    [InlineData(new[] { 11, 11 })] // 중복을 빼면 2개 미만
+    public void Invalid_group_is_ignored_with_a_warning(int[] conditions)
+    {
+        var q = Quest(Id(1), finish: [Beacon(Id(11), "a"), Beacon(Id(12), "b")]);
+
+        var cat = CatalogBuilder.Build(Input([q]) with
+        {
+            AlternativeGroups = [Group(Id(1), conditions.Select(Id).ToArray())],
+        }, Now);
+
+        Assert.Equal(2, cat.Quests[Id(1)].Objectives.Count);
+        Assert.Contains(cat.Warnings, w => w.Code == WarningCodes.AlternativeGroupInvalid && w.QuestId == Id(1).ToString());
+    }
+
+    [Fact]
+    public void Group_overlapping_an_earlier_group_is_ignored_with_a_warning()
+    {
+        var q = Quest(Id(1), finish: [Beacon(Id(11), "a"), Beacon(Id(12), "b"), Beacon(Id(13), "c")]);
+
+        var cat = CatalogBuilder.Build(Input([q]) with
+        {
+            AlternativeGroups = [Group(Id(1), Id(11), Id(12)), Group(Id(1), Id(12), Id(13))],
+        }, Now);
+
+        Assert.Equal([Id(11).ToString(), Id(13).ToString()], cat.Quests[Id(1)].Objectives.Select(o => o.ConditionId));
+        Assert.Contains(cat.Warnings, w => w.Code == WarningCodes.AlternativeGroupInvalid);
+    }
+
     [Fact]
     public void Null_input_throws()
         => Assert.Throws<ArgumentNullException>(() => CatalogBuilder.Build(null!, Now));

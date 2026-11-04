@@ -92,6 +92,7 @@
   "fmt.objectiveFallback": "{type}: {name}",
   "fmt.findItemToStart": "Найдите {name}, чтобы начать",
   "fmt.objectiveCount": " ×{n}",
+  "fmt.objectiveAnyOf": " (любой из {n})",
   "prep.button": "Гид",
   "prep.none": "Нет информации о гиде",
   "prep.map": "Карта",

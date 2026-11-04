@@ -89,6 +89,12 @@ describe('formatObjective', () => {
     expect(formatObjective({ conditionId: 'c', conditionType: 'HandoverItem', text: '', targetName: '황금 아령', targetCount: 1, prep: null }, ko))
       .toEqual({ parts: [{ text: 'HandoverItem: 황금 아령 ×1' }], tone: 'normal' })
   })
+  it('택1 묶음을 합친 목표는 몇 개 중 하나인지 붙인다', () => {
+    const o = { conditionId: 'a', conditionType: 'PlaceBeacon', text: '연료 탱크에 마커 설치', targetName: null, targetCount: 1, prep: null, anyOf: ['a', 'b', 'c', 'd'] }
+    expect(lineText(formatObjective(o, ko))).toBe('연료 탱크에 마커 설치 ×1 (4개 중 하나)')
+    expect(lineText(formatObjective(o, en))).toBe('연료 탱크에 마커 설치 ×1 (any one of 4)')
+    expect(lineText(formatObjective({ ...o, anyOf: [] }, en))).toBe('연료 탱크에 마커 설치 ×1')
+  })
   it('text 비고 targetName 도 없으면 conditionType 만', () => {
     expect(formatObjective({ conditionId: 'c', conditionType: 'CounterCreator', text: '', targetName: null, targetCount: null, prep: null }, ko)).toEqual({ parts: [{ text: 'CounterCreator' }], tone: 'normal' })
   })
