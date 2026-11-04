@@ -47,7 +47,7 @@ internal static class B
         SortedDictionary<string, CatalogTrader>? traders = null)
         => new("", "", DateTimeOffset.UnixEpoch, lang, traders ?? new(StringComparer.Ordinal),
             new(quests.ToDictionary(q => q.Id), StringComparer.Ordinal), new(), [], [], new(),
-            doors ?? new(StringComparer.Ordinal), variants ?? new(StringComparer.Ordinal), exits ?? new(StringComparer.Ordinal), new());
+            doors ?? new(StringComparer.Ordinal), variants ?? new(StringComparer.Ordinal), exits ?? new(StringComparer.Ordinal), new(), new());
 
     public static ObjectiveProgress Op(double current, double? target, bool done = false) => new(current, target, done);
 

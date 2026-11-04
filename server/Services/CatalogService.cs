@@ -88,7 +88,8 @@ public class CatalogService(
         IReadOnlyDictionary<string, string> LocationKeys,
         bool SnapshotMissing,
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<QuestCodex.Catalog.Models.MapArea>>> Areas,
-        IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationExits> Exits);
+        IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationExits> Exits,
+        IReadOnlyDictionary<string, QuestCodex.Catalog.Models.LocationBosses> Bosses);
 
     /// <summary>디스크 캐시 파일. 모드 폴더 안이라 모드를 지우면 같이 사라진다.</summary>
     private static readonly string CacheDir = Path.Combine(
@@ -200,6 +201,7 @@ public class CatalogService(
             MapVariants: mapVariants.Active,
             ExitPositions: questZoneSnapshot.Exits,
             LocationExits: locations.Exits,
+            LocationBosses: locations.Bosses,
             LootSources: loot.LootSources);
 
         var catalog = CatalogBuilder.Build(input, started);
@@ -380,7 +382,28 @@ public class CatalogService(
             if (ReadExits(location) is { } e) exits[map] = e;
         }
 
-        return new LocationData(zones, keys, questZoneSnapshot.Zones is null, areas, exits);
+        var bosses = new Dictionary<string, QuestCodex.Catalog.Models.LocationBosses>(StringComparer.Ordinal);
+        foreach (var (map, location) in maps) bosses[map] = ReadBosses(location);
+
+        return new LocationData(zones, keys, questZoneSnapshot.Zones is null, areas, exits, bosses);
+
+        // 카탈로그를 만드는 시점의 메모리 값이라 위치 모드가 바꾼 확률이 반영된다.
+        static QuestCodex.Catalog.Models.LocationBosses ReadBosses(SPTarkov.Server.Core.Models.Eft.Common.Location location)
+        {
+            var rows = (location.Base.BossLocationSpawn ?? [])
+                .Where(b => b is not null && !string.IsNullOrEmpty(b.BossName))
+                .Select(b => new QuestCodex.Catalog.Models.BossSpawnRow(
+                    b.BossName!, b.BossChance ?? 0, b.BossZone ?? "", !string.IsNullOrEmpty(b.TriggerName)))
+                .ToList();
+            var points = (location.Base.SpawnPointParams ?? [])
+                .Where(p => p is not null && !string.IsNullOrEmpty(p.BotZoneName) && p.Position.HasValue)
+                .Select(p => new QuestCodex.Catalog.Models.BossZonePoint(
+                    p.BotZoneName!,
+                    new QuestCodex.Catalog.Models.MapPoint(p.Position!.Value.X, p.Position.Value.Y, p.Position.Value.Z),
+                    p.Categories?.Contains("Boss") ?? false))
+                .ToList();
+            return new QuestCodex.Catalog.Models.LocationBosses(rows, points);
+        }
 
         // allExtracts 는 PMC·스캐브·협동 탈출구를 진영(Side)과 함께 담는다(모드가 바꾼 목록 포함). 없으면 base.exits(PMC 만).
         // 비밀 탈출구는 base.secretExits 에 따로 있다.

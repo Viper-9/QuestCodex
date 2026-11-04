@@ -102,6 +102,26 @@ public sealed record LocationExits(IReadOnlyList<LocationExitRow> Exits, IReadOn
 public sealed record MapExit(
     string Key, string Name, string Kind, MapPoint Position, string? Requirement, string? RequirementKind, int? Chance, string? Target);
 
+/// <summary>서버 DB base.BossLocationSpawn 한 행. Zone = 쉼표로 이은 후보 구역(빈 문자열 = 정해진 곳 없음), Conditional = 트리거(스위치·이벤트)가 있어야 나온다.</summary>
+public sealed record BossSpawnRow(string Name, double Chance, string Zone, bool Conditional);
+
+/// <summary>서버 DB base.SpawnPointParams 한 행. BossSpot = Categories 에 Boss 가 있다.</summary>
+public sealed record BossZonePoint(string Zone, MapPoint Position, bool BossSpot);
+
+public sealed record LocationBosses(IReadOnlyList<BossSpawnRow> Rows, IReadOnlyList<BossZonePoint> Points);
+
+/// <summary>
+/// 카탈로그에 싣는 보스 한 줄(18 스펙). Key = 게임 이름(bossBully 등, 웹 i18n 이 번역), Kind = "boss" | "minor",
+/// Chance = 이 구역에서 나올 확률(%), MapChance = 맵 어디서든 나올 확률(%).
+/// </summary>
+public sealed record MapBossEntry(string Key, string Kind, int Chance, int MapChance, bool Conditional);
+
+/// <summary>구역 하나 = 지도 마커 하나.</summary>
+public sealed record MapBossZone(string Zone, MapPoint Position, IReadOnlyList<MapBossEntry> Bosses);
+
+/// <summary>Unplaced = 정해진 구역이 없거나 좌표를 모르는 보스(마커 없이 목록으로).</summary>
+public sealed record MapBossSpawns(IReadOnlyList<MapBossZone> Zones, IReadOnlyList<MapBossEntry> Unplaced);
+
 public sealed record FailTrigger(string QuestId, IReadOnlyList<string> Statuses);
 
 public sealed record QuestRewards(
@@ -169,7 +189,9 @@ public sealed record Catalog(
     /// <summary>map 키 → 탈출구·환승. 잠긴 문처럼 맵마다 한 번만 싣는다(지도의 탈출구 토글).</summary>
     SortedDictionary<string, List<MapExit>> Exits,
     /// <summary>아이템 tpl → 주로 나오는 곳(컨테이너·봇). Collector 제출 아이템만(12 kappa-loot-sources 스펙).</summary>
-    SortedDictionary<string, LootSource> LootSources);
+    SortedDictionary<string, LootSource> LootSources,
+    /// <summary>map 키 → 바닐라 보스 출현 구역·확률(지도의 보스 토글, 18 스펙).</summary>
+    SortedDictionary<string, MapBossSpawns> Bosses);
 
 /// <summary>Containers = 하나 열었을 때 들어 있을 확률 높은 순, Bots = 봇 묶음 키(scav·pmc·boss·raider·cultist·other).</summary>
 public sealed record LootSource(IReadOnlyList<LootContainer> Containers, IReadOnlyList<string> Bots);

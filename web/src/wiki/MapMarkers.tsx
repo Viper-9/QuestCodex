@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react'
 import type { LockedDoor, MapExit } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
-import type { UiKey } from '../i18n/index'
+import type { T, UiKey } from '../i18n/index'
 import { doorLabel } from './format'
 import { mapAssetUrl } from './mapAssets'
 import { serverMapName } from './mapNames'
+import type { TabBossEntry, TabBossZone, TabBosses } from './mapProjection'
 
 interface DoorMarkerProps {
   door: LockedDoor
@@ -56,5 +57,49 @@ export function ExitMarker({ exit, style, other }: { exit: MapExit; style: CSSPr
         {detail && <span className="qc-map__tip-sub">{detail}</span>}
       </span>
     </span>
+  )
+}
+
+/** 보스 한 줄: "이름 13% · 맵 전체 39% · 조건부". 맵 전체 값은 구역 값과 다를 때만, 짝 맵 하나의 값이면 맵 이름을 덧붙인다. */
+function bossLine(boss: TabBossEntry, t: T): string {
+  const on = boss.onlyOn ? ` (${t(`map.boss.on.${boss.onlyOn}` as UiKey)})` : ''
+  return [
+    `${t(`map.boss.name.${boss.key}` as UiKey)}${on} ${boss.chance}%`,
+    boss.mapChance !== boss.chance ? t('map.boss.mapChance', { n: boss.mapChance }) : null,
+    boss.conditional ? t('map.boss.conditional') : null,
+  ].filter(Boolean).join(' · ')
+}
+
+/**
+ * 보스 출현 구역(18 스펙): 구역마다 마커 하나, 마우스를 올리면 그 구역의 보스와 확률 목록. 준보스만 있는 구역은 색을 달리한다.
+ * 탈출구처럼 모든 층에 그리고 다른 층의 것은 흐리게 한다. 그림은 직접 그린 해골이라 라이선스 표기가 필요 없다.
+ */
+export function BossMarker({ zone, style, other }: { zone: TabBossZone; style: CSSProperties; other: boolean }) {
+  const t = useT()
+  const minor = zone.bosses.every((b) => b.kind === 'minor')
+  return (
+    <span className={`qc-map__boss${minor ? ' is-minor' : ''}${other ? ' is-other' : ''}`} style={style}>
+      <svg viewBox="0 0 16 16" aria-hidden>
+        <path d="M8 1.5c-3.3 0-5.5 2.2-5.5 5 0 1.8.9 3.2 2.3 4.1V13c0 .6.4 1 1 1h4.4c.6 0 1-.4 1-1v-2.4c1.4-.9 2.3-2.3 2.3-4.1 0-2.8-2.2-5-5.5-5Z" fill="currentColor" />
+        <circle cx="5.8" cy="7" r="1.5" fill="var(--boss-eye)" />
+        <circle cx="10.2" cy="7" r="1.5" fill="var(--boss-eye)" />
+        <path d="M8 9.2 7.1 10.8h1.8Z" fill="var(--boss-eye)" />
+      </svg>
+      <span className="qc-map__tip" role="tooltip">
+        {zone.bosses.map((b) => <span key={`${b.key}|${b.conditional}|${b.onlyOn ?? ''}`}>{bossLine(b, t)}</span>)}
+      </span>
+    </span>
+  )
+}
+
+/** 정해진 구역이 없는 보스(Partisan, 미궁 등) — 지도에 찍을 곳이 없어 왼쪽 아래에 목록으로 둔다. 드래그를 막지 않게 CSS 로 포인터를 통과시킨다. */
+export function BossUnplaced({ bosses }: { bosses: TabBosses['unplaced'] }) {
+  const t = useT()
+  if (bosses.length === 0) return null
+  return (
+    <div className="qc-map__free">
+      <span className="qc-map__free-h">{t('map.boss.unplaced')}</span>
+      {bosses.map((b) => <span key={`${b.key}|${b.conditional}|${b.onlyOn ?? ''}`}>{bossLine(b, t)}</span>)}
+    </div>
   )
 }

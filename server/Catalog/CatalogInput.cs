@@ -48,6 +48,8 @@ public sealed record CatalogInput(
     /// <summary>map → 서버 DB 의 탈출구(allExtracts)·환승(base.transits). 무엇을 그릴지는 이 목록이 정한다.</summary>
     IReadOnlyDictionary<string, Models.LocationExits>? LocationExits = null,
     /// <summary>아이템 tpl → 출처(언어 무관, LootSourceIndex). null 이면 LootSources 를 비워 낸다.</summary>
-    IReadOnlyDictionary<string, Loot.RawLootSource>? LootSources = null);
+    IReadOnlyDictionary<string, Loot.RawLootSource>? LootSources = null,
+    /// <summary>map → 서버 DB 의 보스 출현표·스폰 지점. BossSpawnBuilder 가 Catalog.Bosses 로 만든다.</summary>
+    IReadOnlyDictionary<string, Models.LocationBosses>? LocationBosses = null);
 
 public sealed record HandbookCategoryInput(string? ParentId, string? Icon);

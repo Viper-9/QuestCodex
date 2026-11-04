@@ -3,10 +3,10 @@ import type { LockedDoor, MapExit, MapPoint } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
 import type { T } from '../i18n/index'
 import { mapAssetUrl } from './mapAssets'
-import { DoorMarker, ExitMarker } from './MapMarkers'
+import { BossMarker, BossUnplaced, DoorMarker, ExitMarker } from './MapMarkers'
 import {
   areaDrawOrder, areaPolygon, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, objectiveColor, project, zoomAt,
-  type AreaMarker, type MapDef, type MapTab, type Marker, type View,
+  type AreaMarker, type MapDef, type MapTab, type Marker, type TabBosses, type View,
 } from './mapProjection'
 
 interface MapCanvasProps {
@@ -20,6 +20,8 @@ interface MapCanvasProps {
   doors: LockedDoor[]
   /** 탭의 모든 탈출구·환승(층 무관 — 다른 층의 것은 흐리게). 토글이 꺼져 있으면 빈 배열. */
   exits: MapExit[]
+  /** 탭의 보스 출현(층 무관 — 다른 층의 것은 흐리게). 토글이 꺼져 있으면 빈 값. */
+  bosses: TabBosses
   /** 현재 층의 구역 영역(구역 처치·신호탄, 08 스펙) */
   areas: AreaMarker[]
   view: View
@@ -32,9 +34,9 @@ interface MapCanvasProps {
 /**
  * 층 SVG 를 겹친 캔버스를 뷰포트 안에 "contain" 으로 맞추고, CSS transform 으로 확대·이동한다.
  * 마커는 캔버스 안에 % 로 두고 1/배율로 되돌려 크기가 화면 기준으로 일정하다.
- * 쌓임 순서: 지도 < 구역 영역 < 잠긴 문 < 탈출구 < 퀘스트 마커 < 층 버튼.
+ * 쌓임 순서: 지도 < 구역 영역 < 잠긴 문 < 탈출구 < 보스 < 퀘스트 마커 < 층 버튼.
  */
-export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, areas, view, onView, onLevel, hot, onHot }: MapCanvasProps) {
+export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, bosses, areas, view, onView, onLevel, hot, onHot }: MapCanvasProps) {
   const t = useT()
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -45,6 +47,10 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, area
   const exitsByFloor = useMemo(
     () => exits.map((exit) => ({ exit, other: layerFor(def, exit.position).level !== level })).sort((a, b) => Number(b.other) - Number(a.other)),
     [exits, def, level],
+  )
+  const bossesByFloor = useMemo(
+    () => bosses.zones.map((zone) => ({ zone, other: layerFor(def, zone.position).level !== level })).sort((a, b) => Number(b.other) - Number(a.other)),
+    [bosses, def, level],
   )
 
   // React 의 onWheel 은 passive 라 preventDefault 로 페이지 스크롤을 막을 수 없다 — 네이티브로 붙인다.
@@ -133,6 +139,7 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, area
         {doors.map((d, i) => <DoorMarker key={`d${i}`} door={d} style={place(d.position)} />)}
         {/* 다른 층의 탈출구를 먼저 — 현재 층의 것이 위에 온다 */}
         {exitsByFloor.map(({ exit, other }, i) => <ExitMarker key={`e${i}`} exit={exit} other={other} style={place(exit.position)} />)}
+        {bossesByFloor.map(({ zone, other }) => <BossMarker key={zone.zone} zone={zone} other={other} style={place(zone.position)} />)}
         {markers.map((m, i) => (
           <span
             key={i}
@@ -145,6 +152,7 @@ export function MapCanvas({ mapKey, def, tab, level, markers, doors, exits, area
           </span>
         ))}
       </div>
+      <BossUnplaced bosses={bosses.unplaced} />
       {floors.length > 1 && (
         <div className="qc-map__floors" role="group" aria-label={t('map.floors')}>
           {floors.map((f) => {

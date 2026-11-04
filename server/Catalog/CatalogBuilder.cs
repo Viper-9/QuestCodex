@@ -87,7 +87,7 @@ public static class CatalogBuilder
         var lootSources = BuildLootSources(quests, input.LootSources, rewardParser.NameOf);
 
         return new Models.Catalog(input.SptVersion, input.ModVersion, now, input.Lang, traders, quests, rewardIndex, warnings, itemCategories, itemCategoryOf, lockedDoors,
-            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal), exits, lootSources);
+            new SortedDictionary<string, string>(input.MapVariants?.ToDictionary() ?? [], StringComparer.Ordinal), exits, lootSources, BossSpawnBuilder.Build(input.LocationBosses));
     }
 
     /// <summary>카파 트래커의 Collector — 제출 아이템 출처를 이 퀘스트의 것만 싣는다</summary>

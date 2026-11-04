@@ -38,6 +38,7 @@ export function useKappaDialogs(
       traderName={traderName(mapId)}
       lockedDoors={catalog.lockedDoors}
       exits={catalog.exits}
+      bosses={catalog.bosses}
       mapVariants={catalog.mapVariants}
       onClose={() => setMapId(null)}
     />
