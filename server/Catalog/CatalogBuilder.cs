@@ -266,6 +266,7 @@ public static class CatalogBuilder
                 VisibleAfter = VisibleAfterOf(c),
             })
             .ToList();
+        objectives = MergeAlternatives(objectives, questId, input.AlternativeGroups, warnings);
 
         var rewards = new QuestRewards(
             ParseRewards(quest, "Started", rewardParser, warnings, questId),
@@ -321,6 +322,75 @@ public static class CatalogBuilder
             .Distinct()
             .ToList();
         return ids.Count == 0 ? Array.Empty<string>() : ids;
+    }
+
+    /// <summary>
+    /// "이 중 하나만 하면 되는" 묶음을 목표 하나로 합친다(게임 임무 탭도 묶음당 한 줄이다). 준비물·레이드 계획·진행률이 전부 이 목표 목록을
+    /// 읽으므로 여기서 합치면 따로 고칠 곳이 없다. 합친 목표는 첫 선택지의 ID·문구·준비물을 쓰고 위치는 모든 선택지 것을 갖는다.
+    /// 묶음이 없는 퀘스트는 받은 목록을 그대로 돌려준다.
+    /// </summary>
+    private static List<Objective> MergeAlternatives(
+        List<Objective> objectives, string questId, IReadOnlyList<AlternativeGroup>? groups, List<CatalogWarning> warnings)
+    {
+        var firstOf = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var group in groups ?? [])
+        {
+            if (group.QuestId != questId) continue;
+
+            var ids = group.ConditionIds.ToHashSet(StringComparer.Ordinal);
+            if (ids.Count < 2 || ids.Any(id => firstOf.ContainsKey(id) || objectives.All(o => o.ConditionId != id)))
+            {
+                warnings.Add(new CatalogWarning(questId, WarningCodes.AlternativeGroupInvalid, string.Join(", ", group.ConditionIds)));
+                continue;
+            }
+
+            var first = objectives.First(o => ids.Contains(o.ConditionId)).ConditionId;
+            foreach (var id in ids) firstOf[id] = first;
+        }
+
+        if (firstOf.Count == 0) return objectives;
+
+        var merged = new List<Objective>();
+        foreach (var o in objectives)
+        {
+            // 묶음을 기다리는 목표는 합친 목표를 기다린다.
+            var waiting = o.VisibleAfter.Count == 0
+                ? o
+                : o with { VisibleAfter = o.VisibleAfter.Select(id => firstOf.GetValueOrDefault(id, id)).Distinct().ToList() };
+
+            if (!firstOf.TryGetValue(o.ConditionId, out var first))
+            {
+                merged.Add(waiting);
+            }
+            else if (first == o.ConditionId)
+            {
+                var options = objectives.Where(x => firstOf.GetValueOrDefault(x.ConditionId) == first).ToList();
+                merged.Add(waiting with
+                {
+                    AnyOf = options.Select(x => x.ConditionId).ToList(),
+                    Locations = MergeLocations(options),
+                });
+            }
+        }
+
+        return merged;
+    }
+
+    private static IReadOnlyList<ObjectiveLocation> MergeLocations(IEnumerable<Objective> options)
+    {
+        var locations = options
+            .SelectMany(o => o.Locations)
+            .GroupBy(l => l.Map, StringComparer.Ordinal)
+            .Select(g =>
+            {
+                var areas = g.SelectMany(l => l.Areas).Distinct().ToList();
+                return new ObjectiveLocation(g.Key, g.SelectMany(l => l.Points).Distinct().ToList())
+                {
+                    Areas = areas.Count == 0 ? Array.Empty<MapArea>() : areas,
+                };
+            })
+            .ToList();
+        return locations.Count == 0 ? Array.Empty<ObjectiveLocation>() : locations;
     }
 
     /// <summary>

@@ -92,6 +92,7 @@
   "fmt.objectiveFallback": "{type}: {name}",
   "fmt.findItemToStart": "{name} 획득 시 시작",
   "fmt.objectiveCount": " ×{n}",
+  "fmt.objectiveAnyOf": " ({n}개 중 하나)",
   "prep.button": "가이드",
   "prep.none": "가이드 정보 없음",
   "prep.map": "맵",

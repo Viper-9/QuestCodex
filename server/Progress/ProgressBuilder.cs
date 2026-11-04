@@ -57,8 +57,10 @@ public static class ProgressBuilder
             var objectives = new SortedDictionary<string, ObjectiveProgress>(StringComparer.Ordinal);
             foreach (var o in cq.Objectives)
             {
-                var current = counters.GetValueOrDefault(o.ConditionId, 0);
-                var marked = completed?.Contains(o.ConditionId) == true;
+                // 택1 묶음을 합친 목표는 어느 선택지의 기록이든 이 목표의 기록이다
+                IReadOnlyList<string> ids = o.AnyOf.Count > 0 ? o.AnyOf : [o.ConditionId];
+                var current = ids.Max(id => counters.GetValueOrDefault(id, 0));
+                var marked = completed is not null && ids.Any(completed.Contains);
                 if (marked && o.TargetCount is { } goal) current = Math.Max(current, goal);
                 var done = finished || marked || (o.TargetCount is { } target && current >= target);
                 objectives[o.ConditionId] = new ObjectiveProgress(current, o.TargetCount, done);

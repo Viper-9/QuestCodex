@@ -48,6 +48,10 @@ public sealed record CatalogInput(
     /// <summary>map → 서버 DB 의 탈출구(allExtracts)·환승(base.transits). 무엇을 그릴지는 이 목록이 정한다.</summary>
     IReadOnlyDictionary<string, Models.LocationExits>? LocationExits = null,
     /// <summary>아이템 tpl → 출처(언어 무관, LootSourceIndex). null 이면 LootSources 를 비워 낸다.</summary>
-    IReadOnlyDictionary<string, Loot.RawLootSource>? LootSources = null);
+    IReadOnlyDictionary<string, Loot.RawLootSource>? LootSources = null,
+    /// <summary>모드가 "이 중 하나만 하면 된다"로 바꾼 목표 묶음(ModAlternativeGroups). null 이면 없음.</summary>
+    IReadOnlyList<AlternativeGroup>? AlternativeGroups = null);
 
 public sealed record HandbookCategoryInput(string? ParentId, string? Icon);
+
+public sealed record AlternativeGroup(string QuestId, IReadOnlyList<string> ConditionIds);

@@ -73,7 +73,7 @@ public static class BriefingBuilder
         var line = QuestLines.Of(g.Entries, lang);
         int? marker = numbers is not null && numbers.TryGetValue(g.Quest.Id, out var n) ? n : null;
         var objectives = g.Entries.Select(e => new BriefingObjective(
-            e.Objective.ConditionId, BriefingText.ObjectiveText(e.Objective), e.Progress?.Current ?? 0, e.Progress?.Target,
+            e.Objective.ConditionId, BriefingText.ObjectiveText(e.Objective, lang), e.Progress?.Current ?? 0, e.Progress?.Target,
             e.Inferred, map is null ? e.Objective.Locations : LocationsFor(e.Objective, map))).ToList();
         return new BriefingQuest(g.Quest.Id, g.Quest.TraderId, g.Quest.Name, marker, line.Summary, line.Current, line.Target, objectives,
             flags.Kappa.Contains(g.Quest.Id), flags.Lightkeeper.Contains(g.Quest.Id));
