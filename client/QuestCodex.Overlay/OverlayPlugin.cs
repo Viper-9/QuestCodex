@@ -9,7 +9,7 @@ namespace QuestCodex.Overlay;
 /// Opens QuestCodex from inside the game: in an Anvil-WebOverlay window when that library is
 /// usable, otherwise in the default browser. The server mod and web app know nothing about this.
 /// </summary>
-[BepInPlugin("com.viper.questcodex.overlay", "QuestCodex Overlay", BuildInfo.Version)]
+[BepInPlugin("com.viper.questcodex","QuestCodex Overlay", BuildInfo.Version)]
 [BepInDependency(WebOverlayGate.LibraryGuid, BepInDependency.DependencyFlags.SoftDependency)]
 public class OverlayPlugin : BaseUnityPlugin
 {
