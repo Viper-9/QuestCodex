@@ -64,6 +64,14 @@ public class BossSpawnBuilderTests
     }
 
     [Fact]
+    public void Conditional_rows_list_after_regular_ones_even_with_a_higher_chance()
+    {
+        var bosses = Assert.Single(Build([Row("pmcBot", 45, "A", conditional: true), Row("pmcBot", 30, "A")], Pt("A", 0)).Zones).Bosses;
+
+        Assert.Equal([false, true], bosses.Select(b => b.Conditional));
+    }
+
+    [Fact]
     public void Spawns_without_a_known_place_go_to_the_unplaced_list()
     {
         var result = Build([Row("bossPartisan", 15, "", conditional: true), Row("bossKnight", 20, "Nowhere")], Pt("A", 0));
@@ -86,6 +94,48 @@ public class BossSpawnBuilderTests
         var result = Build([Row("bossBully", 39, "A")], Pt("A", 3, bossSpot: false));
 
         Assert.Equal(3, Assert.Single(result.Zones).Position.X);
+    }
+
+    [Fact]
+    public void A_zone_wide_for_its_map_gets_one_marker_per_group_of_nearby_points()
+    {
+        var result = Build(
+            [Row("pmcBot", 60, "Wide"), Row("bossKilla", 30, "Small")],
+            Pt("Wide", 0), Pt("Wide", 20), Pt("Wide", 200), Pt("Wide", 220), Pt("Small", 100));
+
+        var wide = result.Zones.Where(z => z.Bosses[0].Key == "pmcBot").ToList();
+        Assert.Equal(["Wide", "Wide#1"], wide.Select(z => z.Zone));
+        Assert.All(wide, z => Assert.Equal(60, z.Bosses[0].MapChance));
+        Assert.Equal(["Small"], result.Zones.Where(z => z.Bosses[0].Key == "bossKilla").Select(z => z.Zone));
+    }
+
+    [Fact]
+    public void A_zone_small_for_its_map_keeps_one_marker()
+    {
+        var result = Build(
+            [Row("pmcBot", 60, "A"), Row("bossKilla", 30, "B")],
+            Pt("A", 0), Pt("A", 100), Pt("B", 1000));
+
+        Assert.Equal(["A", "B"], result.Zones.Select(z => z.Zone));
+    }
+
+    [Fact]
+    public void A_map_with_a_single_zone_keeps_one_marker()
+    {
+        var result = Build([Row("sectantPriest", 44, "Whole")], Pt("Whole", 0), Pt("Whole", 500));
+
+        Assert.Equal("Whole", Assert.Single(result.Zones).Zone);
+    }
+
+    [Fact]
+    public void Points_on_different_floors_are_not_grouped_together()
+    {
+        var upstairs = new BossZonePoint("Wide", new MapPoint(1, 5, 0), true);
+        var result = Build(
+            [Row("pmcBot", 60, "Wide"), Row("bossKilla", 30, "Small")],
+            Pt("Wide", 0), upstairs, Pt("Wide", 200), Pt("Small", 100));
+
+        Assert.Equal(3, result.Zones.Count(z => z.Bosses[0].Key == "pmcBot"));
     }
 
     [Fact]

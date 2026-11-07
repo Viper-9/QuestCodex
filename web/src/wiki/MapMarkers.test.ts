@@ -29,7 +29,7 @@ describe('bossLine', () => {
     expect(bossLine(boss({ key: 'bossKnight', rotating: true, mapChance: 35 }), t)).toBe('Goons (rotating) 35%')
   })
 
-  it('조건부 표시는 유지한다', () => {
-    expect(bossLine(boss({ conditional: true }), t)).toBe('Reshala 30% · needs a trigger')
+  it('조건부는 합친 확률이 의미 없어 숫자를 쓰지 않는다', () => {
+    expect(bossLine(boss({ conditional: true }), t)).toBe('Reshala · needs a trigger')
   })
 })
