@@ -53,7 +53,7 @@ the game instead. This is optional, and exclusive fullscreen still uses the brow
 
 ## Features
 
-The wiki, the quest guide and the progress pages (overview, raid prep, needed items) are described with screenshots on the docs site.
+The wiki, the quest guide and the progress pages (overview, raid prep, needed items, unlock paths, Kappa tracker) are described with screenshots on the docs site.
 
 **[QuestCodex docs](https://viper-9.github.io/QuestCodex/)**
 
