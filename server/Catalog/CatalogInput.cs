@@ -49,6 +49,8 @@ public sealed record CatalogInput(
     IReadOnlyDictionary<string, Models.LocationExits>? LocationExits = null,
     /// <summary>아이템 tpl → 출처(언어 무관, LootSourceIndex). null 이면 LootSources 를 비워 낸다.</summary>
     IReadOnlyDictionary<string, Loot.RawLootSource>? LootSources = null,
+    /// <summary>map → 서버 DB 의 보스 출현표·스폰 지점. BossSpawnBuilder 가 Catalog.Bosses 로 만든다.</summary>
+    IReadOnlyDictionary<string, Models.LocationBosses>? LocationBosses = null,
     /// <summary>모드가 "이 중 하나만 하면 된다"로 바꾼 목표 묶음(ModAlternativeGroups). null 이면 없음.</summary>
     IReadOnlyList<AlternativeGroup>? AlternativeGroups = null);
 

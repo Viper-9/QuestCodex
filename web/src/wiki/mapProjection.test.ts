@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { LockedDoor, MapArea, MapExit, Objective, ObjectiveLocation } from '../api/catalog'
+import type { LockedDoor, MapArea, MapBossEntry, MapExit, Objective, ObjectiveLocation } from '../api/catalog'
 import customsJson from '../../public/maps/bigmap/map.json'
 import indexJson from '../../public/maps/index.json'
 import expandedJson from '../../public/maps/interchange-manimal/map.json'
-import { applyMapVariants, areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, firstLevel, markerLevels, doorsForTab, exitsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
+import { applyMapVariants, areaCorners, areaDrawOrder, areaLevels, areaPolygon, objectiveColor, buildTabs, buildNumberedTabs, bossesForTab, firstLevel, markerLevels, doorsForTab, exitsForTab, fitView, floorsWithOtherMarkers, layerFor, layerStyle, markerCountsByLevel, project, zoomAt, type MapDef, type MapIndex } from './mapProjection'
 
 const expanded = expandedJson as MapDef
 const customs = customsJson as MapDef
@@ -233,6 +233,47 @@ describe('exitsForTab', () => {
     expect(exitsForTab({ sandbox_high: [exit('a', 1)] }, index, 'sandbox')).toHaveLength(1)
     expect(exitsForTab(undefined, index, 'bigmap')).toEqual([])
     expect(exitsForTab({}, index, 'labyrinth')).toEqual([])
+  })
+})
+
+describe('bossesForTab', () => {
+  const boss = (key: string, chance: number, conditional = false): MapBossEntry =>
+    ({ key, kind: 'boss', chance, mapChance: chance, conditional, rotating: false })
+  const zone = (name: string, ...bosses: MapBossEntry[]) => ({ zone: name, position: { x: 1, y: 0, z: 2 }, bosses })
+
+  it('탭에 속한 맵만 모은다', () => {
+    const result = bossesForTab({
+      bigmap: { zones: [zone('ZoneScavBase', boss('bossBully', 13))], unplaced: [boss('bossPartisan', 15, true)] },
+      woods: { zones: [zone('ZoneRoad', boss('bossKojaniy', 30))], unplaced: [] },
+    }, index, 'bigmap')
+    expect(result.zones.map((z) => z.zone)).toEqual(['ZoneScavBase'])
+    expect(result.unplaced.map((b) => b.key)).toEqual(['bossPartisan'])
+  })
+
+  it('짝 맵에서 값이 같은 보스는 한 줄, 한쪽에만 있으면 그 맵을 표시', () => {
+    const result = bossesForTab({
+      factory4_day: { zones: [zone('BotZone', boss('bossTagilla', 30))], unplaced: [] },
+      factory4_night: { zones: [zone('BotZone', boss('bossTagilla', 30), boss('sectantPriest', 20))], unplaced: [] },
+    }, index, 'factory4_day')
+    expect(result.zones).toHaveLength(1)
+    expect(result.zones[0].bosses.map((b) => [b.key, b.onlyOn])).toEqual([['bossTagilla', undefined], ['sectantPriest', 'factory4_night']])
+  })
+
+  it('짝 맵에서 값이 다르면 맵마다 한 줄', () => {
+    const result = bossesForTab({
+      factory4_day: { zones: [zone('BotZone', boss('bossTagilla', 30))], unplaced: [] },
+      factory4_night: { zones: [zone('BotZone', boss('bossTagilla', 50))], unplaced: [] },
+    }, index, 'factory4_day')
+    expect(result.zones[0].bosses.map((b) => [b.chance, b.onlyOn])).toEqual([[30, 'factory4_day'], [50, 'factory4_night']])
+  })
+
+  it('짝 맵 중 보스가 없어 서버가 안 보낸 맵이 있어도 나오는 맵을 표시', () => {
+    const result = bossesForTab({ sandbox_high: { zones: [zone('ZoneSandbox', boss('sectantPriest', 44))], unplaced: [] } }, index, 'sandbox')
+    expect(result.zones[0].bosses.map((b) => b.onlyOn)).toEqual(['sandbox_high'])
+  })
+
+  it('정보가 없으면 빈 결과', () => {
+    expect(bossesForTab(undefined, index, 'bigmap')).toEqual({ zones: [], unplaced: [] })
   })
 })
 

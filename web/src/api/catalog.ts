@@ -115,6 +115,33 @@ export interface MapExit {
   target?: string | null
 }
 
+/**
+ * 바닐라 보스 출현(18 스펙). key 는 게임 이름(bossBully 등)으로 웹 i18n 이 번역한다. kind: boss | minor(레이더·로그 등 준보스).
+ * chance = 이 구역에서 나올 확률(%), mapChance = 맵 어디서든 나올 확률(%, 화면에 쓰는 값). conditional = 스위치·이벤트가 있어야 나온다.
+ * rotating = SPT 가 몇 시간마다 맵을 바꿔 켜는 보스(Knight)라 확률은 이 맵에 배정됐을 때의 값이다.
+ */
+export interface MapBossEntry {
+  key: string
+  kind: 'boss' | 'minor'
+  chance: number
+  mapChance: number
+  conditional: boolean
+  rotating: boolean
+}
+
+/** 구역 하나 = 지도 마커 하나 */
+export interface MapBossZone {
+  zone: string
+  position: MapPoint
+  bosses: MapBossEntry[]
+}
+
+/** unplaced = 정해진 구역이 없거나 좌표를 모르는 보스(마커 없이 목록으로) */
+export interface MapBossSpawns {
+  zones: MapBossZone[]
+  unplaced: MapBossEntry[]
+}
+
 export interface Objective {
   conditionId: string
   conditionType: string
@@ -212,6 +239,8 @@ export interface Catalog {
   mapVariants?: Record<string, string>
   /** 서버 맵 키 → 탈출구·환승. 구버전 서버면 undefined. */
   exits?: Record<string, MapExit[]>
+  /** 서버 맵 키 → 바닐라 보스 출현 구역·확률. 구버전 서버면 undefined. */
+  bosses?: Record<string, MapBossSpawns>
   /** 아이템 tpl → 주로 나오는 곳(Collector 제출 아이템만). 구버전 서버면 undefined. */
   lootSources?: Record<string, LootSource>
 }

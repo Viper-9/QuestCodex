@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import type { LockedDoor, MapExit } from '../api/catalog'
+import type { LockedDoor, MapBossSpawns, MapExit } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
 import { MapCanvas } from '../wiki/MapCanvas'
 import { loadMapDef, loadMapIndex } from '../wiki/mapAssets'
-import { areaLevels, buildNumberedTabs, doorsForTab, exitsForTab, firstLevel, fitView, layerFor, mapKeyFor, markerLevels, objectiveColor, type MapIndex, type MapTab, type View } from '../wiki/mapProjection'
+import { areaLevels, bossesForTab, buildNumberedTabs, doorsForTab, exitsForTab, firstLevel, fitView, layerFor, mapKeyFor, markerLevels, objectiveColor, type MapIndex, type MapTab, type TabBosses, type View } from '../wiki/mapProjection'
 import { MapToggle } from '../wiki/MapToggle'
 import { Credit } from '../wiki/QuestMapDialog'
 import { useDialogFrame } from '../wiki/useDialogFrame'
@@ -20,6 +20,8 @@ interface RaidMapProps {
   lockedDoors: Record<string, LockedDoor[]> | undefined
   /** catalog.exits — 서버 맵 키 → 탈출구·환승. 구버전 서버면 undefined */
   mapExits: Record<string, MapExit[]> | undefined
+  /** catalog.bosses — 서버 맵 키 → 보스 출현. 구버전 서버면 undefined */
+  mapBosses: Record<string, MapBossSpawns> | undefined
   /** catalog.mapVariants — 맵 교체 모드가 로드된 서버면 그 맵을 변형 지도로 그린다 */
   mapVariants: Record<string, string> | undefined
   /** 강조할 퀘스트 번호 — 목록 줄과 지도 마커가 같은 값을 공유한다 */
@@ -32,15 +34,19 @@ interface RaidMapProps {
  * 맵은 상단 맵 탭이 정하고, 목록은 "이 맵에서 진행되는 퀘스트" 카드가 대신한다(번호 = 퀘스트).
  * 크게 보기 버튼은 같은 지도를 옮기고 크기를 바꿀 수 있는 팝업으로 연다.
  */
-export function RaidMap({ map, mapLabel, plan, lockedDoors, mapExits, mapVariants, hot, onHot }: RaidMapProps) {
+const NO_BOSSES: TabBosses = { zones: [], unplaced: [] }
+
+export function RaidMap({ map, mapLabel, plan, lockedDoors, mapExits, mapBosses, mapVariants, hot, onHot }: RaidMapProps) {
   const t = useT()
   const index = useLoaded(() => loadMapIndex(mapVariants), [mapVariants])
   const [showDoors, setShowDoors] = usePersistedFlag('qc.map.showDoors', true)
   const [showExits, setShowExits] = usePersistedFlag('qc.map.showExits', true)
+  const [showBosses, setShowBosses] = usePersistedFlag('qc.map.showBosses', true)
   const [expanded, setExpanded] = useState(false)
   const key = index.data ? mapKeyFor(index.data, map) : null
   const doors = useMemo(() => (index.data && key ? doorsForTab(lockedDoors, index.data, key) : []), [lockedDoors, index.data, key])
   const exits = useMemo(() => (index.data && key ? exitsForTab(mapExits, index.data, key) : []), [mapExits, index.data, key])
+  const bosses = useMemo(() => (index.data && key ? bossesForTab(mapBosses, index.data, key) : NO_BOSSES), [mapBosses, index.data, key])
   const title = t('raid.map', { map: mapLabel })
 
   return (
@@ -49,6 +55,7 @@ export function RaidMap({ map, mapLabel, plan, lockedDoors, mapExits, mapVariant
         <h3 className="qc-card__h">{title}</h3>
         <MapToggle label={t('map.doors')} noneLabel={t('map.doorsNone')} on={showDoors} count={doors.length} onToggle={setShowDoors} />
         <MapToggle label={t('map.exits')} noneLabel={t('map.exitsNone')} on={showExits} count={exits.length} onToggle={setShowExits} />
+        <MapToggle label={t('map.bosses')} noneLabel={t('map.bossesNone')} on={showBosses} count={bosses.zones.length + bosses.unplaced.length} onToggle={setShowBosses} />
         <button type="button" className="qc-map__toggle" disabled={key === null} onClick={() => setExpanded(true)}>
           {t('raid.mapExpand')}
         </button>
@@ -58,11 +65,11 @@ export function RaidMap({ map, mapLabel, plan, lockedDoors, mapExits, mapVariant
       {index.data && key === null && <p className="qc-map__msg">{t('raid.mapNone')}</p>}
       {index.data && key !== null && (
         // key: 맵을 바꾸면 층·확대 상태를 초기화한다
-        <MapView key={key} mapKey={key} index={index.data} plan={plan} doors={showDoors ? doors : []} exits={showExits ? exits : []} hot={hot} onHot={onHot} />
+        <MapView key={key} mapKey={key} index={index.data} plan={plan} doors={showDoors ? doors : []} exits={showExits ? exits : []} bosses={showBosses ? bosses : NO_BOSSES} hot={hot} onHot={onHot} />
       )}
       {index.data && key !== null && (
         <RaidMapDialog
-          open={expanded} title={title} mapKey={key} index={index.data} plan={plan} doors={showDoors ? doors : []} exits={showExits ? exits : []}
+          open={expanded} title={title} mapKey={key} index={index.data} plan={plan} doors={showDoors ? doors : []} exits={showExits ? exits : []} bosses={showBosses ? bosses : NO_BOSSES}
           onClose={() => setExpanded(false)}
         />
       )}
@@ -78,6 +85,7 @@ interface RaidMapDialogProps {
   plan: RaidMapPlan
   doors: LockedDoor[]
   exits: MapExit[]
+  bosses: TabBosses
   onClose(): void
 }
 
@@ -87,7 +95,7 @@ interface RaidMapDialogProps {
  * 그래서 바깥 클릭으로 닫지 않고 ✕ 나 Esc 로 닫는다. 오른쪽에 번호 ↔ 퀘스트 범례를 둔다. 강조 상태는 팝업 안에서만 쓴다.
  * .qc-shell 로 포털한다 — 지도 카드(sticky)의 쌓임 맥락 밖에서 페이지 위에 뜨고, .qc-shell 의 색 토큰은 그대로 받는다.
  */
-function RaidMapDialog({ open, title, mapKey, index, plan, doors, exits, onClose }: RaidMapDialogProps) {
+function RaidMapDialog({ open, title, mapKey, index, plan, doors, exits, bosses, onClose }: RaidMapDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const frame = useDialogFrame(ref, 'raidmap', open, onClose)
@@ -131,7 +139,7 @@ function RaidMapDialog({ open, title, mapKey, index, plan, doors, exits, onClose
             <h3 className="qc-dialog__title">{title}</h3>
           </header>
           {/* 열 때마다 새로 그려 전체 보기로 시작한다 */}
-          <MapView mapKey={mapKey} index={index} plan={plan} doors={doors} exits={exits} hot={hot} onHot={setHot} side={legend} />
+          <MapView mapKey={mapKey} index={index} plan={plan} doors={doors} exits={exits} bosses={bosses} hot={hot} onHot={setHot} side={legend} />
         </>
       )}
     </dialog>,
@@ -145,13 +153,14 @@ interface MapViewProps {
   plan: RaidMapPlan
   doors: LockedDoor[]
   exits: MapExit[]
+  bosses: TabBosses
   hot: number | null
   onHot(n: number | null): void
   /** 있으면 팝업 배치 — [지도 | side] + 출처. 없으면 카드 배치 — 지도 + 안내 + 출처. */
   side?: ReactNode
 }
 
-function MapView({ mapKey, index, plan, doors, exits, hot, onHot, side }: MapViewProps) {
+function MapView({ mapKey, index, plan, doors, exits, bosses, hot, onHot, side }: MapViewProps) {
   const t = useT()
   const tab: MapTab = useMemo(
     () => buildNumberedTabs(plan.items, index).find((x) => x.key === mapKey) ?? { key: mapKey, markers: [], areas: [] },
@@ -173,7 +182,7 @@ function MapView({ mapKey, index, plan, doors, exits, hot, onHot, side }: MapVie
   if (!map) return <p className="qc-map__msg">{t('map.loading')}</p>
   const canvas = (
     <MapCanvas
-      mapKey={mapKey} def={map} tab={tab} level={level} markers={markersHere} doors={doorsHere} exits={exits} areas={areasHere}
+      mapKey={mapKey} def={map} tab={tab} level={level} markers={markersHere} doors={doorsHere} exits={exits} bosses={bosses} areas={areasHere}
       view={view} onView={setView} onLevel={(l) => { setChosenLevel(l); onHot(null) }}
       hot={hot} onHot={onHot}
     />

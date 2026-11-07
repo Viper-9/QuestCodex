@@ -1,4 +1,4 @@
-import type { LockedDoor, MapArea, MapExit, MapPoint, Objective } from '../api/catalog'
+import type { LockedDoor, MapArea, MapBossEntry, MapBossSpawns, MapExit, MapPoint, Objective } from '../api/catalog'
 
 // 위치정보 팝업의 계산부. React 없이 테스트된다(mapProjection.test.ts).
 // 맵 정의(public/maps/<key>/map.json)는 tools/maps/build-maps.js 가 DynamicMaps 의 jsonc 에서 만든 것이고,
@@ -248,6 +248,51 @@ export function exitsForTab(exits: Record<string, MapExit[]> | undefined, index:
     }
   }
   return out
+}
+
+/** onlyOn: 짝 맵(공장 주간·야간 등) 중 이 맵에서만 이 값일 때 그 서버 맵 키. 없으면 탭의 모든 맵에서 같다. */
+export type TabBossEntry = MapBossEntry & { onlyOn?: string }
+export type TabBossZone = { zone: string; position: MapPoint; bosses: TabBossEntry[] }
+export type TabBosses = { zones: TabBossZone[]; unplaced: TabBossEntry[] }
+
+/**
+ * 탭의 보스 출현. 짝 맵은 한 지도를 나눠 쓰므로 구역 이름으로 합친다. 모든 짝 맵에서 값이 같은 보스는 한 줄로,
+ * 한쪽에만 있거나 값이 다르면 맵마다 한 줄씩 onlyOn 을 달아 둔다 — 야간에만 나오는 광신도를 주간에도 나오는 것처럼 보이면 안 된다.
+ * 짝 맵 수는 index 에서 센다. 서버는 보스가 없는 맵(그라운드 제로 저레벨)을 보내지 않아 받은 맵만 세면 "모든 맵"으로 잘못 본다.
+ */
+export function bossesForTab(bosses: Record<string, MapBossSpawns> | undefined, index: MapIndex, key: string): TabBosses {
+  const sources = Object.entries(bosses ?? {}).filter(([map]) => mapKeyFor(index, map) === key)
+  const mapCount = index.maps.find((d) => d.key === key)?.internalNames.length ?? sources.length
+  const merge = (lists: [string, MapBossEntry[]][]): TabBossEntry[] => {
+    const groups = new Map<string, [string, MapBossEntry][]>()
+    for (const [map, list] of lists) {
+      for (const entry of list) {
+        const id = `${entry.key}|${entry.conditional}`
+        groups.set(id, [...(groups.get(id) ?? []), [map, entry]])
+      }
+    }
+    const out: TabBossEntry[] = []
+    for (const group of groups.values()) {
+      const [, first] = group[0]
+      const same = group.length === mapCount && group.every(([, e]) => e.mapChance === first.mapChance && e.rotating === first.rotating)
+      if (same) out.push(first)
+      else out.push(...group.map(([map, entry]) => ({ ...entry, onlyOn: map })))
+    }
+    return out
+  }
+
+  const zones = new Map<string, { position: MapPoint; lists: [string, MapBossEntry[]][] }>()
+  for (const [map, spawns] of sources) {
+    for (const z of spawns.zones) {
+      const seen = zones.get(z.zone)
+      if (seen) seen.lists.push([map, z.bosses])
+      else zones.set(z.zone, { position: z.position, lists: [[map, z.bosses]] })
+    }
+  }
+  return {
+    zones: [...zones].map(([zone, { position, lists }]) => ({ zone, position, bosses: merge(lists) })),
+    unplaced: merge(sources.map(([map, spawns]) => [map, spawns.unplaced])),
+  }
 }
 
 /** 층 버튼의 알림 점: 현재 층이 아니면서 퀘스트 마커가 있는 층 */
