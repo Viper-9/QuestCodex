@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- In-game hotkey that opens QuestCodex in an Anvil-WebOverlay window, or the browser without it. -->
+  <PropertyGroup>
+    <AssemblyName>QuestCodex.Overlay</AssemblyName>
+    <RootNamespace>QuestCodex.Overlay</RootNamespace>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SptRoot Condition="'$(SptRoot)' == ''">F:\SPT4.1.2</SptRoot>
+    <Managed>$(SptRoot)\EscapeFromTarkov_Data\Managed</Managed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine"><HintPath>$(Managed)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(Managed)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(Managed)\UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx"><HintPath>$(SptRoot)\BepInEx\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="spt-common"><HintPath>$(SptRoot)\BepInEx\plugins\spt\spt-common.dll</HintPath><Private>false</Private></Reference>
+    <!-- Soft dependency: compiled against, never shipped. Only WebOverlayGate may name its types. -->
+    <Reference Include="Anvil-WebOverlay"><HintPath>$(SptRoot)\BepInEx\plugins\Anvil-WebOverlay\Anvil-WebOverlay.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- Keeps the BepInPlugin version on the single <Version> in Directory.Build.props. -->
+  <Target Name="GenerateBuildInfo" BeforeTargets="BeforeCompile">
+    <PropertyGroup>
+      <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(BuildInfoFile)" Lines="namespace QuestCodex.Overlay { internal static class BuildInfo { internal const string Version = &quot;$(Version)&quot;%3B } }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(BuildInfoFile)" />
+      <FileWrites Include="$(BuildInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
