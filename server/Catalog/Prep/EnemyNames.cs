@@ -6,7 +6,7 @@ namespace QuestCodex.Catalog.Prep;
 /// 처치·명중 목표가 인정하는 봇 역할의 표시 이름(카탈로그 언어). 찾는 순서:
 /// ① 아래 표(이름에 BlackDiv 가 들어가면 블랙 디비전) → ② 게임 로케일 QuestCondition/Elimination/Kill/BotRole/{역할} → ③ ScavRole/{역할} → ④ 역할 키 그대로.
 /// 게임 로케일에는 구형 보스 6명과 광신도 2종의 BotRole 만 있고, 로케일을 넣는 모드도 없어서(2026-11-07 확인) 표가 먼저다.
-/// ②·③ 은 요청 언어 → en 순서(LocaleResolver). 개발용 역할(followerTest 등)과 bossStormtrooper 는 이름에서 뺀다. 이름에 BlackDiv 가 들어가면 "블랙 디비전". 같은 이름은 한 번만.
+/// ②·③ 은 요청 언어 → en 순서(LocaleResolver). 개발용 역할(followerTest 등)과 스톰트루퍼(boss·follower)는 이름에서 뺀다. 이름에 BlackDiv 가 들어가면 "블랙 디비전". 같은 이름은 한 번만.
 ///
 /// 표 규칙: 보스 이름은 웹 사전 map.boss.name.* 와 맞춘다. 다만 bossKnight 는 지도에서는 "군즈"지만 퀘스트는 나이트 한 명을 가리켜 "나이트".
 /// 영문·러시아어는 퀘스트 문장의 표기를 따른다(나이트 일행은 러시아어도 라틴 표기, 경호원은 "Свита"). 이름 있는 경호원(Basmach, Gus)은 이름으로.
@@ -14,8 +14,10 @@ namespace QuestCodex.Catalog.Prep;
 /// </summary>
 public sealed class EnemyNames(LocaleResolver locale, string lang)
 {
-    // 이름에서 빼는 역할: 개발용(바닐라 enum 의 test·bossTest·followerTest)과 정체를 알 수 없는 bossStormtrooper(QuestBackport, 사용자 결정).
-    private static readonly HashSet<string> Hidden = new(StringComparer.OrdinalIgnoreCase) { "test", "bossTest", "followerTest", "bossStormtrooper" };
+    // 이름에서 빼는 역할(사용자 결정 2026-11-07): 개발용(바닐라 enum 의 test·bossTest·followerTest)과 스톰트루퍼 —
+    // bossStormtrooper(QuestBackport)·followerStormtrooper(바닐라 Small Business 2) 모두 이 클라이언트 enum 에 없어 카운트되지 않는다.
+    private static readonly HashSet<string> Hidden = new(StringComparer.OrdinalIgnoreCase)
+        { "test", "bossTest", "followerTest", "bossStormtrooper", "followerStormtrooper" };
 
     private static readonly (string En, string Kr, string Ru) BlackDivision = ("Black Division", "블랙 디비전", "Black Division");
 
@@ -56,7 +58,6 @@ public sealed class EnemyNames(LocaleResolver locale, string lang)
         ["followerKolontayAssault"] = ("Kollontay's guard", "콜론타이 경호원", "Свита Коллонтая"),
         ["followerKolontaySecurity"] = ("Kollontay's guard", "콜론타이 경호원", "Свита Коллонтая"),
         ["followerZryachiy"] = ("Zryachiy's guard", "즈랴치 경호원", "Свита Зрячего"),
-        ["followerStormtrooper"] = ("Stormtrooper", "스톰트루퍼", "Штурмовик"),
 
         // 그 밖의 AI
         ["assault"] = ("Scav", "스캐브", "Дикий"),

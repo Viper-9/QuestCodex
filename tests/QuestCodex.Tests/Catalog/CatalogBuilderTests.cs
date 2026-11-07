@@ -642,9 +642,9 @@ public class CatalogBuilderTests
         [
             HitCounter(Id(11), Hit("Kills", "Savage", "bossTagilla", "followerTagilla", "modBoss", "modGuard", "followerTest", "unknownBot")),
             HitCounter(Id(12), Hit("Kills", "Savage", "assault", "assaultGroup", "marksman")),
-            // 모드 역할: BlackDiv 가 들어가면 전부 블랙 디비전, 웨지 계열은 웨지·웨지 경호원, bossStormtrooper 는 뺀다
+            // 모드 역할: BlackDiv 가 들어가면 전부 블랙 디비전, 웨지 계열은 웨지·웨지 경호원, 스톰트루퍼(boss·follower)는 뺀다
             HitCounter(Id(13), Hit("Kills", "Savage", "blackDivAssault", "bossBullyBlackDiv", "pmcBotBlackDiv", "blackDivision",
-                "bossWedge", "bossWedgeLab", "followerWedgeLab", "bossStormtrooper")),
+                "bossWedge", "bossWedgeLab", "followerWedgeLab", "bossStormtrooper", "followerStormtrooper")),
         ]);
 
         var objectives = CatalogBuilder.Build(Input([q], locale: locale), Now).Quests[Id(1)].Objectives;
