@@ -24,8 +24,21 @@ describe('formatRequirement (§4.1)', () => {
   it('quest Started 만 → 시작', () => {
     expect(lineText(formatRequirement({ kind: 'quest', questId: 'debut', needStatuses: ['Started'], availableAfterSec: 0, resolved: true }, lookup, ko))).toBe('Debut 시작')
   })
-  it('quest 그 외 상태는 원문 나열', () => {
-    expect(lineText(formatRequirement({ kind: 'quest', questId: 'debut', needStatuses: ['AvailableForFinish', 'Fail'], availableAfterSec: 0, resolved: true }, lookup, ko))).toBe('Debut AvailableForFinish/Fail')
+  const statusLine = (needStatuses: string[], t = ko) =>
+    lineText(formatRequirement({ kind: 'quest', questId: 'debut', needStatuses, availableAfterSec: 0, resolved: true }, lookup, t))
+  it('quest 완료·실패 둘 다 받으면 둘 다 표시한다', () => {
+    expect(statusLine(['Success', 'Fail'])).toBe('Debut 완료 또는 실패')
+    expect(statusLine(['Success', 'Fail'], en)).toBe('Debut completed or failed')
+  })
+  it('quest 여러 상태는 데이터 순서와 상관없이 진행 순서로 표시한다', () => {
+    expect(statusLine(['Success', 'Started'])).toBe('Debut 시작 또는 완료')
+    expect(statusLine(['Fail', 'Success', 'AvailableForFinish', 'Started', 'AvailableForStart'])).toBe('Debut 수락 가능 또는 시작 또는 완료 보고 대기 또는 완료 또는 실패')
+  })
+  it('quest 실패만 요구하면 실패로 표시한다', () => {
+    expect(statusLine(['Fail'])).toBe('Debut 실패')
+  })
+  it('quest 모르는 상태는 원문 그대로 맨 뒤에 붙인다', () => {
+    expect(statusLine(['Weird', 'Success'])).toBe('Debut 완료 또는 Weird')
   })
   it('quest availableAfterSec > 0 → (완료 후 H:MM 대기)', () => {
     expect(lineText(formatRequirement({ kind: 'quest', questId: 'debut', needStatuses: ['Success'], availableAfterSec: 5400, resolved: true }, lookup, ko))).toBe('Debut 완료 (완료 후 1:30 대기)')
