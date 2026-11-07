@@ -46,9 +46,9 @@ public class QuestLinesTests
     [Fact]
     public void ObjectiveText_falls_back_to_type_and_target_and_formats_count()
     {
-        Assert.Equal("Find ×1,000", BriefingText.ObjectiveText(Obj("a", "FindItem", text: "Find", targetCount: 1000)));
-        Assert.Equal("VisitPlace", BriefingText.ObjectiveText(new Objective("b", "VisitPlace", "", null, null)));
-        Assert.Equal("HandoverItem: Salewa ×2", BriefingText.ObjectiveText(new Objective("c", "HandoverItem", "", 2, "Salewa")));
+        Assert.Equal("Find ×1,000", BriefingText.ObjectiveText(Obj("a", "FindItem", text: "Find", targetCount: 1000), "en"));
+        Assert.Equal("VisitPlace", BriefingText.ObjectiveText(new Objective("b", "VisitPlace", "", null, null), "en"));
+        Assert.Equal("HandoverItem: Salewa ×2", BriefingText.ObjectiveText(new Objective("c", "HandoverItem", "", 2, "Salewa"), "en"));
     }
 
     [Fact]

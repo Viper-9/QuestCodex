@@ -140,6 +140,55 @@ public class ProgressBuilderTests
         Assert.Equal(new ObjectiveProgress(0, 3, false), objs[Id(401)]);
     }
 
+    private static QuestCodex.Catalog.Models.Catalog CatalogWithGroup()
+    {
+        var q = Quest(Id(1), finish: [FinishCond(Id(11), "PlaceBeacon", 1), FinishCond(Id(12), "PlaceBeacon", 1), FinishCond(Id(13), "CounterCreator", 1)]);
+        return CatalogBuilder.Build(new CatalogInput("en", "4.1.5", "0.2.0",
+            new Dictionary<MongoId, Quest> { [q.Id] = q },
+            new Dictionary<MongoId, TraderBase> { [Prapor] = Trader(Prapor, "Prapor") },
+            new Dictionary<MongoId, TemplateItem>(), new Dictionary<string, string>(), new Dictionary<string, string>(),
+            new HashSet<MongoId>(), new HashSet<MongoId>(), null, null,
+            AlternativeGroups: [new AlternativeGroup(Id(1).ToString(), [Id(11).ToString(), Id(12).ToString()])]), DateTimeOffset.UnixEpoch);
+    }
+
+    /// <summary>합쳐진 목표의 ID 는 첫 선택지지만, 어느 선택지를 끝내도 끝난 것이다.</summary>
+    [Fact]
+    public void Any_completed_option_finishes_the_merged_objective()
+    {
+        var pmc = Pmc();
+        var entry = ProfileQuest(Id(1), QuestStatusEnum.Started);
+        entry.CompletedConditions = [Id(12)];
+        pmc.Quests!.Add(entry);
+
+        var objs = ProgressBuilder.Build(CatalogWithGroup(), pmc, "p", false).Quests[Id(1)].Objectives;
+
+        Assert.Equal(new ObjectiveProgress(1, 1, true), objs[Id(11)]);
+        Assert.False(objs[Id(13)].Done);
+    }
+
+    [Fact]
+    public void Counter_of_any_option_counts_for_the_merged_objective()
+    {
+        var pmc = Pmc();
+        pmc.Quests!.Add(ProfileQuest(Id(1), QuestStatusEnum.Started));
+        pmc.TaskConditionCounters![Id(900)] = new TaskConditionCounter { Id = Id(12), Value = 1 };
+
+        var objs = ProgressBuilder.Build(CatalogWithGroup(), pmc, "p", false).Quests[Id(1)].Objectives;
+
+        Assert.Equal(new ObjectiveProgress(1, 1, true), objs[Id(11)]);
+    }
+
+    [Fact]
+    public void Merged_objective_is_open_until_an_option_is_done()
+    {
+        var pmc = Pmc();
+        pmc.Quests!.Add(ProfileQuest(Id(1), QuestStatusEnum.Started));
+
+        var objs = ProgressBuilder.Build(CatalogWithGroup(), pmc, "p", false).Quests[Id(1)].Objectives;
+
+        Assert.Equal(new ObjectiveProgress(0, 1, false), objs[Id(11)]);
+    }
+
     [Fact]
     public void Finished_quest_marks_all_objectives_done()
     {

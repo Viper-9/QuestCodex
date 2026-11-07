@@ -45,11 +45,20 @@ export function shortId(id: string): string {
   return id.slice(0, 8)
 }
 
-/** needStatuses → 완료 / 시작 / 원문 나열 (§4.1 quest 행) */
+/** 시작 조건이 받는 퀘스트 상태의 문구. 진행 순서로 적어 데이터 순서와 상관없이 같은 문장이 되게 한다. */
+const NEED_STATUS_KEYS: [string, UiKey][] = [
+  ['AvailableForStart', 'fmt.questAvailable'],
+  ['Started', 'fmt.questStarted'],
+  ['AvailableForFinish', 'fmt.questReady'],
+  ['Success', 'fmt.questDone'],
+  ['Fail', 'fmt.questFailed'],
+]
+
+/** needStatuses 를 빠짐없이 나열한다(§4.1 quest 행). 모르는 상태(모드·신규 SPT)는 원문 그대로 맨 뒤에. */
 function statusLabel(needStatuses: string[], t: T): string {
-  if (needStatuses.includes('Success')) return t('fmt.questDone')
-  if (needStatuses.length === 1 && needStatuses[0] === 'Started') return t('fmt.questStarted')
-  return needStatuses.join('/')
+  const known = NEED_STATUS_KEYS.filter(([status]) => needStatuses.includes(status)).map(([, key]) => t(key))
+  const unknown = needStatuses.filter((s) => !NEED_STATUS_KEYS.some(([status]) => status === s))
+  return [...known, ...unknown].join(t('fmt.questStatusOr'))
 }
 
 export function formatRequirement(r: Requirement, lookup: NameLookup, t: T): FormattedLine {
@@ -122,6 +131,7 @@ export function formatObjective(o: Objective, t: T): FormattedLine {
       : t('fmt.objectiveFallback', { type: o.conditionType, name: o.targetName })
   }
   if (o.targetCount !== null) text += t('fmt.objectiveCount', { n: formatInt(o.targetCount) })
+  if (o.anyOf?.length) text += t('fmt.objectiveAnyOf', { n: formatInt(o.anyOf.length) })
   return plain(text)
 }
 

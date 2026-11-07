@@ -153,6 +153,8 @@ export interface Objective {
   locations?: ObjectiveLocation[]
   /** 이 목표가 게임에 보이려면 먼저 끝나야 하는 같은 퀘스트의 조건 ID. 대부분 빈 배열, 필드가 생기기 전 서버는 undefined. */
   visibleAfter?: string[]
+  /** 택1 묶음을 합친 목표면 묶음의 조건 ID 전부(자기 포함). 아니면 빈 배열, 필드가 생기기 전 서버는 undefined. */
+  anyOf?: string[]
 }
 
 export type Reward =

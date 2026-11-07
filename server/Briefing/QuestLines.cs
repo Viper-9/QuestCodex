@@ -20,7 +20,7 @@ public static class QuestLines
             any = true;
         }
 
-        var summary = entries.Count == 1 ? BriefingText.ObjectiveText(entries[0].Objective) : BriefingText.ObjectiveCount(entries.Count, lang);
+        var summary = entries.Count == 1 ? BriefingText.ObjectiveText(entries[0].Objective, lang) : BriefingText.ObjectiveCount(entries.Count, lang);
         return any ? new QuestLine(summary, current, target) : new QuestLine(summary, null, null);
     }
 }

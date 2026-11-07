@@ -1,6 +1,11 @@
 using QuestCodex.Briefing;
+using QuestCodex.Catalog;
 using QuestCodex.Catalog.Models;
+using QuestCodex.Progress;
 using QuestCodex.Progress.Models;
+using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Enums;
 using static QuestCodex.Tests.Briefing.B;
 
 namespace QuestCodex.Tests.Briefing;
@@ -227,4 +232,44 @@ public class RaidPlanTests
         Assert.Empty(b.Bring);
         Assert.Equal(new[] { "jam" }, b.BringAnywhere.Select(r => r.Key));
     }
+
+    // BP Depot 모양: 마커 설치 4곳. QuestBackport 가 있으면 1개, 없으면 바닐라대로 4개다.
+    [Theory]
+    [InlineData(true, 1, 1)]
+    [InlineData(false, 4, 4)]
+    public void Raid_plan_asks_for_one_marker_only_when_the_group_applies(bool withGroup, int entries, double markers)
+    {
+        var marker = Fixtures.Id(7001);
+        var ids = new[] { Fixtures.Id(11), Fixtures.Id(12), Fixtures.Id(13), Fixtures.Id(14) };
+        var q = Fixtures.Quest(Fixtures.Id(1), finish: ids.Select(id => Fixtures.FinishCond(id, "PlaceBeacon", 1, marker)).ToList());
+        var catalog = CatalogBuilder.Build(new CatalogInput("en", "4.1.5", "0.2.0",
+            new Dictionary<MongoId, Quest> { [q.Id] = q },
+            new Dictionary<MongoId, TraderBase> { [Fixtures.Prapor] = Fixtures.Trader(Fixtures.Prapor, "Prapor") },
+            new Dictionary<MongoId, TemplateItem>(), new Dictionary<string, string>(), new Dictionary<string, string>(),
+            new HashSet<MongoId>(), new HashSet<MongoId>(), null, null,
+            AlternativeGroups: withGroup ? [new AlternativeGroup(q.Id.ToString(), ids.Select(id => id.ToString()).ToList())] : null),
+            DateTimeOffset.UnixEpoch);
+        var pmc = Fixtures.Pmc();
+        pmc.Quests!.Add(Fixtures.ProfileQuest(q.Id, QuestStatusEnum.Started));
+
+        var plan = RaidPlan.RaidEntries(catalog, ProgressBuilder.Build(catalog, pmc, "p", false));
+
+        Assert.Equal(entries, plan.Count);
+        Assert.Equal(markers, RaidPlan.PlantNeeds(plan).Sum(n => n.Count));
+    }
+
+    [Theory]
+    [InlineData("en", "Mark a tank ×1 (any one of 4)")]
+    [InlineData("kr", "Mark a tank ×1 (4개 중 하나)")]
+    [InlineData("ru", "Mark a tank ×1 (любой из 4)")]
+    public void Merged_objective_text_says_any_one_is_enough(string lang, string expected)
+    {
+        var o = Obj("a", "PlaceBeacon", targetCount: 1, text: "Mark a tank") with { AnyOf = ["a", "b", "c", "d"] };
+
+        Assert.Equal(expected, BriefingText.ObjectiveText(o, lang));
+    }
+
+    [Fact]
+    public void Ordinary_objective_text_has_no_any_one_note()
+        => Assert.Equal("Mark a tank ×1", BriefingText.ObjectiveText(Obj("a", "PlaceBeacon", targetCount: 1, text: "Mark a tank"), "en"));
 }

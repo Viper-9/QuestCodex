@@ -2,6 +2,8 @@ namespace QuestCodex.Catalog.Models;
 
 public static class WarningCodes
 {
+    /// <summary>택1 그룹의 조건이 퀘스트에 없거나, 2개 미만이거나, 다른 그룹과 겹친다. 그 그룹은 합치지 않는다.</summary>
+    public const string AlternativeGroupInvalid = "alternativeGroupInvalid";
     public const string DanglingPrereq = "danglingPrereq";
     public const string MissingLocale = "missingLocale";
     public const string UnknownTrader = "unknownTrader";
@@ -39,6 +41,12 @@ public sealed record Objective(
     /// 대부분 비어 있다. 빈 값은 Locations 와 같은 이유로 Array.Empty.
     /// </summary>
     public IReadOnlyList<string> VisibleAfter { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// 택1 그룹을 합친 목표면 그룹의 조건 ID 전부(자기 포함). 아니면 빈 목록. 이 중 하나만 끝나면 이 목표가 끝난 것이다.
+    /// 빈 값은 Locations 와 같은 이유로 Array.Empty.
+    /// </summary>
+    public IReadOnlyList<string> AnyOf { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>Unity 월드 좌표 그대로. Y = 높이. SVG 투영은 브라우저가 한다.</summary>
