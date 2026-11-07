@@ -26,6 +26,9 @@ public static class BriefingBuilder
         var entries = RaidPlan.RaidEntries(catalog, progress);
         var finds = RaidFinds.Rows(catalog, progress, inventory, names);
         var serverMaps = catalog.Exits.Keys.Concat(catalog.LockedDoors.Keys).ToList();
+        // 예전 카탈로그 JSON(녹화 데이터)에는 bosses 가 없어 null 로 들어올 수 있다.
+        var bosses = (SortedDictionary<string, MapBossSpawns>?)catalog.Bosses;
+        var groupMaps = serverMaps.Concat(bosses?.Keys ?? Enumerable.Empty<string>()).ToList();
         var flags = new QuestFlags(
             QuestChains.PrerequisitesOf(catalog, CatalogBuilder.CollectorId), QuestChains.PrerequisitesOf(catalog, QuestChains.InformationSourceId));
 
@@ -47,7 +50,8 @@ public static class BriefingBuilder
                 Gear(brief.Gear.Where(e => e.Maps.Count > 0)),
                 Special(brief.Special.Where(e => e.Maps.Count > 0)),
                 ForTab(catalog.Exits, tab.Key, (x, y) => x.Key == y.Key && x.Kind == y.Kind && x.Position == y.Position),
-                ForTab(catalog.LockedDoors, tab.Key, (x, y) => x.KeyTpl == y.KeyTpl && x.Position == y.Position));
+                ForTab(catalog.LockedDoors, tab.Key, (x, y) => x.KeyTpl == y.KeyTpl && x.Position == y.Position),
+                BossTabs.ForTab(bosses, tab.Key, MapCount(groupMaps, tab.Key)));
         }).ToList();
 
         // 아무 맵 목록은 탭과 상관없이 한 번만 보내니 맵 키를 "" 로 넘긴다.
@@ -137,6 +141,11 @@ public static class BriefingBuilder
         => RaidPlan.GroupByQuest(entries)
             .Select(g => new BriefingSpecial(g.Quest.Id, RaidRules.DedupeSpecial(g.Entries.SelectMany(e => RaidRules.SpecialRows(e.Objective.Prep!)))))
             .ToList();
+
+    // 탭에 묶이는 서로 다른 서버 맵 수. 웹은 maps/index.json 의 internalNames 수로 세는데,
+    // SPT 서버 DB 에는 index 에 없는 변종(sandbox_start, laboratory_dark)이 없어서 카탈로그 맵 키로 세도 같다.
+    private static int MapCount(IEnumerable<string> serverMaps, string tab)
+        => serverMaps.Where(m => RaidPlan.MapGroup(m) == tab).Select(m => m.ToLowerInvariant()).Distinct(StringComparer.Ordinal).Count();
 
     // 탭에 묶이는 서버 맵(짝 맵 포함)의 탈출구나 잠긴 문을 모은다.
     // 짝 맵에서는 같은 것이 같은 좌표로 두 번 들어오니 한 번만 넣는다. 웹 exitsForTab, doorsForTab 과 같다.

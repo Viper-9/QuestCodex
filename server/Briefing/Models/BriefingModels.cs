@@ -37,7 +37,17 @@ public sealed record BriefingMap(
     IReadOnlyList<BriefingGear> Gear,
     IReadOnlyList<BriefingSpecial> Special,
     IReadOnlyList<MapExit> Exits,
-    IReadOnlyList<LockedDoor> LockedDoors);
+    IReadOnlyList<LockedDoor> LockedDoors,
+    BriefingBosses Bosses);
+
+// 탭의 보스 출현(카탈로그 Bosses 를 탭 단위로 합친 것, BriefingBosses.ForTab 참고). 구역 몫 확률(Chance)은 싣지 않는다.
+// OnlyOn 은 짝 맵 중 한쪽에만 있거나 값이 다를 때 그 서버 맵 키(factory4_night 등). 모든 짝 맵에서 같으면 null.
+public sealed record BriefingBoss(string Key, string Kind, int MapChance, bool Conditional, bool Rotating, string? OnlyOn);
+
+public sealed record BriefingBossZone(string Zone, MapPoint Position, IReadOnlyList<BriefingBoss> Bosses);
+
+// Unplaced 는 정해진 구역이 없거나 좌표를 모르는 보스(지도 마커 없이 목록으로).
+public sealed record BriefingBosses(IReadOnlyList<BriefingBossZone> Zones, IReadOnlyList<BriefingBoss> Unplaced);
 
 // Marker 는 지도 번호. 좌표가 있는 퀘스트에만 1부터 붙고 나머지는 null. Current, Target 은 QuestLines 에서 계산한다.
 // Kappa 는 Collector 의 선행 퀘스트, Lightkeeper 는 Information Source(등대지기 첫 퀘스트)의 선행 퀘스트라는 뜻(QuestChains 참고).

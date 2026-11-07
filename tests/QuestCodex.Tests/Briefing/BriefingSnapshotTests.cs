@@ -40,6 +40,8 @@ public class BriefingSnapshotTests
             Exits = new SortedDictionary<string, List<MapExit>>(catalog.Exits, StringComparer.Ordinal),
             LockedDoors = new SortedDictionary<string, List<LockedDoor>>(catalog.LockedDoors, StringComparer.Ordinal),
             Traders = new SortedDictionary<string, CatalogTrader>(catalog.Traders, StringComparer.Ordinal),
+            // 예전 녹화에는 bosses 가 없어 null 일 수 있다
+            Bosses = catalog.Bosses is { } bosses ? new SortedDictionary<string, MapBossSpawns>(bosses, StringComparer.Ordinal) : null!,
         };
         var progress = JsonSerializer.Deserialize<ProfileProgress>(File.ReadAllText(progressPath), ReadJson)!;
         var index = MapIndex.Parse(File.ReadAllText(TestPaths.MapIndexJson));
