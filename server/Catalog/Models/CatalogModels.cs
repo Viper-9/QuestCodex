@@ -111,7 +111,7 @@ public sealed record MapExit(
     string Key, string Name, string Kind, MapPoint Position, string? Requirement, string? RequirementKind, int? Chance, string? Target);
 
 /// <summary>서버 DB base.BossLocationSpawn 한 행. Zone = 쉼표로 이은 후보 구역(빈 문자열 = 정해진 곳 없음), Conditional = 트리거(스위치·이벤트)가 있어야 나온다.</summary>
-public sealed record BossSpawnRow(string Name, double Chance, string Zone, bool Conditional);
+public sealed record BossSpawnRow(string Name, double Chance, string Zone, bool Conditional, bool Rotating = false);
 
 /// <summary>서버 DB base.SpawnPointParams 한 행. BossSpot = Categories 에 Boss 가 있다.</summary>
 public sealed record BossZonePoint(string Zone, MapPoint Position, bool BossSpot);
@@ -122,7 +122,7 @@ public sealed record LocationBosses(IReadOnlyList<BossSpawnRow> Rows, IReadOnlyL
 /// 카탈로그에 싣는 보스 한 줄(18 스펙). Key = 게임 이름(bossBully 등, 웹 i18n 이 번역), Kind = "boss" | "minor",
 /// Chance = 이 구역에서 나올 확률(%), MapChance = 맵 어디서든 나올 확률(%).
 /// </summary>
-public sealed record MapBossEntry(string Key, string Kind, int Chance, int MapChance, bool Conditional);
+public sealed record MapBossEntry(string Key, string Kind, int Chance, int MapChance, bool Conditional, bool Rotating);
 
 /// <summary>구역 하나 = 지도 마커 하나.</summary>
 public sealed record MapBossZone(string Zone, MapPoint Position, IReadOnlyList<MapBossEntry> Bosses);

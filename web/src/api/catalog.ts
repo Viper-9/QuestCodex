@@ -117,7 +117,8 @@ export interface MapExit {
 
 /**
  * 바닐라 보스 출현(18 스펙). key 는 게임 이름(bossBully 등)으로 웹 i18n 이 번역한다. kind: boss | minor(레이더·로그 등 준보스).
- * chance = 이 구역에서 나올 확률(%), mapChance = 맵 어디서든 나올 확률(%). conditional = 스위치·이벤트가 있어야 나온다.
+ * chance = 이 구역에서 나올 확률(%), mapChance = 맵 어디서든 나올 확률(%, 화면에 쓰는 값). conditional = 스위치·이벤트가 있어야 나온다.
+ * rotating = SPT 가 몇 시간마다 맵을 바꿔 켜는 보스(Knight)라 확률은 이 맵에 배정됐을 때의 값이다.
  */
 export interface MapBossEntry {
   key: string
@@ -125,6 +126,7 @@ export interface MapBossEntry {
   chance: number
   mapChance: number
   conditional: boolean
+  rotating: boolean
 }
 
 /** 구역 하나 = 지도 마커 하나 */

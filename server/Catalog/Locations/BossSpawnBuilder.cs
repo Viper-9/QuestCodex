@@ -49,12 +49,14 @@ public static class BossSpawnBuilder
         var inZone = new Dictionary<(string Zone, string Key, bool Conditional), double>();
         var unplaced = new Dictionary<(string Key, bool Conditional), double>();
         var onMap = new Dictionary<(string Key, bool Conditional), double>();
+        var rotating = new HashSet<(string Key, bool Conditional)>();
 
         foreach (var row in location.Rows.Where(r => r.Chance > 0 && Vanilla.ContainsKey(r.Name)))
         {
             var chance = Math.Min(row.Chance, 100) / 100;
             var who = (row.Name, row.Conditional);
             Roll(onMap, who, chance);
+            if (row.Rotating) rotating.Add(who);
 
             // 후보 구역 중 하나를 고르므로 구역 몫 = 나온 횟수 / 후보 수. 해안선처럼 같은 구역을 여러 번 적으면 그만큼 자주 뽑힌다.
             var zones = row.Zone.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -81,25 +83,25 @@ public static class BossSpawnBuilder
         var markers = zoneOrder
             .Select(zone => new MapBossZone(zone, positions[zone], Sorted(inZone
                 .Where(e => e.Key.Zone == zone)
-                .Select(e => Entry(e.Key.Key, e.Key.Conditional, e.Value, onMap)))))
+                .Select(e => Entry((e.Key.Key, e.Key.Conditional), e.Value)))))
             .ToList();
-        var free = Sorted(unplaced.Select(e => Entry(e.Key.Key, e.Key.Conditional, e.Value, onMap)));
+        var free = Sorted(unplaced.Select(e => Entry(e.Key, e.Value)));
         return new MapBossSpawns(markers, free);
+
+        MapBossEntry Entry((string Key, bool Conditional) who, double miss) => new(
+            who.Key, Vanilla[who.Key], Percent(miss), Percent(onMap[who]), who.Conditional, rotating.Contains(who));
     }
 
     /// <summary>값 = 지금까지 이 묶음이 한 번도 안 나올 확률.</summary>
     private static void Roll<TKey>(Dictionary<TKey, double> misses, TKey key, double chance) where TKey : notnull
         => misses[key] = misses.GetValueOrDefault(key, 1) * (1 - chance);
 
-    private static MapBossEntry Entry(string key, bool conditional, double miss, Dictionary<(string Key, bool Conditional), double> onMap)
-        => new(key, Vanilla[key], Percent(miss), Percent(onMap[(key, conditional)]), conditional);
-
     /// <summary>1% 미만도 나오긴 하므로 0% 로 쓰지 않는다.</summary>
     private static int Percent(double miss) => Math.Max(1, (int)Math.Round((1 - miss) * 100, MidpointRounding.AwayFromZero));
 
     private static List<MapBossEntry> Sorted(IEnumerable<MapBossEntry> entries) => entries
         .OrderBy(e => e.Kind == Boss ? 0 : 1)
-        .ThenByDescending(e => e.Chance)
+        .ThenByDescending(e => e.MapChance)
         .ThenBy(e => e.Key, StringComparer.Ordinal)
         .ToList();
 

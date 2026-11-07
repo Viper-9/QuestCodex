@@ -274,7 +274,7 @@ export function bossesForTab(bosses: Record<string, MapBossSpawns> | undefined, 
     const out: TabBossEntry[] = []
     for (const group of groups.values()) {
       const [, first] = group[0]
-      const same = group.length === mapCount && group.every(([, e]) => e.chance === first.chance && e.mapChance === first.mapChance)
+      const same = group.length === mapCount && group.every(([, e]) => e.mapChance === first.mapChance && e.rotating === first.rotating)
       if (same) out.push(first)
       else out.push(...group.map(([map, entry]) => ({ ...entry, onlyOn: map })))
     }

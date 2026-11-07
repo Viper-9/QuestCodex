@@ -101,6 +101,25 @@ public class BossSpawnBuilderTests
     }
 
     [Fact]
+    public void Rotating_rows_are_flagged()
+    {
+        var bosses = Assert.Single(Build(
+            [new BossSpawnRow("bossKnight", 35, "A", false, Rotating: true), Row("bossBully", 39, "A")], Pt("A", 0)).Zones).Bosses;
+
+        Assert.True(bosses.Single(b => b.Key == "bossKnight").Rotating);
+        Assert.False(bosses.Single(b => b.Key == "bossBully").Rotating);
+    }
+
+    [Fact]
+    public void Bosses_sort_by_the_map_chance_shown_to_the_user()
+    {
+        var bosses = Assert.Single(Build([Row("bossBully", 30, "A,B,C"), Row("bossKnight", 15, "A")], Pt("A", 0), Pt("B", 1), Pt("C", 2)).Zones
+            .Where(z => z.Zone == "A")).Bosses;
+
+        Assert.Equal(["bossBully", "bossKnight"], bosses.Select(b => b.Key));
+    }
+
+    [Fact]
     public void Real_bosses_list_before_minor_ones_then_by_chance()
     {
         var bosses = Assert.Single(Build(

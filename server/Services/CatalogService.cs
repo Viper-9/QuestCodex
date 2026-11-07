@@ -23,6 +23,7 @@ public class CatalogService(
     TradersTable tradersTable,
     LocationTable locationTable,
     BotTable botTable,
+    BotConfig botConfig,
     QuestConfig questConfig,
     LocationConfig locationConfig,
     LocaleService localeService,
@@ -80,7 +81,7 @@ public class CatalogService(
 
     private Generation NewGeneration(bool readDiskCache) => new(
         new ConcurrentDictionary<string, Lazy<QuestCodex.Catalog.Models.Catalog>>(StringComparer.Ordinal),
-        new(() => LoadLocationData(questZoneSnapshot, modQuestZoneIndex, locationTable)),
+        new(() => LoadLocationData(questZoneSnapshot, modQuestZoneIndex, locationTable, botConfig.GoonSpawnSystem)),
         new(() => LoadLootData(readDiskCache)),
         new(LoadHandbook));
 
@@ -365,7 +366,7 @@ public class CatalogService(
     /// 맵 키는 LocationBase.Id 소문자(= locations 폴더 이름, 예: Sandbox_high → sandbox_high).
     /// </summary>
     private static LocationData LoadLocationData(
-        QuestZoneSnapshot questZoneSnapshot, ModQuestZoneIndex modQuestZoneIndex, LocationTable locationTable)
+        QuestZoneSnapshot questZoneSnapshot, ModQuestZoneIndex modQuestZoneIndex, LocationTable locationTable, GoonSpawnSystem goons)
     {
         var zones = new PointTableBuilder().AddAll(questZoneSnapshot.Zones).AddAll(modQuestZoneIndex.Zones).Build();
         var areas = new AreaTableBuilder().AddAll(questZoneSnapshot.Areas).AddAll(modQuestZoneIndex.Areas).Build();
@@ -385,17 +386,24 @@ public class CatalogService(
         }
 
         var bosses = new Dictionary<string, QuestCodex.Catalog.Models.LocationBosses>(StringComparer.Ordinal);
-        foreach (var (map, location) in maps) bosses[map] = ReadBosses(location);
+        // SPT 는 몇 시간마다 이 풀에서 Knight 맵을 하나 골라 확률을 켜고 나머지를 0 으로 만든다(GoonLocationSpawnService).
+        // 카탈로그는 재시작 전까지 유지되므로 그 순간의 값 대신 "순환"으로 표시한다.
+        var goonPool = new HashSet<string>(goons.Enabled ? goons.LocationPool : [], StringComparer.OrdinalIgnoreCase);
+        foreach (var (map, location) in maps) bosses[map] = ReadBosses(location, goonPool.Contains(map) ? goons.SpawnChance : null);
 
         return new LocationData(zones, keys, questZoneSnapshot.Zones is null, areas, exits, bosses);
 
         // 카탈로그를 만드는 시점의 메모리 값이라 위치 모드가 바꾼 확률이 반영된다.
-        static QuestCodex.Catalog.Models.LocationBosses ReadBosses(SPTarkov.Server.Core.Models.Eft.Common.Location location)
+        static QuestCodex.Catalog.Models.LocationBosses ReadBosses(SPTarkov.Server.Core.Models.Eft.Common.Location location, double? goonChance)
         {
             var rows = (location.Base.BossLocationSpawn ?? [])
                 .Where(b => b is not null && !string.IsNullOrEmpty(b.BossName))
-                .Select(b => new QuestCodex.Catalog.Models.BossSpawnRow(
-                    b.BossName!, b.BossChance ?? 0, b.BossZone ?? "", !string.IsNullOrEmpty(b.TriggerName)))
+                .Select(b =>
+                {
+                    var rotating = goonChance is not null && b.BossName == "bossKnight";
+                    return new QuestCodex.Catalog.Models.BossSpawnRow(
+                        b.BossName!, rotating ? goonChance!.Value : b.BossChance ?? 0, b.BossZone ?? "", !string.IsNullOrEmpty(b.TriggerName), rotating);
+                })
                 .ToList();
             var points = (location.Base.SpawnPointParams ?? [])
                 .Where(p => p is not null && !string.IsNullOrEmpty(p.BotZoneName) && p.Position.HasValue)

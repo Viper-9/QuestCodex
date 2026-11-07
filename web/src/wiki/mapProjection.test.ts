@@ -238,7 +238,7 @@ describe('exitsForTab', () => {
 
 describe('bossesForTab', () => {
   const boss = (key: string, chance: number, conditional = false): MapBossEntry =>
-    ({ key, kind: 'boss', chance, mapChance: chance, conditional })
+    ({ key, kind: 'boss', chance, mapChance: chance, conditional, rotating: false })
   const zone = (name: string, ...bosses: MapBossEntry[]) => ({ zone: name, position: { x: 1, y: 0, z: 2 }, bosses })
 
   it('탭에 속한 맵만 모은다', () => {

@@ -60,12 +60,20 @@ export function ExitMarker({ exit, style, other }: { exit: MapExit; style: CSSPr
   )
 }
 
-/** 보스 한 줄: "이름 13% · 맵 전체 39% · 조건부". 맵 전체 값은 구역 값과 다를 때만, 짝 맵 하나의 값이면 맵 이름을 덧붙인다. */
-function bossLine(boss: TabBossEntry, t: T): string {
-  const on = boss.onlyOn ? ` (${t(`map.boss.on.${boss.onlyOn}` as UiKey)})` : ''
+/**
+ * 보스 한 줄: "이름 (고레벨, 밤) 39% · 조건부". 확률은 맵 어디서든 나올 값 하나만 쓴다.
+ * 맵을 순환하는 보스는 "(순환)"을 붙인다 — 숫자는 이 맵에 배정됐을 때의 값이고, 지금 이 맵인지는 알 수 없다.
+ * 광신도는 서버 표에 시간 조건이 없지만 클라이언트가 낮에 막는다(BotZonesLeaveController.DayBlocks). 야간 공장은 이미 "야간"이라 덧붙이지 않는다.
+ */
+export function bossLine(boss: TabBossEntry, t: T): string {
+  const labels = [
+    boss.onlyOn ? t(`map.boss.on.${boss.onlyOn}` as UiKey) : null,
+    boss.key === 'sectantPriest' && boss.onlyOn !== 'factory4_night' ? t('map.boss.night') : null,
+    boss.rotating ? t('map.boss.rotating') : null,
+  ].filter(Boolean)
+  const name = t(`map.boss.name.${boss.key}` as UiKey) + (labels.length > 0 ? ` (${labels.join(', ')})` : '')
   return [
-    `${t(`map.boss.name.${boss.key}` as UiKey)}${on} ${boss.chance}%`,
-    boss.mapChance !== boss.chance ? t('map.boss.mapChance', { n: boss.mapChance }) : null,
+    `${name} ${boss.mapChance}%`,
     boss.conditional ? t('map.boss.conditional') : null,
   ].filter(Boolean).join(' · ')
 }
