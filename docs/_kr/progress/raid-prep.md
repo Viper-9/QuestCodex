@@ -25,7 +25,10 @@ nav_order: 2
 
 ## 이 맵에서 진행되는 퀘스트 {#quests-on-this-map}
 
-고른 맵에 목표가 있는 퀘스트와, 어느 맵에서나 할 수 있는 목표를 퀘스트별로 묶어 보여 줍니다. 퀘스트를 펼치면 다른 맵의 목표는 흐리게 표시됩니다.
+고른 맵에 목표가 있는 퀘스트와, 어느 맵에서나 할 수 있는 목표를 퀘스트별로 묶어 보여 줍니다. 퀘스트를 펼치면 다른 맵의 목표는 흐리게 표시됩니다. 펼친 퀘스트에는 **위키에서 보기**(Open in wiki) 옆에 [**가이드**(Guide)]({{ '/kr/wiki/quest-guide.html' | relative_url }}) 버튼도 있습니다.
+
+- 게임에서 아직 숨겨진 목표(같은 퀘스트의 앞 단계를 끝내야 나타나는 목표)는 게임에 나타날 때까지 빠집니다. 위키에는 그대로 나옵니다
+- 늘 같은 자리에 스폰되는 퀘스트 아이템은 그 아이템이 나오는 맵의 목표로 칩니다
 
 [![선택한 맵의 퀘스트]({{ '/assets/images/progress-raid-quests.png' | relative_url }})]({{ '/assets/images/progress-raid-quests.png' | relative_url }})
 
@@ -38,12 +41,27 @@ nav_order: 2
 - 퀘스트 행에 마커와 같은 색의 번호가 붙습니다. 한쪽에 마우스를 올리면 다른 쪽도 강조됩니다
 - 층 버튼, 목표 영역, **잠긴 문**(Locked doors) 토글은 위키와 같습니다. 마커 근처의 자물쇠 아이콘으로 챙겨 갈 열쇠를 짐작할 수 있습니다
 - **탈출구**(Extracts)를 켜면 이 맵의 탈출구와 환승 지점이 표시됩니다. 마우스를 올려 조건과 등장 확률을 보고 나갈 길을 정할 수 있습니다
+- **보스**(Bosses)를 켜면 보스가 나오는 곳이 표시됩니다. 아래 [보스 출현](#boss-spawns)을 참고하세요
 
 [![지도 카드]({{ '/assets/images/progress-raid-map-card.png' | relative_url }})]({{ '/assets/images/progress-raid-map-card.png' | relative_url }})
 
 **크게 보기**(Expand)를 누르면 지도가 옮기고 크기를 바꿀 수 있는 창으로 열리고, 번호가 붙은 퀘스트 목록도 함께 보입니다. 창 뒤의 페이지도 그대로 스크롤하고 누를 수 있습니다. 닫기 버튼이나 `Esc`로 닫습니다.
 
 [![크게 보기 창]({{ '/assets/images/progress-raid-map-window.png' | relative_url }})]({{ '/assets/images/progress-raid-map-window.png' | relative_url }})
+
+### 보스 출현 {#boss-spawns}
+
+**보스**(Bosses)를 켜면 보스가 나오는 곳에 해골 마커가 찍힙니다. 위키의 퀘스트 위치 지도에도 같은 토글이 있습니다.
+
+- 마커에 마우스를 올리면 그곳에 나오는 보스와 이 맵에서의 등장 확률이 나옵니다
+- 주황색 마커는 레이더·로그처럼 무리로 나오는 적만 있는 구역입니다
+- **(밤)**(night)은 밤에만 나오는 보스, **(순환)**(rotating)은 군즈처럼 맵을 옮겨 다니는 보스입니다. 순환 보스의 확률은 그 맵에 있을 때의 값입니다
+- 특정 조건을 만족해야 나오는 보스는 확률 대신 **조건부**(needs a trigger)로 표시됩니다
+- 정해진 출현 구역이 없는 보스는 구석의 **위치 정해지지 않음**(No fixed location) 목록에 나옵니다
+
+확률은 서버의 보스 출현 표에서 읽어 오므로, 모드가 확률을 바꿨다면 바뀐 값이 나옵니다.
+
+[![해안선의 보스 출현]({{ '/assets/images/progress-raid-map-bosses.png' | relative_url }})]({{ '/assets/images/progress-raid-map-bosses.png' | relative_url }})
 
 ## 챙겨 갈 아이템 / 파밍할 아이템 {#bring-with-you--items-to-loot}
 

@@ -14,7 +14,7 @@
     "whats-inside.table1.r3c1": "[위키](wiki/)",
     "whats-inside.table1.r3c2": "서버의 모든 퀘스트를 필터, 연계, 보상, 모드 출처와 함께",
     "whats-inside.table1.r4c1": "[퀘스트 가이드](wiki/quest-guide.html)",
-    "whats-inside.table1.r4c2": "레이드 전에 챙길 것: 맵, 무기, 장비, 제출·설치할 아이템",
+    "whats-inside.table1.r4c2": "레이드 전에 챙길 것: 맵, 처치 대상, 무기, 장비, 제출·설치할 아이템",
     "whats-inside.table1.r5c1": "[진행현황](progress/)",
     "whats-inside.table1.r5c2": "프로필의 퀘스트 진행도, 맵별 레이드 준비, 아직 필요한 아이템, 아이템을 해금하는 퀘스트, 카파까지 남은 것",
     "translation-note": "스크린샷은 영문 UI 기준입니다. 본문에는 한국어 UI 이름과 영문 이름을 함께 적었습니다."
@@ -23,10 +23,10 @@
     "title": "시작하기",
     "requirements.heading": "요구 사항",
     "requirements.li1": "SPT 서버 `~4.1.6`",
-    "requirements.li2": "**클라이언트 플러그인 없음.** 서버 모드만 있고 BepInEx는 쓰지 않습니다.",
+    "requirements.li2": "게임 안에서 여는 단축키는 zip 에 함께 든 클라이언트 플러그인이 담당합니다. 필요 없으면 `BepInEx` 폴더는 설치하지 않아도 됩니다.",
     "installation.heading": "설치",
     "installation.li1": "[Releases](https://github.com/Viper-9/QuestCodex/releases)에서 `QuestCodex-<버전>.zip`을 받습니다.",
-    "installation.li2": "압축을 풀고 나온 `SPT_Runtime` 폴더를 SPT 설치 루트(예: `C:\\SPT`, `SPT.Server.exe`가 든 `SPT_Runtime` 폴더의 상위 폴더)에 덮어씁니다.",
+    "installation.li2": "압축을 풀고 나온 `SPT_Runtime`, `BepInEx` 폴더를 SPT 설치 루트(예: `C:SPT`, `SPT.Server.exe`가 든 `SPT_Runtime` 폴더의 상위 폴더)에 덮어씁니다.",
     "installation.li3": "서버를 재시작합니다.",
     "installation.p1": "서버 루트가 `SPT_Runtime` 폴더 자체인 예전 구조라면, zip 안의 `SPT_Runtime\\user\\mods\\QuestCodex` 폴더만 서버 루트의 `user\\mods\\`에 복사하면 됩니다.",
     "opening-it.heading": "여는 방법",
@@ -41,7 +41,8 @@
     "side-menu.heading": "사이드 메뉴",
     "side-menu.p1": "상단 바 왼쪽의 메뉴 버튼으로 사이드 메뉴를 접거나 펼칠 수 있고, 선택한 상태가 기억됩니다.",
     "refresh-data.heading": "데이터 갱신",
-    "refresh-data.p1": "지도·루트 데이터는 서버를 켤 때 한 번 만들어 디스크에 저장해 두므로, 다음 실행부터는 빨리 열립니다. 모드 목록은 그대로인데 루트에 영향을 주는 모드 설정(루트 프리셋 등)을 바꿨다면, 상단 바 오른쪽의 **데이터 갱신**(Refresh data)을 눌러 다시 만드세요. 10초 정도 걸립니다."
+    "refresh-data.p1": "지도·루트 데이터는 서버를 켤 때 한 번 만들어 디스크에 저장해 두므로, 다음 실행부터는 빨리 열립니다. 모드 목록은 그대로인데 루트에 영향을 주는 모드 설정(루트 프리셋 등)을 바꿨다면, 상단 바 오른쪽의 **데이터 갱신**(Refresh data)을 눌러 다시 만드세요. 10초 정도 걸립니다.",
+    "opening-it.li4": "게임 안에서 **`F4`** 를 누르면 기본 브라우저로 열립니다. 단축키는 BepInEx 설정(F12)에서 바꿀 수 있습니다."
   },
   "wiki/index": {
     "title": "위키",
@@ -112,17 +113,18 @@
     "icebreaker.li3": "**배에 선을 대다**(Wiring the Vessel)의 차단기 수리처럼 스위치를 가리키는 수리 목표에도 마커가 찍힙니다",
     "icebreaker.img.wiki-quest-map-icebreaker": "배에 선을 대다의 아이스브레이커 지도",
     "expanded-interchange.heading": "확장된 인터체인지",
-    "expanded-interchange.p1": "인터체인지를 확장하는 모드가 로드돼 있으면 지도와 퀘스트 구역·영역·잠긴 문이 확장판으로 바뀌고, 탭 이름도 **확장된 인터체인지**(Interchange (Expanded))로 나옵니다. 모드가 없으면 아무것도 바뀌지 않습니다."
+    "expanded-interchange.p1": "인터체인지를 확장하는 모드가 로드돼 있으면 지도와 퀘스트 구역·영역·잠긴 문이 확장판으로 바뀌고, 탭 이름도 **확장된 인터체인지**(Interchange (Expanded))로 나옵니다. 모드가 없으면 아무것도 바뀌지 않습니다.",
+    "inline-expansion.p2": "여러 목표 중 하나만 하면 되는 퀘스트는 그 목표들이 끝에 **(N개 중 하나)**(any one of N)가 붙은 목표 하나로 합쳐 보이고, 어느 쪽 진행도든 반영됩니다.",
+    "quest-locations-map.li6": "**보스**(Bosses)를 켜면 보스가 나오는 곳이 해골 마커로 표시됩니다. 읽는 법은 레이드 준비의 [보스 출현](../progress/raid-prep.html#boss-spawns)을 참고하세요"
   },
   "wiki/quest-guide": {
     "title": "퀘스트 가이드",
-    "intro.p1": "퀘스트의 **가이드**(Guide) 버튼을 누르면 레이드 전에 챙길 것을 볼 수 있습니다.",
+    "intro.p1": "퀘스트의 **가이드**(Guide) 버튼을 누르면 레이드 전에 챙길 것을 볼 수 있습니다. 진행현황 페이지에서 퀘스트를 펼쳐도 같은 버튼이 있습니다.",
     "what-it-shows.heading": "보여 주는 것",
     "what-it-shows.li1": "퀘스트를 진행하는 맵",
-    "what-it-shows.li2": "허용 무기, 구경, 부착물",
-    "what-it-shows.li3": "필수 장비나 착용 금지 장비",
-    "what-it-shows.li4": "제출하거나 설치할 아이템과 FIR(인레이드 획득) 조건",
-    "what-it-shows.li5": "한 레이드 안에 완료, 특정 탈출구 사용 같은 규칙",
+    "what-it-shows.li3": "허용 무기, 구경, 부착물",
+    "what-it-shows.li4": "필수 장비나 착용 금지 장비",
+    "what-it-shows.li5": "제출하거나 설치할 아이템과 FIR(인레이드 획득) 조건",
     "what-it-shows.p1": "모드 아이템도 포함됩니다.",
     "what-it-shows.img.wiki-guide-plant": "설치할 아이템",
     "what-it-shows.p2": "긴 목록은 앞의 몇 개만 보이고, **+N more**를 누르면 전부 펼쳐집니다.",
@@ -130,7 +132,12 @@
     "moving-and-resizing.heading": "이동과 크기 조절",
     "moving-and-resizing.li1": "제목 줄을 끌어서 팝업을 옮깁니다.",
     "moving-and-resizing.li2": "가장자리를 끌어서 크기를 바꿉니다.",
-    "moving-and-resizing.li3": "배치는 기억되고, 제목 줄을 더블클릭하면 처음대로 돌아갑니다."
+    "moving-and-resizing.li3": "배치는 기억되고, 제목 줄을 더블클릭하면 처음대로 돌아갑니다.",
+    "what-it-shows.li6": "한 레이드 안에 완료, 특정 탈출구 사용 같은 규칙",
+    "what-it-shows.li2": "처치·명중 목표에서 인정되는 대상: 모든 PMC, 스캐브, 특정 보스·경호원 등",
+    "kill-targets.heading": "처치 대상",
+    "kill-targets.p1": "처치·명중 목표에는 인정되는 적이 **처치 대상**(Kill targets) 또는 **명중 대상**(Hit targets)으로 나옵니다. \"모든 스캐브 진영 AI\"에는 게임 판정과 똑같이 보스·경호원·레이더·로그가 포함됩니다.",
+    "kill-targets.img.wiki-guide-enemies": "The Punisher - Part 6 의 처치 대상"
   },
   "progress/index": {
     "title": "진행현황",
@@ -193,7 +200,7 @@
     "map-tabs.p1": "맵 탭마다 남은 목표 수가 표시됩니다. 아이스브레이커처럼 아직 퀘스트가 없는 맵도 서버에 있으면 탭이 생겨서, 탈출구와 잠긴 문을 미리 볼 수 있습니다.",
     "map-tabs.img.progress-raid-maps": "맵 탭",
     "quests-on-this-map.heading": "이 맵에서 진행되는 퀘스트",
-    "quests-on-this-map.p1": "고른 맵에 목표가 있는 퀘스트와, 어느 맵에서나 할 수 있는 목표를 퀘스트별로 묶어 보여 줍니다. 퀘스트를 펼치면 다른 맵의 목표는 흐리게 표시됩니다.",
+    "quests-on-this-map.p1": "고른 맵에 목표가 있는 퀘스트와, 어느 맵에서나 할 수 있는 목표를 퀘스트별로 묶어 보여 줍니다. 퀘스트를 펼치면 다른 맵의 목표는 흐리게 표시됩니다. 펼친 퀘스트에는 **위키에서 보기**(Open in wiki) 옆에 [**가이드**(Guide)](../wiki/quest-guide.html) 버튼도 있습니다.",
     "quests-on-this-map.img.progress-raid-quests": "선택한 맵의 퀘스트",
     "quests-on-this-map.p2": "지도에 표시되는 퀘스트가 먼저, 그다음 진행도가 있는 퀘스트를 진행률 순으로, 나머지는 이름순으로 정렬됩니다.",
     "map.heading": "지도",
@@ -212,7 +219,19 @@
     "gear-and-special-conditions.li2": "**특수 조건**(Special conditions): 한 레이드 안에 완료, 특정 탈출구 사용 같은 규칙",
     "gear-and-special-conditions.img.progress-raid-gear": "장비와 무기",
     "gear-and-special-conditions.p1": "퀘스트 데이터에 맵 정보가 없는 목표는 목표 문장에 적힌 맵을 쓰고, **문장 기준**(from text)으로 표시합니다.",
-    "map.li3": "**탈출구**(Extracts)를 켜면 이 맵의 탈출구와 환승 지점이 표시됩니다. 마우스를 올려 조건과 등장 확률을 보고 나갈 길을 정할 수 있습니다"
+    "map.li3": "**탈출구**(Extracts)를 켜면 이 맵의 탈출구와 환승 지점이 표시됩니다. 마우스를 올려 조건과 등장 확률을 보고 나갈 길을 정할 수 있습니다",
+    "quests-on-this-map.li1": "게임에서 아직 숨겨진 목표(같은 퀘스트의 앞 단계를 끝내야 나타나는 목표)는 게임에 나타날 때까지 빠집니다. 위키에는 그대로 나옵니다",
+    "quests-on-this-map.li2": "늘 같은 자리에 스폰되는 퀘스트 아이템은 그 아이템이 나오는 맵의 목표로 칩니다",
+    "map.li4": "**보스**(Bosses)를 켜면 보스가 나오는 곳이 표시됩니다. 아래 [보스 출현](#boss-spawns)을 참고하세요",
+    "boss-spawns.heading": "보스 출현",
+    "boss-spawns.p1": "**보스**(Bosses)를 켜면 보스가 나오는 곳에 해골 마커가 찍힙니다. 위키의 퀘스트 위치 지도에도 같은 토글이 있습니다.",
+    "boss-spawns.li1": "마커에 마우스를 올리면 그곳에 나오는 보스와 이 맵에서의 등장 확률이 나옵니다",
+    "boss-spawns.li2": "주황색 마커는 레이더·로그처럼 무리로 나오는 적만 있는 구역입니다",
+    "boss-spawns.li3": "**(밤)**(night)은 밤에만 나오는 보스, **(순환)**(rotating)은 군즈처럼 맵을 옮겨 다니는 보스입니다. 순환 보스의 확률은 그 맵에 있을 때의 값입니다",
+    "boss-spawns.li4": "특정 조건을 만족해야 나오는 보스는 확률 대신 **조건부**(needs a trigger)로 표시됩니다",
+    "boss-spawns.li5": "정해진 출현 구역이 없는 보스는 구석의 **위치 정해지지 않음**(No fixed location) 목록에 나옵니다",
+    "boss-spawns.p2": "확률은 서버의 보스 출현 표에서 읽어 오므로, 모드가 확률을 바꿨다면 바뀐 값이 나옵니다.",
+    "boss-spawns.img.progress-raid-map-bosses": "해안선의 보스 출현"
   },
   "progress/needed-items": {
     "title": "필요 아이템",
@@ -283,7 +302,11 @@
     "overridden-vanilla-quests.p1": "모드가 바닐라 퀘스트를 대신하는 파일을 갖고 있으면 그 퀘스트를 덮어쓴 것으로 표시합니다. 모드가 실제로 내용을 바꿨는지는 확인하지 않습니다.",
     "kappa-tracker.heading": "카파 트래커",
     "kappa-tracker.li1": "Collector 아이템의 컨테이너 확률은 서버 루트 테이블로 계산해 맵 전체에 걸쳐 평균 낸 값이라, 레이드마다 그대로 나오는 드롭률이 아니라 추정치입니다.",
-    "kappa-tracker.li2": "루트 출처는 Collector 제출 아이템에만 나옵니다."
+    "kappa-tracker.li2": "루트 출처는 Collector 제출 아이템에만 나옵니다.",
+    "boss-spawns.heading": "보스 출현",
+    "boss-spawns.li1": "바닐라 보스만 표시합니다. 모드가 추가한 보스는 나오지 않습니다.",
+    "boss-spawns.li2": "확률은 그 지점이 아니라 맵 전체 기준입니다. 출현 구역이 여러 곳인 보스는 그중 어디서든 나올 수 있습니다.",
+    "boss-spawns.li3": "지금 군즈가 어느 맵에 있는지는 알 수 없어서, 순환하는 모든 맵에 표시합니다."
   },
   "progress/kappa-tracker": {
     "title": "카파 트래커",

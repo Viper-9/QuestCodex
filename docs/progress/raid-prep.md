@@ -26,7 +26,12 @@ it yet, such as the Icebreaker, so you can still check its extracts and locked d
 ## Quests on this map
 
 Quests with objectives on the selected map, plus objectives you can do on any map, grouped per quest.
-Expanding a quest dims the objectives that belong to other maps.
+Expanding a quest dims the objectives that belong to other maps. An expanded quest also has a
+[**Guide**](../wiki/quest-guide.html) button next to **Open in wiki**.
+
+- Objectives the game still hides (ones that show up only after an earlier step of the same quest) stay out
+  until they appear in game. The wiki still lists them
+- Quest items that always spawn in the same place count as objectives on the map where they spawn
 
 [![Quests on the selected map](../assets/images/progress-raid-quests.png)](../assets/images/progress-raid-quests.png)
 
@@ -43,6 +48,7 @@ with all the quests on this map at once.
   marker tell you which key you may want to bring
 - **Extracts** shows the map's extracts and transits. Hover one to check its requirement and spawn chance
   before you plan your way out
+- **Bosses** shows where bosses can spawn. See [Boss spawns](#boss-spawns) below
 
 [![Map card](../assets/images/progress-raid-map-card.png)](../assets/images/progress-raid-map-card.png)
 
@@ -50,6 +56,21 @@ with all the quests on this map at once.
 stays scrollable and clickable. Close it with the close button or `Esc`.
 
 [![Expanded map window](../assets/images/progress-raid-map-window.png)](../assets/images/progress-raid-map-window.png)
+
+### Boss spawns
+
+Turn on **Bosses** to see skull markers where bosses spawn. The wiki's quest locations map has the same toggle.
+
+- Hover a marker to see which bosses spawn there and their chance on this map
+- Orange markers are zones with only Raiders, Rogues or similar groups
+- **(night)** and **(rotating)** mark bosses that appear only at night or move between maps, like the Goons.
+  A rotating boss's chance applies only when it's on this map
+- Bosses that need a trigger show **needs a trigger** instead of a chance
+- Bosses without a fixed spawn zone are listed in the corner under **No fixed location**
+
+The chances come from your server's spawn table, so a mod that changes them shows here too.
+
+[![Boss spawns on Shoreline](../assets/images/progress-raid-map-bosses.png)](../assets/images/progress-raid-map-bosses.png)
 
 ## Bring with you / Items to loot
 

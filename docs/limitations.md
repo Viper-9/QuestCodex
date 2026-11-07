@@ -33,6 +33,12 @@ no file trace, so their source mod can't be identified. Those get a generic `mod
   or misplaced.
 - QuestCodex doesn't track which keys you own. Lock icons tell you which key a door needs, nothing more.
 
+## Boss spawns
+
+- Only vanilla bosses are shown. Bosses a mod adds don't appear.
+- The chance is the boss's chance on that map, not on that exact spot. A boss with several zones can spawn at any of them.
+- QuestCodex can't tell which map the Goons are on right now, so it shows them on every map they rotate through.
+
 ## Unlock paths
 
 The path summary checks the required level against your profile, but trader loyalty and standing are only

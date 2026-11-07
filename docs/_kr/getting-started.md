@@ -15,12 +15,12 @@ nav_order: 2
 ## 요구 사항 {#requirements}
 
 - SPT 서버 `~4.1.6`
-- **클라이언트 플러그인 없음.** 서버 모드만 있고 BepInEx는 쓰지 않습니다.
+- 게임 안에서 여는 단축키는 zip 에 함께 든 클라이언트 플러그인이 담당합니다. 필요 없으면 `BepInEx` 폴더는 설치하지 않아도 됩니다.
 
 ## 설치 {#installation}
 
 1. [Releases](https://github.com/Viper-9/QuestCodex/releases)에서 `QuestCodex-<버전>.zip`을 받습니다.
-2. 압축을 풀고 나온 `SPT_Runtime` 폴더를 SPT 설치 루트(예: `C:\SPT`, `SPT.Server.exe`가 든 `SPT_Runtime` 폴더의 상위 폴더)에 덮어씁니다.
+2. 압축을 풀고 나온 `SPT_Runtime`, `BepInEx` 폴더를 SPT 설치 루트(예: `C:SPT`, `SPT.Server.exe`가 든 `SPT_Runtime` 폴더의 상위 폴더)에 덮어씁니다.
 3. 서버를 재시작합니다.
 
 {: .note-kr }
@@ -33,6 +33,7 @@ nav_order: 2
 - 인증서 경고가 나오면 그대로 진행하면 됩니다. SPT 서버 웹 페이지와 같은 자체 서명 인증서입니다.
 - SPT 서버는 `127.0.0.1`에만 열리므로 **서버를 실행한 PC의 브라우저에서만** 열립니다. 휴대폰이나 다른 PC에서는 접속할 수 없습니다.
 - 게임하면서 보조 모니터에 띄워 두셔도 됩니다. 읽기 전용이라 게임에 영향을 주지 않습니다.
+- 게임 안에서 **`F4`** 를 누르면 기본 브라우저로 열립니다. 단축키는 BepInEx 설정(F12)에서 바꿀 수 있습니다.
 
 ## 언어와 테마 {#language-and-theme}
 

@@ -8,7 +8,7 @@ nav_order: 3
 # 퀘스트 가이드
 {: .no_toc }
 
-퀘스트의 **가이드**(Guide) 버튼을 누르면 레이드 전에 챙길 것을 볼 수 있습니다.
+퀘스트의 **가이드**(Guide) 버튼을 누르면 레이드 전에 챙길 것을 볼 수 있습니다. 진행현황 페이지에서 퀘스트를 펼쳐도 같은 버튼이 있습니다.
 
 1. TOC
 {:toc}
@@ -18,6 +18,7 @@ nav_order: 3
 ## 보여 주는 것 {#what-it-shows}
 
 - 퀘스트를 진행하는 맵
+- 처치·명중 목표에서 인정되는 대상: 모든 PMC, 스캐브, 특정 보스·경호원 등
 - 허용 무기, 구경, 부착물
 - 필수 장비나 착용 금지 장비
 - 제출하거나 설치할 아이템과 FIR(인레이드 획득) 조건
@@ -30,6 +31,12 @@ nav_order: 3
 긴 목록은 앞의 몇 개만 보이고, **+N more**를 누르면 전부 펼쳐집니다.
 
 [![허용 무기]({{ '/assets/images/wiki-guide-weapons.png' | relative_url }})]({{ '/assets/images/wiki-guide-weapons.png' | relative_url }})
+
+## 처치 대상 {#kill-targets}
+
+처치·명중 목표에는 인정되는 적이 **처치 대상**(Kill targets) 또는 **명중 대상**(Hit targets)으로 나옵니다. "모든 스캐브 진영 AI"에는 게임 판정과 똑같이 보스·경호원·레이더·로그가 포함됩니다.
+
+[![The Punisher - Part 6 의 처치 대상]({{ '/assets/images/wiki-guide-enemies.png' | relative_url }})]({{ '/assets/images/wiki-guide-enemies.png' | relative_url }})
 
 ## 이동과 크기 조절 {#moving-and-resizing}
 
