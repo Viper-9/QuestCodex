@@ -34,6 +34,7 @@ public class PrepParserTests
         ["Lighthouse"] = "등대",
         ["Sandbox"] = "그라운드 제로",
         ["Sandbox_high"] = "그라운드 제로",
+        ["laboratory"] = "연구소",
         ["5704e4dad2720bb55b8b4567 Name"] = "등대",
         ["E9_sniper"] = "클리모프 거리",
     };
@@ -167,6 +168,35 @@ public class PrepParserTests
         var q = Quest(Id(1), finish: [Counter(Id(201), subs: [Kills(), Location("Sandbox", "Sandbox_high")])]);
 
         Assert.Equal(["그라운드 제로"], Build(q).Objectives[0].Prep!.Maps);
+    }
+
+    [Fact]
+    public void Map_variant_without_a_locale_name_borrows_the_base_map_name()
+    {
+        // 라이브 EFT 의 어두운 연구소(laboratory_dark)는 4.1.5 로케일에 이름이 없다 — 모드가 조건에 넣으면 키가 그대로 보였다
+        var q = Quest(Id(1), finish: [Counter(Id(201), subs: [Kills(), Location("laboratory", "laboratory_dark")])]);
+        var prep = Build(q).Objectives[0].Prep!;
+
+        Assert.Equal(["연구소"], prep.Maps);
+        Assert.Equal(["laboratory", "laboratory_dark"], prep.MapKeys);
+    }
+
+    [Fact]
+    public void Develop_location_is_left_out_of_map_names()
+    {
+        var q = Quest(Id(1), finish: [Counter(Id(201), subs: [Kills(), Location("Lighthouse", "develop")])]);
+        var prep = Build(q).Objectives[0].Prep!;
+
+        Assert.Equal(["등대"], prep.Maps);
+        Assert.Equal(["lighthouse", "develop"], prep.MapKeys);
+    }
+
+    [Fact]
+    public void Ground_zero_start_area_borrows_the_ground_zero_name()
+    {
+        var q = Quest(Id(1), finish: [Counter(Id(201), subs: [Kills(), Location("Lighthouse", "Sandbox_start")])]);
+
+        Assert.Equal(["등대", "그라운드 제로"], Build(q).Objectives[0].Prep!.Maps);
     }
 
     [Fact]

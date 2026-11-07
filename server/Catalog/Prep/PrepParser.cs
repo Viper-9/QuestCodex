@@ -10,6 +10,24 @@ namespace QuestCodex.Catalog.Prep;
 /// </summary>
 public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemName, Func<string, string?> itemParent)
 {
+    /// <summary>
+    /// 로케일에 이름이 없는 맵 변종 → 이름을 빌려 올 본 맵의 로케일 키(대소문자 그대로). 라이브 EFT 의 어두운 연구소(laboratory_dark)와
+    /// 그라운드 제로 시작 구역(Sandbox_start)은 4.1.5 로케일에 없어, 모드(QuestBackport 등)가 조건에 넣으면 키가 그대로 보였다.
+    /// 본 맵과 같이 나열되면 같은 이름이라 하나로 합쳐진다.
+    /// </summary>
+    private static readonly Dictionary<string, string> NameFallback = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["laboratory_dark"] = "laboratory",
+        ["sandbox_start"] = "Sandbox",
+    };
+
+    private static readonly HashSet<string> HiddenMaps = new(StringComparer.OrdinalIgnoreCase) { "develop" };
+
+    private string MapName(string map) =>
+        locale.TryResolve(map)
+        ?? (NameFallback.TryGetValue(map, out var baseMap) ? locale.TryResolve(baseMap) : null)
+        ?? map;
+
     public ObjectivePrep? Parse(QuestCondition c)
     {
         var maps = new List<string>();
@@ -30,7 +48,8 @@ public sealed class PrepParser(LocaleResolver locale, Func<string, string> itemN
                 case "Location":
                     foreach (var map in Targets(sub.Target))
                     {
-                        AddDistinct(maps, locale.TryResolve(map) ?? map);
+                        // 개발용 로케이션(리저브 + develop)은 이름만 뺀다. 키는 남겨도 웹·브리핑이 이미 버린다(MapGroup)
+                        if (!HiddenMaps.Contains(map)) AddDistinct(maps, MapName(map));
                         AddDistinct(mapKeys, map.ToLowerInvariant());
                     }
                     break;
