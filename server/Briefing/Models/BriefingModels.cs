@@ -46,8 +46,17 @@ public sealed record BriefingQuest(
     IReadOnlyList<BriefingObjective> Objectives, bool Kappa, bool Lightkeeper);
 
 // Locations 는 월드 좌표 그대로. 맵 탭 안에서는 그 탭 것만 하나로 합치고 Map 을 탭 키로 둔다.
+// Enemies 는 처치·명중 목표가 인정하는 적(하위 조건마다 하나). 그 밖의 목표는 빈 목록.
 public sealed record BriefingObjective(
-    string ConditionId, string Text, double Current, double? Target, bool InferredMap, IReadOnlyList<ObjectiveLocation> Locations);
+    string ConditionId, string Text, double Current, double? Target, bool InferredMap, IReadOnlyList<ObjectiveLocation> Locations,
+    IReadOnlyList<BriefingEnemy> Enemies);
+
+// 처치(Kind "kills")·명중("shots") 목표 하나가 인정하는 적. 게임 판정 규칙은 카탈로그 EnemyRule 주석 참고.
+// Target 은 Savage, AnyPmc, Usec, Bear, Any 중 하나(모드는 다른 값도 가능). AnyPmc = USEC·BEAR, Any = 아군이 아닌 누구나.
+// Roles 는 봇 역할 키(WildSpawnType 이름) 그대로. 비어 있으면 Target 진영 전부 — Savage 면 보스·경호원·레이더·로그·광신도도 포함이다.
+// TargetName 은 응답 언어의 진영 이름(EnemyText, 표에 없으면 키). Names 는 역할 이름(카탈로그 EnemyNames): Roles 순서대로
+// 같은 이름은 한 번만(감염자 역할 5개 → "감염자" 하나), 개발용 역할(followerTest 등)은 빠지고, 이름을 못 찾은 역할은 키 그대로.
+public sealed record BriefingEnemy(string Kind, string Target, string TargetName, IReadOnlyList<string> Roles, IReadOnlyList<string> Names);
 
 public sealed record BriefingSource(string QuestId, double Count);
 

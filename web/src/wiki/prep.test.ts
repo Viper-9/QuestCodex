@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { CatalogQuest, Objective, ObjectivePrep, PrepItem } from '../api/catalog'
+import type { CatalogQuest, EnemyRule, Objective, ObjectivePrep, PrepItem } from '../api/catalog'
 import { getT } from '../i18n/index'
-import { distinctNames, exitText, hasRules, headerMap, itemDetails, optionText, prepCount, questMaps } from './prep'
+import { distinctNames, enemyRows, exitText, hasRules, headerMap, itemDetails, optionText, prepCount, questMaps } from './prep'
 
 const ko = getT('kr')
 const en = getT('en')
@@ -96,5 +96,34 @@ describe('headerMap', () => {
     expect(headerMap(quest([obj('1', prep({ maps: ['세관'] })), obj('2', prep({ maps: ['삼림'] }))]), ko)).toBe('여러 맵')
     expect(headerMap(quest([obj('1', prep({ maps: ['세관'] }))], '공장'), en)).toBe('Multiple maps')
     expect(headerMap(quest([obj('1', null)]), ko)).toBeNull()
+  })
+})
+
+const killObj = (id: string, enemies: EnemyRule[], p: ObjectivePrep | null = null): Objective => ({ ...obj(id, p), enemies })
+const kills = (target: string, roles: string[] = [], names: string[] = roles): EnemyRule => ({ kind: 'kills', target, roles, names })
+
+describe('enemyRows', () => {
+  it('처치 대상만 있는 목표도 준비물 수에 센다', () => {
+    expect(prepCount(quest([killObj('1', [kills('Savage', ['bossKilla'])]), killObj('2', [kills('Savage')]), obj('3', null)]))).toBe(2)
+  })
+  it('역할이 있으면 서버가 정한 이름 그대로', () => {
+    const o = killObj('1', [kills('Savage', ['bossTagilla', 'followerTagilla'], ['타길라', '타길라 경호원'])])
+    expect(enemyRows(o, ko)).toEqual([{ label: '처치 대상', names: ['타길라', '타길라 경호원'] }])
+  })
+  it('names 가 없는 구버전 서버 응답은 역할 키를 이름 대신', () => {
+    const o = killObj('1', [{ kind: 'kills', target: 'Savage', roles: ['bossKilla'] } as EnemyRule])
+    expect(enemyRows(o, en)).toEqual([{ label: 'Kill targets', names: ['bossKilla'] }])
+  })
+  it('역할이 없으면 진영 설명, 명중은 따로, 모르는 진영은 키 그대로', () => {
+    const o = killObj('1', [kills('Savage'), { kind: 'shots', target: 'AnyPmc', roles: [] }, kills('ModSide')])
+    expect(enemyRows(o, en)).toEqual([
+      { label: 'Kill targets', names: ['Any Scav-side AI (incl. bosses, guards, Raiders, Rogues)'] },
+      { label: 'Hit targets', names: ['Any PMC (USEC, BEAR)'] },
+      { label: 'Kill targets', names: ['ModSide'] },
+    ])
+  })
+  it('enemies 필드가 없는 구버전 서버 응답은 빈 목록', () => {
+    expect(enemyRows(obj('1', null), en)).toEqual([])
+    expect(prepCount(quest([obj('1', null)]))).toBe(0)
   })
 })

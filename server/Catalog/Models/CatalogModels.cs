@@ -47,7 +47,22 @@ public sealed record Objective(
     /// 빈 값은 Locations 와 같은 이유로 Array.Empty.
     /// </summary>
     public IReadOnlyList<string> AnyOf { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// 처치·명중 목표가 인정하는 적(Kills/Shots 하위 조건마다 하나). 그 밖의 목표는 빈 목록. 빈 값은 Locations 와 같은 이유로 Array.Empty.
+    /// </summary>
+    public IReadOnlyList<EnemyRule> Enemies { get; init; } = Array.Empty<EnemyRule>();
 }
+
+/// <summary>
+/// 처치(kills)·명중(shots) 하위 조건 하나가 인정하는 적. 값은 퀘스트 데이터 그대로다.
+/// 게임 판정(클라이언트 ConditionHitProgressChecker, 2026-11-07 디컴파일 확인): 피해자 진영에서 나온 후보 중 Target 과 같은 것이 있어야 하고
+/// (Usec → Usec·AnyPmc, Bear → Bear·AnyPmc, Savage → Savage, 아군이 아니면 누구나 Any), Roles 가 있으면 피해자 봇 역할(WildSpawnType)이 그 안에 있어야 한다.
+/// 그래서 Target 이 Savage 이고 Roles 가 비면 보스·경호원·레이더·로그·광신도까지 Savage 진영 AI 전부가 인정된다.
+/// Names 는 Roles 의 표시 이름(카탈로그 언어, EnemyNames). 같은 이름은 한 번만, 개발용 역할은 빠져서 Roles 보다 짧을 수 있다.
+/// 예전 카탈로그 JSON(녹화 데이터)에는 없어서 null 로 들어올 수 있다.
+/// </summary>
+public sealed record EnemyRule(string Kind, string Target, IReadOnlyList<string> Roles, IReadOnlyList<string> Names);
 
 /// <summary>Unity 월드 좌표 그대로. Y = 높이. SVG 투영은 브라우저가 한다.</summary>
 public sealed record MapPoint(double X, double Y, double Z);

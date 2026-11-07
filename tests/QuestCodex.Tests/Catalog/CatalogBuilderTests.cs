@@ -598,6 +598,80 @@ public class CatalogBuilderTests
         Assert.Equal([other], objective.Locations[1].Points);
     }
 
+    private static QuestCondition HitCounter(MongoId id, params QuestConditionCounterCondition[] subs) => new()
+    {
+        Id = id, ConditionType = "CounterCreator", DynamicLocale = false, Value = 1,
+        Counter = new QuestConditionCounter { Id = "c", Conditions = [.. subs] },
+    };
+
+    private static QuestConditionCounterCondition Hit(string type, string target, params string[] roles) => new()
+    {
+        ConditionType = type, Target = new SPTarkov.Server.Core.Utils.Json.ListOrT<string>(null, target),
+        SavageRole = roles.Length == 0 ? null : [.. roles],
+    };
+
+    private static string Show(EnemyRule e) => $"{e.Kind}:{e.Target}:{string.Join(',', e.Roles)}";
+
+    [Fact]
+    public void Kill_and_shot_counters_list_who_counts()
+    {
+        var q = Quest(Id(1), finish:
+        [
+            HitCounter(Id(11), Hit("Kills", "Savage", "bossTagilla", "followerTagilla")),
+            HitCounter(Id(12), Hit("Shots", "AnyPmc")),
+            Beacon(Id(13), "a"),
+        ]);
+
+        var objectives = CatalogBuilder.Build(Input([q]), Now).Quests[Id(1)].Objectives;
+
+        Assert.Equal(["kills:Savage:bossTagilla,followerTagilla"], objectives[0].Enemies.Select(Show));
+        Assert.Equal(["shots:AnyPmc:"], objectives[1].Enemies.Select(Show)); // 역할 없음 = 그 진영 전부
+        Assert.Empty(objectives[2].Enemies);
+    }
+
+    // 이름 찾는 순서: 이름 표 → 게임 로케일 BotRole → ScavRole → 키 그대로. 개발용 역할은 빼고, 같은 이름은 한 번만.
+    [Fact]
+    public void Enemy_names_come_from_the_table_then_the_game_locale_then_the_key()
+    {
+        var locale = new Dictionary<string, string>
+        {
+            ["QuestCondition/Elimination/Kill/BotRole/modBoss"] = "모드 보스",
+            ["ScavRole/ModGuard"] = "모드 경호원",
+        };
+        var q = Quest(Id(1), finish:
+        [
+            HitCounter(Id(11), Hit("Kills", "Savage", "bossTagilla", "followerTagilla", "modBoss", "modGuard", "followerTest", "unknownBot")),
+            HitCounter(Id(12), Hit("Kills", "Savage", "assault", "assaultGroup", "marksman")),
+            // 모드 역할: BlackDiv 가 들어가면 전부 블랙 디비전, 웨지 계열은 웨지·웨지 경호원, bossStormtrooper 는 뺀다
+            HitCounter(Id(13), Hit("Kills", "Savage", "blackDivAssault", "bossBullyBlackDiv", "pmcBotBlackDiv", "blackDivision",
+                "bossWedge", "bossWedgeLab", "followerWedgeLab", "bossStormtrooper")),
+        ]);
+
+        var objectives = CatalogBuilder.Build(Input([q], locale: locale), Now).Quests[Id(1)].Objectives;
+
+        var rule = Assert.Single(objectives[0].Enemies);
+        Assert.Equal(["bossTagilla", "followerTagilla", "modBoss", "modGuard", "followerTest", "unknownBot"], rule.Roles); // 키는 원본 그대로
+        Assert.Equal(["타길라", "타길라 경호원", "모드 보스", "모드 경호원", "unknownBot"], rule.Names);
+        Assert.Equal(["스캐브", "스나이퍼 스캐브"], Assert.Single(objectives[1].Enemies).Names);
+        Assert.Equal(["블랙 디비전", "웨지", "웨지 경호원"], Assert.Single(objectives[2].Enemies).Names);
+    }
+
+    [Fact]
+    public void Merged_objective_keeps_every_option_enemy_once()
+    {
+        var q = Quest(Id(1), finish:
+        [
+            HitCounter(Id(11), Hit("Kills", "Savage", "bossKilla")),
+            HitCounter(Id(12), Hit("Kills", "Savage", "bossGluhar")),
+            HitCounter(Id(13), Hit("Kills", "Savage", "bossKilla")),
+        ]);
+
+        var objective = Assert.Single(CatalogBuilder.Build(Input([q]) with { AlternativeGroups = [Group(Id(1), Id(11), Id(12), Id(13))] }, Now)
+            .Quests[Id(1)].Objectives);
+
+        Assert.Equal(["kills:Savage:bossKilla", "kills:Savage:bossGluhar"], objective.Enemies.Select(Show));
+    }
+
     [Fact]
     public void Objective_waiting_for_a_group_waits_for_the_merged_objective()
     {

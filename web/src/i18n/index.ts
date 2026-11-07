@@ -16,6 +16,11 @@ export function interpolate(template: string, params?: Record<string, string | n
   return template.replace(/\{(\w+)\}/g, (m, k: string) => (k in params ? String(params[k]) : m))
 }
 
+/** 데이터에서 온 키(모드 봇 역할 등)가 사전에 있는지. 없는 키를 t() 에 넘기면 undefined 가 나온다. */
+export function isUiKey(key: string): key is UiKey {
+  return Object.hasOwn(en, key)
+}
+
 export function getT(lang: Lang): T {
   const table = TABLES[lang]
   return (key, params) => interpolate(table[key], params)

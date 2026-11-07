@@ -153,6 +153,7 @@
 .qc-rgroups .qc-pline:last-child { border-bottom: 0; }
 .qc-rgroups .qc-pline__row { grid-template-columns: minmax(0, 1.3fr) 90px minmax(0, 2fr) 72px; padding: 6px 4px; } /* 72px: 카운터 "100 / 100"(.qc-count) */
 .qc-rgroups .qc-pline__detail { padding: 4px 4px 12px 16px; }
+.qc-rgroups .qc-detail__bar { margin: 10px 0 0; } /* 레이드준비 펼친 줄의 가이드·위키 버튼 — 목표 목록과 띄우고, 맨 아래라 아래 여백 없이 */
 /* 펼친 목표: 지금 탭의 맵은 도드라지게, 다른 맵은 비활성처럼, 맵 미상은 보통 */
 .qc-rgroups .qc-place--here { color: var(--fg); font-weight: 600; }
 .qc-rgroups .qc-place--here::before { background: var(--accent); }

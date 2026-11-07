@@ -7,7 +7,8 @@ import { useT } from '../i18n/I18nContext'
 import { navigate } from '../shell/router'
 import type { NameLookup } from '../wiki/derive'
 import { formatInt, formatObjective, lineText } from '../wiki/format'
-import { distinctNames, exitText, optionText } from '../wiki/prep'
+import { distinctNames, exitText, optionText, prepCount } from '../wiki/prep'
+import { QuestPrepDialog } from '../wiki/QuestPrepDialog'
 import { objectiveColor } from '../wiki/mapProjection'
 import { mapName as wikiMapName } from '../wiki/mapNames'
 import { dedupeRows, entryPlace, groupByQuest, orderRaidQuests, mapBrief, mapTabs, missing, placeFinds, raidEntries, raidFinds, raidMapPlan, type NeedRow, type PlacedRow, type RuleRow, type RaidEntry } from './derive'
@@ -47,6 +48,7 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
   const finds = useMemo(() => placeFinds(needs, catalog, selected), [needs, catalog, selected])
   const plan = useMemo(() => raidMapPlan(brief.here, selected), [brief, selected])
   const [hot, setHot] = useState<number | null>(null)
+  const [prepId, setPrepId] = useState<string | null>(null)
 
   return (
     <div className="qc-raid">
@@ -70,12 +72,12 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
           <section className="qc-card">
             <h3 className="qc-card__h">{t('raid.todo', { map: mapName(selected, t, catalog.mapVariants) })}</h3>
             {brief.here.length === 0 && <p className="qc-muted">{t('raid.nothing')}</p>}
-            <QuestGroups entries={brief.here} all={entries} map={selected} lookup={lookup} numbers={plan.numbers} hot={hot} onHot={setHot} />
+            <QuestGroups entries={brief.here} all={entries} map={selected} lookup={lookup} onOpenPrep={setPrepId} numbers={plan.numbers} hot={hot} onHot={setHot} />
           </section>
           {brief.anywhere.length > 0 && (
             <section className="qc-card">
               <h3 className="qc-card__h">{t('raid.anywhere')}</h3>
-              <QuestGroups entries={brief.anywhere} all={entries} map={selected} lookup={lookup} />
+              <QuestGroups entries={brief.anywhere} all={entries} map={selected} lookup={lookup} onOpenPrep={setPrepId} />
             </section>
           )}
           {/* 오른쪽 칸이 길어 왼쪽 아래가 비므로 거기에 두고, 스크롤해도 따라오게 sticky(progress.css) */}
@@ -119,6 +121,11 @@ export function RaidView({ catalog, progress, inventory, lookup, map }: RaidView
           </section>
         </div>
       </div>
+      <QuestPrepDialog
+        quest={prepId ? catalog.quests[prepId] ?? null : null}
+        traderName={prepId ? lookup.traderName(catalog.quests[prepId]?.traderId ?? '') : ''}
+        onClose={() => setPrepId(null)}
+      />
     </div>
   )
 }
@@ -134,13 +141,15 @@ interface QuestGroupsProps {
   all: RaidEntry[]
   map: string
   lookup: NameLookup
+  /** 펼친 줄의 "가이드" 버튼 — 현황 펼친 행과 같은 준비물 창(처치 대상·무기·장비 조건) */
+  onOpenPrep(questId: string): void
   /** 지도 번호(퀘스트 → 번호). 주면 퀘스트 이름 뒤에 지도 마커와 같은 색 번호를 붙이고, 마우스를 올리면 지도에서 강조한다. */
   numbers?: Map<string, number>
   hot?: number | null
   onHot?(n: number | null): void
 }
 
-function QuestGroups({ entries, all, map, lookup, numbers, hot, onHot }: QuestGroupsProps) {
+function QuestGroups({ entries, all, map, lookup, onOpenPrep, numbers, hot, onHot }: QuestGroupsProps) {
   const t = useT()
   const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set())
   const toggle = (id: string) => setOpen((prev) => {
@@ -185,7 +194,18 @@ function QuestGroups({ entries, all, map, lookup, numbers, hot, onHot }: QuestGr
                     </li>
                   ))}
                 </ul>
-                <button type="button" className="qc-btn" onClick={() => navigate('wiki', null, { quest: quest.id })}>{t('overview.openWiki')}</button>
+                <div className="qc-detail__bar">
+                  <button
+                    type="button"
+                    className="qc-btn"
+                    disabled={prepCount(quest) === 0}
+                    title={prepCount(quest) === 0 ? t('prep.none') : undefined}
+                    onClick={() => onOpenPrep(quest.id)}
+                  >
+                    {t('prep.button')}
+                  </button>
+                  <button type="button" className="qc-btn" onClick={() => navigate('wiki', null, { quest: quest.id })}>{t('overview.openWiki')}</button>
+                </div>
               </div>
             )}
           </li>

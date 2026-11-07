@@ -238,4 +238,59 @@ public class BriefingBuilderTests
         Assert.Contains("\"kappaQuests\":[\"B\",\"a\"]", json);
         Assert.Contains("\"lightkeeperQuests\":[\"a\",\"c\"]", json);
     }
+
+    // 처치 대상: 키·이름은 카탈로그 값 그대로, 진영 이름만 응답 언어로. 표에 없는 진영은 키 그대로.
+    private static BriefingObjective KillObjective(string lang, params EnemyRule[] enemies)
+    {
+        var k = Quest("k", [Obj("k1", "CounterCreator", Prep(mapKeys: ["woods"]), 5, text: "Kill") with { Enemies = enemies }]);
+        var prog = B.Progress(new() { ["k"] = Qp("Started", new() { ["k1"] = Op(1, 5) }) });
+        var r = BriefingBuilder.Build(B.Catalog([k], lang), prog, MapIndex.Parse(IndexJson), "9.9.9", DateTimeOffset.UnixEpoch);
+        return Assert.Single(Assert.Single(Map(r, "woods").Quests).Objectives);
+    }
+
+    [Fact]
+    public void Kill_objective_carries_catalog_names_and_a_localized_side()
+    {
+        var o = KillObjective("kr",
+            new EnemyRule("kills", "Savage", ["bossTagilla", "followerTagilla"], ["타길라", "타길라 경호원"]),
+            new EnemyRule("shots", "AnyPmc", [], []),
+            new EnemyRule("kills", "ModSide", [], []));
+
+        Assert.Equal(3, o.Enemies.Count);
+        var boss = o.Enemies[0];
+        Assert.Equal(("kills", "Savage", "스캐브"), (boss.Kind, boss.Target, boss.TargetName));
+        Assert.Equal(["bossTagilla", "followerTagilla"], boss.Roles);
+        Assert.Equal(["타길라", "타길라 경호원"], boss.Names);
+        Assert.Equal(("shots", "PMC"), (o.Enemies[1].Kind, o.Enemies[1].TargetName));
+        Assert.Equal("ModSide", o.Enemies[2].TargetName);
+    }
+
+    // 예전 카탈로그 JSON(녹화 데이터)에는 names 가 없다 → 키를 이름 대신.
+    [Fact]
+    public void Missing_catalog_names_fall_back_to_role_keys_and_side_to_english()
+    {
+        var o = KillObjective("de", new EnemyRule("kills", "Any", ["bossKnight"], null!));
+
+        Assert.Equal("Any enemy", o.Enemies[0].TargetName);
+        Assert.Equal(["bossKnight"], o.Enemies[0].Names);
+    }
+
+    [Fact]
+    public void Objective_without_enemies_sends_an_empty_list()
+    {
+        var o = KillObjective("en");
+
+        Assert.Empty(o.Enemies);
+        var json = JsonSerializer.Serialize(o, QuestCodexJson.Options);
+        Assert.Contains("\"enemies\":[]", json);
+    }
+
+    [Fact]
+    public void Enemy_json_shape()
+    {
+        var o = KillObjective("en", new EnemyRule("kills", "Savage", ["bossKilla"], ["Killa"]));
+
+        var enemy = JsonSerializer.SerializeToElement(o, QuestCodexJson.Options).GetProperty("enemies")[0];
+        Assert.Equal(["kind", "target", "targetName", "roles", "names"], enemy.EnumerateObject().Select(p => p.Name));
+    }
 }

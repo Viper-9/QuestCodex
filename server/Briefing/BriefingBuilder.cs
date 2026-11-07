@@ -74,10 +74,16 @@ public static class BriefingBuilder
         int? marker = numbers is not null && numbers.TryGetValue(g.Quest.Id, out var n) ? n : null;
         var objectives = g.Entries.Select(e => new BriefingObjective(
             e.Objective.ConditionId, BriefingText.ObjectiveText(e.Objective, lang), e.Progress?.Current ?? 0, e.Progress?.Target,
-            e.Inferred, map is null ? e.Objective.Locations : LocationsFor(e.Objective, map))).ToList();
+            e.Inferred, map is null ? e.Objective.Locations : LocationsFor(e.Objective, map),
+            Enemies(e.Objective, lang))).ToList();
         return new BriefingQuest(g.Quest.Id, g.Quest.TraderId, g.Quest.Name, marker, line.Summary, line.Current, line.Target, objectives,
             flags.Kappa.Contains(g.Quest.Id), flags.Lightkeeper.Contains(g.Quest.Id));
     }
+
+    // 역할 이름은 카탈로그가 정한 것 그대로. 예전 카탈로그 JSON(녹화 데이터)에는 enemies·names 가 없어 null 로 들어올 수 있다.
+    private static IReadOnlyList<BriefingEnemy> Enemies(Objective o, string lang)
+        => (o.Enemies ?? []).Select(e => new BriefingEnemy(
+            e.Kind, e.Target, EnemyText.TargetName(e.Target, lang), e.Roles, e.Names ?? e.Roles)).ToList();
 
     // Build 에서 한 번만 계산해 퀘스트마다 넘기는 선행 퀘스트 목록.
     private sealed record QuestFlags(IReadOnlySet<string> Kappa, IReadOnlySet<string> Lightkeeper);
