@@ -1,5 +1,5 @@
 import type { CatalogQuest, ItemRef, Objective, ObjectivePrep, PrepItem } from '../api/catalog'
-import type { T, UiKey } from '../i18n/index'
+import { isUiKey, type T, type UiKey } from '../i18n/index'
 
 // 준비물 팝업·목표 칩의 표시 문자열. format.ts 와 같은 규칙 — JSX 없이 t 를 받아 React 없이 테스트된다.
 
@@ -13,10 +13,29 @@ export function hasPrep(o: Objective): o is Objective & { prep: ObjectivePrep } 
   return o.prep != null
 }
 
-/** 버튼 배지: 준비물이 있는 목표 수 */
-export function prepCount(q: CatalogQuest): number {
-  return q.objectives.filter(hasPrep).length
+/** 처치·명중 대상이 있는 목표인가. enemies 필드가 생기기 전 서버는 undefined 를 보낸다. */
+export function hasEnemies(o: Objective): boolean {
+  return (o.enemies?.length ?? 0) > 0
 }
+
+/** 버튼 배지: 준비물이나 처치 대상이 있는 목표 수 */
+export function prepCount(q: CatalogQuest): number {
+  return q.objectives.filter((o) => hasPrep(o) || hasEnemies(o)).length
+}
+
+/**
+ * 처치·명중 대상 줄. 역할이 있으면 서버가 정한 이름(같은 이름은 하나로, 못 찾은 역할은 키 그대로 — 서버 EnemyNames),
+ * 없으면 진영 설명. 사전에 없는 진영(모드)은 키 그대로.
+ */
+export function enemyRows(o: Objective, t: T): { label: string; names: string[] }[] {
+  return (o.enemies ?? []).map((e) => ({
+    label: e.kind === 'shots' ? t('prep.enemyShot') : t('prep.enemyKill'),
+    // names 가 생기기 전 서버는 undefined → 역할 키를 이름 대신
+    names: e.roles.length > 0 ? distinctNames(e.names ?? e.roles) : [lookup(`enemy.target.${e.target}`, e.target, t)],
+  }))
+}
+
+const lookup = (key: string, fallback: string, t: T) => (isUiKey(key) ? t(key) : fallback)
 
 /** 팝업 머리의 맵 목록. 퀘스트에 묶인 맵이 먼저, 목표별 맵이 뒤. */
 export function questMaps(q: CatalogQuest): string[] {

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { CatalogQuest, Objective, ObjectivePrep } from '../api/catalog'
 import { useT } from '../i18n/I18nContext'
+import type { T } from '../i18n/index'
 import { formatInt, formatObjective, lineText } from './format'
 import { useDialogFrame } from './useDialogFrame'
-import { distinctNames, exitText, hasPrep, hasRules, headerMap, itemDetails, optionText } from './prep'
+import { distinctNames, enemyRows, exitText, hasEnemies, hasPrep, hasRules, headerMap, itemDetails, optionText } from './prep'
 
 interface QuestPrepDialogProps {
   /** null 이면 닫힘. QuestDescriptionDialog 와 같은 showModal()/close() 토글. */
@@ -14,7 +15,7 @@ interface QuestPrepDialogProps {
 
 type Prepped = Objective & { prep: ObjectivePrep }
 
-/** 준비물 팝업. 위: 챙길 아이템(제출·설치) 모음, 아래: 목표별 무기·장비·레이드 조건. */
+/** 준비물 팝업. 위: 챙길 아이템(제출·설치) 모음, 아래: 목표별 처치 대상·무기·장비·레이드 조건. */
 export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogProps) {
   const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
@@ -29,7 +30,8 @@ export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogP
 
   const prepped: Prepped[] = (quest?.objectives ?? []).filter(hasPrep)
   const withItem = prepped.filter((o) => o.prep.item !== null)
-  const withRules = prepped.filter((o) => hasRules(o.prep))
+  // 처치 대상만 있는 목표(prep null)도 섹션을 만든다 — "Killa 처치" 처럼 다른 조건 없는 보스 목표가 대부분이다.
+  const withRules = (quest?.objectives ?? []).filter((o) => hasEnemies(o) || (hasPrep(o) && hasRules(o.prep)))
   const mapText = quest ? headerMap(quest, t) : null
 
   return (
@@ -54,7 +56,7 @@ export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogP
         // key: 다른 퀘스트로 다시 열면 "외 N종" 펼침 상태를 초기화한다
         <div className="qc-dialog__body" key={quest.id}>
 
-          {prepped.length === 0 && <p className="qc-detail__note">{t('prep.none')}</p>}
+          {prepped.length === 0 && withRules.length === 0 && <p className="qc-detail__note">{t('prep.none')}</p>}
 
           {withItem.length > 0 && (
             <section className="qc-prep__sec">
@@ -85,7 +87,7 @@ export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogP
           {withRules.map((o) => (
             <section key={o.conditionId} className="qc-prep__sec qc-prep__obj">
               <h4 className="qc-prep__objtitle">{lineText(formatObjective(o, t))}</h4>
-              <Rules prep={o.prep} />
+              <Rules objective={o} />
             </section>
           ))}
         </div>
@@ -94,19 +96,12 @@ export function QuestPrepDialog({ quest, traderName, onClose }: QuestPrepDialogP
   )
 }
 
-function Rules({ prep }: { prep: ObjectivePrep }) {
+function Rules({ objective }: { objective: Objective }) {
   const t = useT()
-  const exit = exitText(prep, t)
   const rows: [string, ReactNode][] = []
-  if (prep.maps.length > 0) rows.push([t('prep.map'), prep.maps.join(' · ')])
-  if (prep.weapons.length > 0) rows.push([t('prep.weapon'), <Names names={prep.weapons.map((w) => w.name)} />])
-  if (prep.calibers.length > 0) rows.push([t('prep.caliber'), prep.calibers.join(' · ')])
-  if (prep.weaponMods.length > 0) rows.push([t('prep.weaponMods'), <Names names={prep.weaponMods.map(optionText)} />])
-  // 슬롯끼리는 AND — 슬롯마다 한 줄. 줄 안의 대안은 OR.
-  prep.equipment.forEach((slot) => rows.push([t('prep.wear'), <Names names={slot.map(optionText)} />]))
-  if (prep.forbiddenEquipment.length > 0) rows.push([t('prep.forbidden'), <Names names={prep.forbiddenEquipment.map((i) => i.name)} />])
-  if (prep.oneRaid) rows.push([t('prep.raid'), t('prep.oneRaid')])
-  if (exit !== null) rows.push([t('prep.exit'), exit])
+  enemyRows(objective, t).forEach((e) => rows.push([e.label, <Names names={e.names} />]))
+  const prep = objective.prep
+  if (prep != null) prepRows(prep, rows, t)
 
   return (
     <dl className="qc-prep__rules">
@@ -118,6 +113,19 @@ function Rules({ prep }: { prep: ObjectivePrep }) {
       ))}
     </dl>
   )
+}
+
+function prepRows(prep: ObjectivePrep, rows: [string, ReactNode][], t: T) {
+  const exit = exitText(prep, t)
+  if (prep.maps.length > 0) rows.push([t('prep.map'), prep.maps.join(' · ')])
+  if (prep.weapons.length > 0) rows.push([t('prep.weapon'), <Names names={prep.weapons.map((w) => w.name)} />])
+  if (prep.calibers.length > 0) rows.push([t('prep.caliber'), prep.calibers.join(' · ')])
+  if (prep.weaponMods.length > 0) rows.push([t('prep.weaponMods'), <Names names={prep.weaponMods.map(optionText)} />])
+  // 슬롯끼리는 AND — 슬롯마다 한 줄. 줄 안의 대안은 OR.
+  prep.equipment.forEach((slot) => rows.push([t('prep.wear'), <Names names={slot.map(optionText)} />]))
+  if (prep.forbiddenEquipment.length > 0) rows.push([t('prep.forbidden'), <Names names={prep.forbiddenEquipment.map((i) => i.name)} />])
+  if (prep.oneRaid) rows.push([t('prep.raid'), t('prep.oneRaid')])
+  if (exit !== null) rows.push([t('prep.exit'), exit])
 }
 
 const NAMES_LIMIT = 3

@@ -258,12 +258,14 @@ public static class CatalogBuilder
         var minLevel = requirements.OfType<LevelRequirement>().Select(r => (int?)Math.Round(r.Value)).Min();
 
         var questMap = locationResolver.QuestMap(quest.Location);
+        var enemyNames = new EnemyNames(locale, input.Lang);
         var objectives = (quest.Conditions.AvailableForFinish ?? [])
             .Select(c => BuildObjective(c, locale, warnings, questId) with
             {
                 Prep = prepParser.Parse(c),
                 Locations = locationResolver.Resolve(c, questMap, warnings, questId),
                 VisibleAfter = VisibleAfterOf(c),
+                Enemies = EnemyParser.Parse(c, enemyNames),
             })
             .ToList();
         objectives = MergeAlternatives(objectives, questId, input.AlternativeGroups, warnings);
@@ -369,6 +371,7 @@ public static class CatalogBuilder
                 {
                     AnyOf = options.Select(x => x.ConditionId).ToList(),
                     Locations = MergeLocations(options),
+                    Enemies = EnemyParser.Merge(options.Select(x => x.Enemies)),
                 });
             }
         }

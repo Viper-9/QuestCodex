@@ -157,6 +157,21 @@ export interface Objective {
   visibleAfter?: string[]
   /** 택1 묶음을 합친 목표면 묶음의 조건 ID 전부(자기 포함). 아니면 빈 배열, 필드가 생기기 전 서버는 undefined. */
   anyOf?: string[]
+  /** 처치·명중 목표가 인정하는 적(하위 조건마다 하나). 그 밖의 목표는 빈 배열, 필드가 생기기 전 서버는 undefined. */
+  enemies?: EnemyRule[]
+}
+
+/**
+ * 처치(kills)·명중(shots) 하위 조건 하나가 인정하는 적. 값은 퀘스트 데이터 그대로(서버 EnemyRule 주석에 게임 판정 규칙).
+ * target 은 Savage | AnyPmc | Usec | Bear | Any (모드는 다른 값도 가능). roles 는 봇 역할 키, 비어 있으면 target 진영 전부 —
+ * Savage 면 보스·경호원·레이더·로그·광신도까지 포함이다.
+ */
+export interface EnemyRule {
+  kind: 'kills' | 'shots'
+  target: string
+  roles: string[]
+  /** roles 의 표시 이름(카탈로그 언어). 같은 이름은 한 번만, 개발용 역할은 빠지고, 이름을 못 찾은 역할은 키 그대로. 필드가 생기기 전 서버는 undefined. */
+  names?: string[]
 }
 
 export type Reward =
