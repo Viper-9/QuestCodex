@@ -17,12 +17,12 @@ mods it simply shows you what those mods did.
 ## Requirements
 
 - SPT server `~4.1.6`
-- **No client plugin** — this is a server mod only, no BepInEx involved
+- The in-game hotkey comes from the client plugin in the same zip. Skip the `BepInEx` folder if you don't want it
 
 ## Installation
 
 1. Download `QuestCodex-<version>.zip` for the version you want from [Releases](../../releases).
-2. Extract it and overwrite the resulting `SPT_Runtime` folder into your SPT install root (e.g. `C:\SPT`,
+2. Extract it and overwrite the resulting `SPT_Runtime` and `BepInEx` folders into your SPT install root (e.g. `C:\SPT`,
    the parent folder of the `SPT_Runtime` folder containing `SPT.Server.exe`).
    (`SPT_Runtime/user/mods/QuestCodex/...` structure)
    - If your server root is the `SPT_Runtime` folder itself (older SPT layout), you can instead copy just
@@ -39,6 +39,17 @@ You can also reach it from the mod card on the SPT server web page (`https://127
 - The SPT server binds to `127.0.0.1` only, so the page opens **only in a browser on the machine running
   the server**. Phones and other PCs cannot reach it.
 - You can keep it open on a second monitor while playing. It's read-only and doesn't touch the game.
+
+### Opening it in game
+
+Press **`F4`** in game to open it in your default browser. You can change the key in the BepInEx config (F12).
+
+Install [WebOverlay](https://sp-mod.com/mod/2879/weboverlay) 1.11.0 or newer as well and it opens in a window over
+the game instead. This is optional, and exclusive fullscreen still uses the browser.
+
+- If you get a certificate warning the first time you open it after starting the game, choose **Advanced → Continue**.
+  It's the same warning you'd see in a browser.
+- Close the window with the hotkey or the ✕ on its title bar.
 
 ## Features
 
